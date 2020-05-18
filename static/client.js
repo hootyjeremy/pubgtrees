@@ -13,32 +13,47 @@ var player_response_json; // parsed json responses
 var match_response_json;
 var telemetry_response_json;
 
-//
-//
-//
+var match_offset = 0;
 
+
+// # FLOOD PREVENTION
+// # NEED TO BE ABLE TO SUPPRESS GETTING MATCHES UNTIL A RESPONSE COMES BACK
 async function GetPlayerMatches() {
 
+	match_offset = (match_offset < 0) ? 0 : match_offset;
+
 	console.log('client requesting from ' + hooty_server_url);
-	console.log('requesting player: ' + strPlatform + ', ' + strPlayerName);
+	console.log('requesting player:     ' + strPlatform + ', ' + strPlayerName);
+	console.log('match_offset:          ' + match_offset);
 
 
-	const axios_response = await axios.get(hooty_server_url + '/getplayer', {
+	const btnSearch = document.getElementById('btnSearchPlayer');
+	const btnPrevious = document.getElementById('btnPreviousMatches');
+	const btnNext = document.getElementById('btnNextMatches');
+
+	btnSearch.disabled 		= btnPrevious.disabled = btnNext.disabled 		= true;
+
+	const axios_response = await axios.get(hooty_server_url + '/getplayermatches', {
 		params: {
 			'endpoint'		: 'players', 
 			'platform'		:  strPlatform,
 			'player_name' 	:  strPlayerName,
+			'match_offset'	:  match_offset,
 			'match_id'		: '',
-			'telemetry_id'	: ''
+			'telemetry_id'	: '',
 		}
 	})
 
-
+	btnSearch.disabled 		= false;
+	btnPrevious.disabled 	= false;
+	btnNext.disabled 		= false;
+	
 	console.log('axios_response.data...');
 	console.log(getDate() + ' ' + axios_response.data);
 
 
-	// check for any errors from the pubg api...
+	// ! check for any errors from the pubg api...
+	//   if there was an error here, then there isn't much reason to do anything else other than display it
 	if (axios_response.data.pubg_response_status != undefined) {
 		// if pubg_response_statue is defined, then there was an error retrieving from the pubg api
 		if (axios_response.data.pubg_response_status != 200) {
@@ -78,9 +93,28 @@ function btnSearchPlayer_Click() {
 	console.log(strLine);
 	console.log("Searching: " + strPlatform + "/" + strPlayerName);
 
-	GetPlayerMatches();
+	GetPlayerMatches();	// match offset = 0
 	//GetTest();
 }
+
+
+function btnNext_Click() {
+	console.log('btnNext_Click()');
+
+	match_offset += 10;
+
+	btnSearchPlayer_Click();
+}
+
+
+function btnPrevious_Click() {
+	console.log('btnPrevious_Click()');
+
+	match_offset -= 10;
+
+	btnSearchPlayer_Click();
+}
+
 
 
 // ! it appears that get and post responses are not what i think i'm sending back

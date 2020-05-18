@@ -13,9 +13,6 @@ const apiKey        = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFk
 
 // ! Global variables...
 var strLine         = "--------------------------------------------";
-var strPlatform     = '';
-var strPlayer       = '';
-var telemetry_url   = '';
 
 
 // ? what is this app receiving from the user?
@@ -49,10 +46,11 @@ app.get('/', (req, res) => {
 
 
 // ------------------------------------------------------------->
-app.get('/getplayer', async (req, res) => {
+app.get('/getplayermatches', async (req, res) => {
     console.log(strLine);
 
     console.log('/getplayer called -> ' + req.query.platform + '/' + req.query.player_name);
+    console.log('match_offset: ' + req.query.match_offset);
 
     // console.log('request ip: ' + req.ip);
     // console.log('req.query.endpoint:     ' + req.query.endpoint);
@@ -68,12 +66,11 @@ app.get('/getplayer', async (req, res) => {
     var player_url  = '';
 
     var player_data; // player_data is the data portion of the full pubg_player_response (whether from api or cache)
-    var pubg_match_response;
     var blPlayerCacheExists;
 
 
-    base_url  += req.query.platform + '/';
-    player_url = base_url + req.query.endpoint + '?filter[playerNames]=' + req.query.player_name;
+    base_url   += req.query.platform + '/';
+    player_url  = base_url + req.query.endpoint + '?filter[playerNames]=' + req.query.player_name;
 
     var match_url = base_url + 'matches/';
     //console.log('match_url: ' + match_url);
@@ -197,37 +194,28 @@ app.get('/getplayer', async (req, res) => {
 
 
 
-    //res.send({ pubg_response_status: pubg_player_response.status, pubg_response_statusText: pubg_player_response.statusText });
+    // ------------------------------------------------------->
+    // ! get match data
 
-
-
-
-
-    // # when it comes to the matches, send back the first 10.
-    // # if they want a different set, then that will be sent back with a different parameter in "getMatches()" or some other place.
-    // # if they want a different set, it should come from the cache
-
-    // # get all matches and store in a cache file?
+    // ? why not cache the pulled match data as long as the player data is cached? when player data cache is deleted, delete their match data? this way you don't have to keep hitting the server?
 
     // if there are more than 10 matches, just get the first 10. if there are less than 10 matches, get them all...
     var match_length = (player_data.relationships.matches.data.length <= 10) ? player_data.relationships.matches.data.length : 10 ;
 
-    // # if you want any matches other than the first 10, then there will need to be a different button-caller/route to return that stuff
-
     console.log(getDate() + ' before get matches');
 
-    for (let i = 0; i < match_length; i++) {
-        //console.log(i + '. ' + getDate() + ' -> match_url: ' + match_url + pubg_player_response.data.data[0].relationships.matches.data[i].id);
+    // # fix this so that offset isn't allowed to exceed the number of matches...
+    for (let i = req.query.match_offset; i < match_length; i++) {
+        console.log(i + '. ' + getDate() + ' -> match_url: ' + match_url + player_data.relationships.matches.data[i].id);
         
 
         // match_url + id: https://api.pubg.com/shards/steam/matches/ba57018d-6e6f-46ea-bcd4-ebd8bbcefd28
-        pubg_match_response = await axios.get(match_url + player_data.relationships.matches.data[i].id, {
+        var pubg_match_response = await axios.get(match_url + player_data.relationships.matches.data[i].id, {
             headers: {
                 Accept: 'application/vnd.api+json'
             }
         });
         
-
         // # HANDLE GET() ERRORS
         
         // # will need to build the tailored json response with the data that vue will use to create a table
@@ -235,8 +223,7 @@ app.get('/getplayer', async (req, res) => {
         //console.log(getDate() + ' pubg_match_response.data...');
         
         //console.log(getDate() + ' (' + i + ') -> ', pubg_match_response.data);
-        
-        //debugger;
+
     }
 
     console.log(getDate() + ' after get matches');
