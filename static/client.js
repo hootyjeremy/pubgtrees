@@ -13,7 +13,8 @@ var player_response_json; // parsed json responses
 var match_response_json;
 var telemetry_response_json;
 
-var match_offset = 0;
+var match_offset	= 0;
+var total_matches 	= 0;
 
 
 // # FLOOD PREVENTION
@@ -44,10 +45,21 @@ async function GetPlayerMatches() {
 		}
 	})
 
+
+	total_matches = axios_response.data.totalMatches;
+
+	console.log('axios_response.data...');
+	console.log(getDate() + ' ' + JSON.stringify(axios_response.data));
+	console.log('match_offset: ' + match_offset + ', total_matches: ' + total_matches);
+
+	// enable all buttons...
 	btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
 	
-	console.log('axios_response.data...');
-	console.log(getDate() + ' ' + axios_response.data);
+	// disable buttons if they need to be disabled...
+	btnPrevious.disabled 	= (match_offset < 10) 						? true : false ;
+	btnNext.disabled 		= (match_offset + 10 > total_matches - 1) 	? true : false ;	// # verify this is hitting the ceiling properly
+
+
 
 
 	// ! check for any errors from the pubg api...

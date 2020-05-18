@@ -47,10 +47,15 @@ app.get('/', (req, res) => {
 
 // ------------------------------------------------------------->
 app.get('/getplayermatches', async (req, res) => {
+
+    var match_offset = new Number(req.query.match_offset);  // i don't know why this is catching a string. maybe the query converts it?
+
+
     console.log(strLine);
 
     console.log('/getplayer called -> ' + req.query.platform + '/' + req.query.player_name);
-    console.log('match_offset: ' + req.query.match_offset);
+    console.log('match_offset: ' + match_offset);
+
 
     // console.log('request ip: ' + req.ip);
     // console.log('req.query.endpoint:     ' + req.query.endpoint);
@@ -97,7 +102,6 @@ app.get('/getplayermatches', async (req, res) => {
         res.send(_response_json);
         return;
     }
-
 
 
     // -------------------------------------------------------------->
@@ -200,12 +204,19 @@ app.get('/getplayermatches', async (req, res) => {
     // ? why not cache the pulled match data as long as the player data is cached? when player data cache is deleted, delete their match data? this way you don't have to keep hitting the server?
 
     // if there are more than 10 matches, just get the first 10. if there are less than 10 matches, get them all...
-    var match_length = (player_data.relationships.matches.data.length <= 10) ? player_data.relationships.matches.data.length : 10 ;
+    //var match_range = (player_data.relationships.matches.data.length <= 10) ? player_data.relationships.matches.data.length : 10 ;
 
-    console.log(getDate() + ' before get matches');
+    // if (matches.length < match_offset + 10) then match_ceiling is match.length
+    // if not, then match_ceiling is match_offset + 10;
+    const match_ceiling = (match_offset + 10 > player_data.relationships.matches.data.length) ? player_data.relationships.matches.data.length : match_offset + 10 ; 
 
-    // # fix this so that offset isn't allowed to exceed the number of matches...
-    for (let i = req.query.match_offset; i < match_length; i++) {
+    //console.log(getDate() + ' before get matches');
+
+    //console.log('matches.length: ' + player_data.relationships.matches.data.length);
+    //console.log('match_offset:   ' + match_offset);
+    //console.log('match_ceiling:  ' + match_ceiling);
+
+    for (let i = match_offset; i < match_ceiling; i++) {
         console.log(i + '. ' + getDate() + ' -> match_url: ' + match_url + player_data.relationships.matches.data[i].id);
         
 
@@ -226,14 +237,15 @@ app.get('/getplayermatches', async (req, res) => {
 
     }
 
-    console.log(getDate() + ' after get matches');
+    //console.log(getDate() + ' after get matches');
 
 
 
 
 
+    var response_data = { 'totalMatches' : player_data.relationships.matches.data.length };
 
-    res.send();
+    res.json(response_data);
 
 })
 
