@@ -27,11 +27,11 @@ async function GetPlayerMatches() {
 	console.log('match_offset:          ' + match_offset);
 
 
-	const btnSearch = document.getElementById('btnSearchPlayer');
-	const btnPrevious = document.getElementById('btnPreviousMatches');
-	const btnNext = document.getElementById('btnNextMatches');
+	const btnSearch 	= document.getElementById('btnSearchPlayer');
+	const btnPrevious 	= document.getElementById('btnPreviousMatches');
+	const btnNext 		= document.getElementById('btnNextMatches');
 
-	btnSearch.disabled 		= btnPrevious.disabled = btnNext.disabled 		= true;
+	btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = true;
 
 	const axios_response = await axios.get(hooty_server_url + '/getplayermatches', {
 		params: {
@@ -44,9 +44,7 @@ async function GetPlayerMatches() {
 		}
 	})
 
-	btnSearch.disabled 		= false;
-	btnPrevious.disabled 	= false;
-	btnNext.disabled 		= false;
+	btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
 	
 	console.log('axios_response.data...');
 	console.log(getDate() + ' ' + axios_response.data);
