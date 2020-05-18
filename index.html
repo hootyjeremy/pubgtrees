@@ -1,0 +1,112 @@
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<style type="text/css"></style>
+</head>
+
+<body>
+<title>pubg match stuff</title>
+
+<style type="text/css">
+	body {
+		background-color: #303030;
+		color: #cad3f1;
+		font-family: Verdana, Arial, Helvetica, sans-serif;
+		font-size: 14px;
+	}
+
+
+	/* unvisited link */
+	a:link {
+		color: #ffde40;
+	}
+
+	/* visited link */
+	a:visited {
+		color: #DE8D00;
+	}
+
+	/* mouse over link */
+	a:hover {
+		color: #EBB014;
+	}
+
+	/* selected link */
+	a:active {
+		color: #EBB014;
+	}
+
+
+
+	td, th {
+		border: 4px;
+		padding: 4px;
+	}
+</style>
+
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://momentjs.com/downloads/moment.min.js"></script>
+<script src="static/hf.js" 		type="text/javascript">	</script>
+<script src="static/client.js" 	type="text/javascript">	</script>
+
+
+
+
+<center>
+<br>
+<br>
+
+
+<!--
+<input type="radio" name="platform" id="rdoSteam" value="steam" checked>Steam
+<input type="radio" name="platform" id="rdoPS4" value="psn">PS4
+<input type="radio" name="platform" id="rdoXbox" value="xbox">Xbox
+<input type="radio" name="platform" id="rdoConsole" value="console">Console
+<br>
+<br>
+-->
+
+
+<select id="slcPlatform">
+	<option value="steam" selected="selected">Steam</option>
+	<option value="psn">PS4</option>>
+	<option value="xbox">Xbox</option>>
+</select>
+
+<input  id="inputPlayerName" placeholder="Player name" onsubmit="btnSearchPlayer_Click()" value="hooty__">
+<button id="btnSearchPlayer" onclick="btnSearchPlayer_Click()">Search</button>
+
+<script>
+	// Trigger search button click on hitting ENTER in the input text box...
+
+	// https://stackoverflow.com/questions/155188/trigger-a-button-click-with-javascript-on-the-enter-key-in-a-text-box?rq=1
+
+	document.getElementById("inputPlayerName").addEventListener("keyup", function (event) {
+		event.preventDefault();
+		if (event.keyCode === 13) {
+			document.getElementById("btnSearchPlayer").click();
+		}
+	});	
+</script>
+
+
+<table>
+	<tbody id='matchesTable'></tbody>
+</table>
+
+
+
+<br>
+<br>
+<a href="javascript:void(0);" onclick="ClickedSomething();">Hello to you</a>
+<br>
+<a href="javascript:void(0)"; onclick="InjectTest();">Inject Test</a>
+
+
+
+</center>
+</body>
+
+</html>
