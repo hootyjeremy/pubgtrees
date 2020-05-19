@@ -203,11 +203,7 @@ app.get('/getplayermatches', async (req, res) => {
 
     // ? why not cache the pulled match data as long as the player data is cached? when player data cache is deleted, delete their match data? this way you don't have to keep hitting the server?
 
-    // if there are more than 10 matches, just get the first 10. if there are less than 10 matches, get them all...
-    //var match_range = (player_data.relationships.matches.data.length <= 10) ? player_data.relationships.matches.data.length : 10 ;
-
-    // if (matches.length < match_offset + 10) then match_ceiling is match.length
-    // if not, then match_ceiling is match_offset + 10;
+    // only want to pull 10 matches at a time depending on match_offset, but also no more than the end of matches
     const match_ceiling = (match_offset + 10 > player_data.relationships.matches.data.length) ? player_data.relationships.matches.data.length : match_offset + 10 ; 
 
     //console.log(getDate() + ' before get matches');
@@ -216,8 +212,10 @@ app.get('/getplayermatches', async (req, res) => {
     //console.log('match_offset:   ' + match_offset);
     //console.log('match_ceiling:  ' + match_ceiling);
 
+    var match_data_response;    // an array of json objects about each match
+
     for (let i = match_offset; i < match_ceiling; i++) {
-        console.log(i + '. ' + getDate() + ' -> match_url: ' + match_url + player_data.relationships.matches.data[i].id);
+        //console.log(i + '. ' + getDate() + ' -> match_url: ' + match_url + player_data.relationships.matches.data[i].id);
         
 
         // match_url + id: https://api.pubg.com/shards/steam/matches/ba57018d-6e6f-46ea-bcd4-ebd8bbcefd28
@@ -228,12 +226,20 @@ app.get('/getplayermatches', async (req, res) => {
         });
         
         // # HANDLE GET() ERRORS
-        
         // # will need to build the tailored json response with the data that vue will use to create a table
 
-        //console.log(getDate() + ' pubg_match_response.data...');
+        console.log(i + '. ' + getDate(), pubg_match_response.data);
         
-        //console.log(getDate() + ' (' + i + ') -> ', pubg_match_response.data);
+        // ! filter out non-regular games
+		if (
+			pubg_match_response.data.data.attributes.gameMode != "solo" 	&&	pubg_match_response.data.data.attributes.gameMode != "solo-fpp" 	&&
+			pubg_match_response.data.data.attributes.gameMode != "duo" 		&&	pubg_match_response.data.data.attributes.gameMode != "duo-fpp"      &&
+			pubg_match_response.data.data.attributes.gameMode != "squad"    &&	pubg_match_response.data.data.attributes.gameMode != "squad-fpp"      ) {
+            // # recalculate match_ceiling if you skip a match so that this still retrieves blocks of 10
+			continue;
+		}
+
+
 
     }
 
