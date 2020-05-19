@@ -7,6 +7,7 @@ const moment        = require('moment');
 const app           = express();
 const port          = 3000;
 const fs            = require('fs');
+const glob          = require('glob');
 
 const apiKey        = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02ODAwLTAxMzgtZTQ4Ny0wNjc0ZmE5YWVjOGYiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0IjoxNTg3Njk1MTM1LCJwdWIiOiJibHVlaG9sZSIsInRpdGxlIjoicHViZyIsImFwcCI6Im1pbmlzdGVya2F0YW9rIn0.HiuLi97rFSW-ho5zE1XBYmpV9E6M0Nj90qXIY1TWsco';
 
@@ -19,6 +20,35 @@ var strLine         = "--------------------------------------------";
 // ? what is this app requesting from the pubg api?
 // ? what is this app receiving  from the pubg api?
 // ? what is this app responding to the user with?
+
+
+setInterval(clearCache, 5000);
+
+function clearCache() {
+
+    // # check the create date of every file in the cache and delete it if it is older than 30 minutes
+
+    const cacheGlobPattern = './cache/**/*.*';
+
+    console.log(getDate() + cacheGlobPattern);
+
+    glob(cacheGlobPattern, function (err, files) {
+        if (err){
+            console.log("glob error: " + err);
+        } else {
+            console.log(files);
+
+            files.forEach(file => {
+                console.log(file);
+            })
+        }
+
+    })
+
+
+}
+
+
 
 
 app.use(bodyParser.json());
@@ -50,6 +80,7 @@ app.get('/getplayermatches', async (req, res) => {
 
     var match_offset = new Number(req.query.match_offset);  // i don't know why this is catching a string. maybe the query converts it?
 
+    
 
     console.log(strLine);
 
@@ -91,7 +122,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
     // ---------------------------------------------------------->
-    // ! verify that the searched player 404 file doesn't exist...
+    // ! 404 -> verify that the searched player 404 file doesn't exist...
     if (fs.existsSync(player_cache_file_404)) {
         // if this file exists, then we know the pubg api already returned a 404 player not found. this will prevent from spamming the pubg api for non existent players.
 
@@ -105,7 +136,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
     // -------------------------------------------------------------->
-    // ! if you can get the player cache from the file, then get it...
+    // ! READ CACHE FILE -> if you can get the player cache from the file, then get it...
     try {
 
         console.log('retrieving from cache file: ' + player_cache_file);
@@ -134,7 +165,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
     // ---------------------------------------------------------------------------------------->
-    // ! if the cache file doesn't exist, then fetch from the pubg api and create the cache file
+    // ! FETCH PUBG API -> if the cache file doesn't exist, then fetch from the pubg api and create the cache file
     if (!blPlayerCacheExists) { 
 
         console.log('no cache file. fetching from pubg api -> ' + player_url);
@@ -178,7 +209,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
         // ----------------------------->
-        // ! write player's cache file...
+        // ! WRITE CACHE FILE -> write player's cache file...
         fs.writeFile(player_cache_file, JSON.stringify(pubg_player_response.data), function (err) {
             if (err) {
                 console.log('error writing cache file: ' + player_cache_file);
@@ -199,7 +230,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
     // ------------------------------------------------------->
-    // ! get match data
+    // ! MATCH DATA ->
 
     // ? why not cache the pulled match data as long as the player data is cached? when player data cache is deleted, delete their match data? this way you don't have to keep hitting the server?
 
@@ -235,7 +266,6 @@ app.get('/getplayermatches', async (req, res) => {
 			pubg_match_response.data.data.attributes.gameMode != "solo" 	&&	pubg_match_response.data.data.attributes.gameMode != "solo-fpp" 	&&
 			pubg_match_response.data.data.attributes.gameMode != "duo" 		&&	pubg_match_response.data.data.attributes.gameMode != "duo-fpp"      &&
 			pubg_match_response.data.data.attributes.gameMode != "squad"    &&	pubg_match_response.data.data.attributes.gameMode != "squad-fpp"      ) {
-            // # recalculate match_ceiling if you skip a match so that this still retrieves blocks of 10
 			continue;
 		}
 
