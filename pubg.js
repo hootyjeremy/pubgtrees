@@ -8,6 +8,8 @@ const app           = express();
 const port          = 3000;
 const fs            = require('fs');
 const glob          = require('glob');
+const chalk         = require('chalk');     // https://www.npmjs.com/package/chalk
+
 
 const apiKey        = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02ODAwLTAxMzgtZTQ4Ny0wNjc0ZmE5YWVjOGYiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0IjoxNTg3Njk1MTM1LCJwdWIiOiJibHVlaG9sZSIsInRpdGxlIjoicHViZyIsImFwcCI6Im1pbmlzdGVya2F0YW9rIn0.HiuLi97rFSW-ho5zE1XBYmpV9E6M0Nj90qXIY1TWsco';
 
@@ -22,33 +24,9 @@ var strLine         = "--------------------------------------------";
 // ? what is this app responding to the user with?
 
 
-setInterval(clearCache, 5000);
-
-function clearCache() {
-
-    // # check the create date of every file in the cache and delete it if it is older than 30 minutes
-
-    const cacheGlobPattern = './cache/**/*.*';
-
-    console.log(getDate() + cacheGlobPattern);
-
-    glob(cacheGlobPattern, function (err, files) {
-        if (err){
-            console.log("glob error: " + err);
-        } else {
-            console.log(files);
-
-            files.forEach(file => {
-                console.log(file);
-            })
-        }
-
-    })
-
-
-}
-
-
+// ---------------------------->
+// ! Cache Purging...
+//setInterval(clearCache, 5000);
 
 
 app.use(bodyParser.json());
@@ -58,8 +36,8 @@ app.use('/', express.static(__dirname));    // so that root/pubg.js and root/ind
 
 // ------------------------------------------------------------->
 app.listen(port, () => {
-    console.log(strLine);
-    console.log(getDate() + ' -> listening on port ' + port)
+    console.log(chalk.blue(strLine));
+    console.log(chalk.blue(getDate() + ' -> listening on port ' + port));
 });
 
 
@@ -116,8 +94,8 @@ app.get('/getplayermatches', async (req, res) => {
     //console.log('player_url: ' + player_url);
 
 
-    const player_cache_file     = './cache/' + req.query.platform + '/'     + req.query.player_name + '.json';
-    const player_cache_file_404 = './cache/' + req.query.platform + '/404/' + req.query.player_name + '.txt';
+    const player_cache_file     = './cache/player_data/' + req.query.platform + '/'     + req.query.player_name + '.json';
+    const player_cache_file_404 = './cache/player_data/' + req.query.platform + '/404/' + req.query.player_name + '.txt';
 
 
 
@@ -210,7 +188,7 @@ app.get('/getplayermatches', async (req, res) => {
 
         // ----------------------------->
         // ! WRITE CACHE FILE -> write player's cache file...
-        fs.writeFile(player_cache_file, JSON.stringify(pubg_player_response.data), function (err) {
+        fs.writeFile(player_cache_file, JSON.stringify(pubg_player_response.data, null, 2), function (err) {
             if (err) {
                 console.log('error writing cache file: ' + player_cache_file);
             }
@@ -289,6 +267,43 @@ app.get('/getplayermatches', async (req, res) => {
 
 
 
+
+// ! Purge cache files...
+function clearCache() {
+
+    const cacheGlobPattern = './cache/**/*.*';
+
+    //console.log(getDate() + ' -> '  + cacheGlobPattern);
+
+    glob(cacheGlobPattern, function (err, files) {
+        if (err){
+            console.log(chalk.yellow(getDate() +  " purge glob error: " + err));
+        } else {
+            //console.log(files);
+
+            files.forEach(file => {
+                const stat = fs.statSync(file);
+
+                //console.log('curr time: ' + Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
+                //curr time: 1589928871171 
+                //birthtime: 1589928825360.3643
+
+                // purge cache files older than 30 minutes (1,800,000 seconds)
+                if (Date.now() - stat.birthtimeMs > 600000) {
+
+                    // 600,000 = 10 minutes
+                    fs.unlink(file, (err) =>{
+                        if (err) {
+                            console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
+                        } else {
+                            console.log(chalk.green( getDate() + ' purged cache file because of retention -> ' + file));
+                        }
+                    })
+                }
+            })
+        }
+    })
+}
 
 
 

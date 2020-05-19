@@ -1,0 +1,162 @@
+{
+  "data": [
+    {
+      "type": "player",
+      "id": "account.4db189c2a87d46f8917b11bcb6217446",
+      "attributes": {
+        "createdAt": "2020-05-19T23:37:28Z",
+        "updatedAt": "2020-05-19T23:37:28Z",
+        "patchVersion": "",
+        "name": "hooty__",
+        "stats": null,
+        "titleId": "bluehole-pubg",
+        "shardId": "steam"
+      },
+      "relationships": {
+        "assets": {
+          "data": []
+        },
+        "matches": {
+          "data": [
+            {
+              "type": "match",
+              "id": "adb5bdd1-fdd4-4747-91f5-3b9021489790"
+            },
+            {
+              "type": "match",
+              "id": "2a92f345-84a6-47b7-aa46-a1a8ea890818"
+            },
+            {
+              "type": "match",
+              "id": "62857eeb-dc04-4d23-9f77-c2b3b4357935"
+            },
+            {
+              "type": "match",
+              "id": "0b3256a5-6266-4185-a72d-5b1bb63e44ad"
+            },
+            {
+              "type": "match",
+              "id": "585312f8-7f29-417c-8888-adea3fdcdb70"
+            },
+            {
+              "type": "match",
+              "id": "9e713ee8-d70e-4192-9e25-e7aed3d819a3"
+            },
+            {
+              "type": "match",
+              "id": "072c0acc-e6a1-4da3-8b18-81dcfe87d957"
+            },
+            {
+              "type": "match",
+              "id": "125f462c-1355-4624-a1db-3f1200989ec6"
+            },
+            {
+              "type": "match",
+              "id": "956bea31-3c7b-449d-b0cb-7779b6b25a27"
+            },
+            {
+              "type": "match",
+              "id": "1adceecc-4ded-4a3e-bbcb-36ac1f843545"
+            },
+            {
+              "type": "match",
+              "id": "4eb41533-cfcd-4771-b676-0a97750e37ae"
+            },
+            {
+              "type": "match",
+              "id": "4baff99c-5b01-44a1-a038-d554bd29ecb2"
+            },
+            {
+              "type": "match",
+              "id": "56a74d33-dfd2-4291-88f6-65aa7bc7220a"
+            },
+            {
+              "type": "match",
+              "id": "25ccab9f-c3b8-4d51-88bd-ca8f31eccf2a"
+            },
+            {
+              "type": "match",
+              "id": "2d281902-3294-45b3-9db9-1b48194c3efa"
+            },
+            {
+              "type": "match",
+              "id": "fe46d7ee-2099-4503-a6ca-ac67c94b5226"
+            },
+            {
+              "type": "match",
+              "id": "c69408ef-285c-4f5a-841b-8860c14f4aa0"
+            },
+            {
+              "type": "match",
+              "id": "59607bb1-0366-4ea1-9807-e52e17cdebe8"
+            },
+            {
+              "type": "match",
+              "id": "bc32dde6-2e2c-443e-8536-bd22268f8696"
+            },
+            {
+              "type": "match",
+              "id": "eef202c0-4739-42af-aa2f-41893959a4f9"
+            },
+            {
+              "type": "match",
+              "id": "d9dc9543-61fd-43e7-bda7-473cc460b0c1"
+            },
+            {
+              "type": "match",
+              "id": "1c0f481a-884b-48c7-868c-eadb72ee7bdc"
+            },
+            {
+              "type": "match",
+              "id": "9c9b06a5-c4ff-42d7-a4d0-59eabdaa86f6"
+            },
+            {
+              "type": "match",
+              "id": "3a774c62-9dff-4c00-94a6-1c1e62159730"
+            },
+            {
+              "type": "match",
+              "id": "3c9486e1-8788-4152-8d6d-c24b24bee68e"
+            },
+            {
+              "type": "match",
+              "id": "066befe1-6320-44c6-8a66-2a9578ad87ba"
+            },
+            {
+              "type": "match",
+              "id": "7544a857-fe93-421a-80a9-76c7a472ab11"
+            },
+            {
+              "type": "match",
+              "id": "7cd9b3d7-0ed3-493b-ae98-31e45494bb13"
+            },
+            {
+              "type": "match",
+              "id": "5bd3823b-68ab-4d2b-9637-26ce4a4916cb"
+            },
+            {
+              "type": "match",
+              "id": "9305b2b7-e853-4eb2-b752-6029dca7e6dc"
+            },
+            {
+              "type": "match",
+              "id": "89715046-90ca-48f4-a006-99398ba33007"
+            },
+            {
+              "type": "match",
+              "id": "ea7f2359-ccdf-4c13-be9b-be4458d03ec2"
+            }
+          ]
+        }
+      },
+      "links": {
+        "self": "https://api.playbattlegrounds.com/shards/steam/players/account.4db189c2a87d46f8917b11bcb6217446",
+        "schema": ""
+      }
+    }
+  ],
+  "links": {
+    "self": "https://api.pubg.com/shards/steam/players?filter[playerNames]=hooty__"
+  },
+  "meta": {}
+}

@@ -6,6 +6,8 @@ let strLine = "--------------------------------------------";
 let hooty_server_url 	= 'http://localhost:3000';
 
 var strPlatform, strPlayerName;
+var prevPlatform, prevPlayerName;	// these are used to reset match_offset if searching for a new player
+
 
 var url, player_url, match_url, telemetry_url = ""; // store the match ID's of the player
 //var response; // fetch() responses
@@ -22,6 +24,13 @@ var total_matches 	= 0;
 async function GetPlayerMatches() {
 
 	match_offset = (match_offset < 0) ? 0 : match_offset;
+
+	if (strPlatform != prevPlatform || strPlayerName != prevPlayerName) {
+		// reset match_offset if a new player or platform is selected...
+		console.log('resetting match_offset for new player');
+		match_offset = 0;
+	}
+
 
 	console.log('client requesting from ' + hooty_server_url);
 	console.log('requesting player:     ' + strPlatform + ', ' + strPlayerName);
@@ -45,12 +54,17 @@ async function GetPlayerMatches() {
 		}
 	})
 
+	// # check for response errors here
+
+
+	prevPlatform 	= strPlatform;
+	prevPlayerName 	= strPlayerName;
 
 	total_matches = axios_response.data.totalMatches;
 
-	console.log('axios_response.data...');
+	console.log('axios_response.data... ');
 	console.log(getDate() + ' ' + JSON.stringify(axios_response.data));
-	console.log('match_offset: ' + match_offset + ', total_matches: ' + total_matches);
+	//console.log('match_offset: ' + match_offset + ', total_matches: ' + total_matches);
 
 	// enable all buttons...
 	btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
