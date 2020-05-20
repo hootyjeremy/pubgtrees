@@ -34,7 +34,7 @@ async function GetPlayerMatches() {
 
 	console.log('client requesting from ' + hooty_server_url);
 	console.log('requesting player:     ' + strPlatform + ', ' + strPlayerName);
-	console.log('match_offset:          ' + match_offset);
+	console.log('match_offset:          ' + match_offset + ' of ' + total_matches);
 
 
 	const btnSearch 	= document.getElementById('btnSearchPlayer');

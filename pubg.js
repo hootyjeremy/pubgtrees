@@ -79,7 +79,7 @@ app.get('/getplayermatches', async (req, res) => {
     var base_url    = "https://api.pubg.com/shards/";
     var player_url  = '';
 
-    var player_data; // player_data is the data portion of the full pubg_player_response (whether from api or cache)
+    var player_data; // player_data is the data portion of the full pubgapi_player_response (whether from api or cache)
     var blPlayerCacheExists;
 
 
@@ -94,8 +94,8 @@ app.get('/getplayermatches', async (req, res) => {
     //console.log('player_url: ' + player_url);
 
 
-    const player_cache_file     = './cache/player_data/' + req.query.platform + '/'     + req.query.player_name + '.json';
-    const player_cache_file_404 = './cache/player_data/' + req.query.platform + '/404/' + req.query.player_name + '.txt';
+    const player_cache_file     = './cache/players/' + req.query.platform + '/'     + req.query.player_name + '.json';
+    const player_cache_file_404 = './cache/players/' + req.query.platform + '/404/' + req.query.player_name + '.txt';
 
 
 
@@ -117,13 +117,13 @@ app.get('/getplayermatches', async (req, res) => {
     // ! READ CACHE FILE -> if you can get the player cache from the file, then get it...
     try {
 
-        console.log('retrieving from cache file: ' + player_cache_file);
+        //console.log('retrieving from cache file: ' + player_cache_file);
 
 
         player_data = fs.readFileSync(player_cache_file, {encoding: 'utf8'});
 
 
-        //console.log(pubg_player_response);
+        //console.log(pubgapi_player_response);
 
         player_data = JSON.parse(player_data);
         player_data = player_data.data[0];   // only get "data" portion from cache file
@@ -134,10 +134,9 @@ app.get('/getplayermatches', async (req, res) => {
     }
     catch (err) {
         blPlayerCacheExists = false;
-        //pubg_player_response = '';
 
         //console.log('error reading cache file: ' + player_cache_file);
-        console.log('error code: ' + err.code);
+        console.log('player cache file read error: ' + err.code);
     }
 
 
@@ -148,11 +147,11 @@ app.get('/getplayermatches', async (req, res) => {
 
         console.log('no cache file. fetching from pubg api -> ' + player_url);
 
-        var pubg_player_response;
+        var pubgapi_player_response;
 
         try 
         {
-            pubg_player_response = await axios.get(player_url, { 
+            pubgapi_player_response = await axios.get(player_url, { 
                 headers: {
                     Authorization: 'Bearer ' + apiKey,
                     Accept: 'application/vnd.api+json'
@@ -188,7 +187,7 @@ app.get('/getplayermatches', async (req, res) => {
 
         // ----------------------------->
         // ! WRITE CACHE FILE -> write player's cache file...
-        fs.writeFile(player_cache_file, JSON.stringify(pubg_player_response.data, null, 2), function (err) {
+        fs.writeFile(player_cache_file, JSON.stringify(pubgapi_player_response.data, null, 2), function (err) {
             if (err) {
                 console.log('error writing cache file: ' + player_cache_file);
             }
@@ -198,7 +197,7 @@ app.get('/getplayermatches', async (req, res) => {
         });
 
 
-        player_data = pubg_player_response.data.data[0];
+        player_data = pubgapi_player_response.data.data[0];
     }
 
 
@@ -209,8 +208,6 @@ app.get('/getplayermatches', async (req, res) => {
 
     // ------------------------------------------------------->
     // ! MATCH DATA ->
-
-    // ? why not cache the pulled match data as long as the player data is cached? when player data cache is deleted, delete their match data? this way you don't have to keep hitting the server?
 
     // only want to pull 10 matches at a time depending on match_offset, but also no more than the end of matches
     const match_ceiling = (match_offset + 10 > player_data.relationships.matches.data.length) ? player_data.relationships.matches.data.length : match_offset + 10 ; 
@@ -223,40 +220,91 @@ app.get('/getplayermatches', async (req, res) => {
 
     var match_data_response;    // an array of json objects about each match
 
+
     for (let i = match_offset; i < match_ceiling; i++) {
         //console.log(i + '. ' + getDate() + ' -> match_url: ' + match_url + player_data.relationships.matches.data[i].id);
-        
 
-        // match_url + id: https://api.pubg.com/shards/steam/matches/ba57018d-6e6f-46ea-bcd4-ebd8bbcefd28
-        var pubg_match_response = await axios.get(match_url + player_data.relationships.matches.data[i].id, {
-            headers: {
-                Accept: 'application/vnd.api+json'
+        // # check for match cache file first. if not there, then get it from the pubg api
+        var match_cache_file = './cache/matches/' + player_data.relationships.matches.data[i].id + '.json';
+        var pubgapi_match_response;
+        var match_data;
+
+        // ! fetch from cache or pubg api...
+        if (fs.existsSync(match_cache_file)) {
+            // a cache file exists
+
+            try 
+            {
+                match_data = fs.readFileSync(match_cache_file, {encoding: 'utf8'});
+                match_data = JSON.parse(match_data);
+    
+                console.log(i +  '. ' + getDate() + ' (cached) ' , match_data);       
+
             }
-        });
-        
-        // # HANDLE GET() ERRORS
-        // # will need to build the tailored json response with the data that vue will use to create a table
+            catch (err) 
+            {
+                console.log('match cache read error: ' + err + ' -> for cache file ' + match_cache_file);
+            }
 
-        console.log(i + '. ' + getDate(), pubg_match_response.data);
-        
-        // ! filter out non-regular games
-		if (
-			pubg_match_response.data.data.attributes.gameMode != "solo" 	&&	pubg_match_response.data.data.attributes.gameMode != "solo-fpp" 	&&
-			pubg_match_response.data.data.attributes.gameMode != "duo" 		&&	pubg_match_response.data.data.attributes.gameMode != "duo-fpp"      &&
-			pubg_match_response.data.data.attributes.gameMode != "squad"    &&	pubg_match_response.data.data.attributes.gameMode != "squad-fpp"      ) {
-			continue;
-		}
+        } 
+        else {
+            // no cache file exists. fetch from the pubg api...
+
+            try 
+            {
+                // match_url + id: https://api.pubg.com/shards/steam/matches/ba57018d-6e6f-46ea-bcd4-ebd8bbcefd28
+
+                pubgapi_match_response = await axios.get(match_url + player_data.relationships.matches.data[i].id, {
+                    headers: {
+                        Accept: 'application/vnd.api+json'
+                    }
+                });
+
+            }
+            catch (error) 
+            {
+                // handle fetch errors...
+
+                if (error.response.status != 200) {
+                    console.log('could not fetch match from pubg api: ' + match_url + player_data.relationships.matches.data[i].id)
+                }
+
+                continue; // get next match if this one fails? does any data need to be sent back to the client? probably not.
+            }
+
+            
+
+            // create cache file for this match response...
+            fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 2), function (err) {
+                //console.log('writing match cache...');
+
+                if (err) {
+                    console.log('error writing match cache file: ' + match_cache_file);
+                }
+                else {
+                    //console.log('created match cache file: ' + match_cache_file);
+                }
+            })
+
+            //console.log(i + '. ' + getDate(), pubgapi_match_response.data);
+
+            match_data = pubgapi_match_response.data;
+
+            console.log(i +  '. ' + getDate() + ' (fetched) ' , match_data);       
+
+        }
 
 
 
-    }
+
+    }   // matches loop
+
 
     //console.log(getDate() + ' after get matches');
 
 
-
-
-
+    
+    // # if no matches, then the client should be aware
     var response_data = { 'totalMatches' : player_data.relationships.matches.data.length };
 
     res.json(response_data);
