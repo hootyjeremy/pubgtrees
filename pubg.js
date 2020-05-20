@@ -23,7 +23,7 @@ const strLine   = "--------------------------------------------";
 
 // ---------------------------->
 // ! Cache Purging...
-setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
+//setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
 
 
 app.use(bodyParser.json());
@@ -79,7 +79,6 @@ app.get('/getplayermatches', async (req, res) => {
     var player_data; // player_data is the data portion of the full pubgapi_player_response (whether from api or cache)
     var blPlayerCacheExists;
 
-
     base_url   += req.query.platform + '/';
     player_url  = base_url + req.query.endpoint + '?filter[playerNames]=' + req.query.player_name;
 
@@ -91,10 +90,15 @@ app.get('/getplayermatches', async (req, res) => {
     //console.log('player_url: ' + player_url);
 
 
+
+
+    // ------------------------------------------------------->
+    // ! PLAYER DATA ->
+    //#region : fetch player_data
+    //
+
     const player_cache_file     = './cache/players/' + req.query.platform + '/'     + req.query.player_name + '.json';
     const player_cache_file_404 = './cache/players/' + req.query.platform + '/404/' + req.query.player_name + '.txt';
-
-
 
     // ---------------------------------------------------------->
     // ! 404 -> verify that the searched player 404 file doesn't exist...
@@ -116,9 +120,7 @@ app.get('/getplayermatches', async (req, res) => {
 
         //console.log('retrieving from cache file: ' + player_cache_file);
 
-
         player_data = fs.readFileSync(player_cache_file, {encoding: 'utf8'});
-
 
         //console.log(pubgapi_player_response);
 
@@ -142,7 +144,7 @@ app.get('/getplayermatches', async (req, res) => {
     // ! FETCH PUBG API -> if the cache file doesn't exist, then fetch from the pubg api and create the cache file
     if (!blPlayerCacheExists) { 
 
-        console.log('no cache file. fetching from pubg api -> ' + player_url);
+        //console.log('no cache file. fetching from pubg api -> ' + player_url);
 
         var pubgapi_player_response;
 
@@ -189,13 +191,14 @@ app.get('/getplayermatches', async (req, res) => {
                 console.log('error writing cache file: ' + player_cache_file);
             }
             else {
-                console.log('created player cache file: ' + player_cache_file);
+                //console.log('created player cache file: ' + player_cache_file);
             }
         });
 
 
         player_data = pubgapi_player_response.data.data[0];
     }
+    //#endregion ---------------------------------------------------------------------------------------------->
 
 
     console.log('player_data -> ', player_data);
@@ -215,18 +218,22 @@ app.get('/getplayermatches', async (req, res) => {
     //console.log('match_offset:   ' + match_offset);
     //console.log('match_ceiling:  ' + match_ceiling);
 
-    var match_data_response;    // an array of json objects about each match
+    var matches_array   = [];    // an array of json objects about each match
+    var match_arr_index = 0;
 
-
+    // matches loop...
     for (let i = match_offset; i < match_ceiling; i++) {
+        // $ need to recalculate match_celing when skipping unwanted gameMode types
         //console.log(i + '. ' + getDate() + ' -> match_url: ' + match_url + player_data.relationships.matches.data[i].id);
 
-        // # check for match cache file first. if not there, then get it from the pubg api
         var match_cache_file = './cache/matches/' + player_data.relationships.matches.data[i].id + '.json';
         var pubgapi_match_response;
         var match_data;
+        var _cached;
 
-        // ! fetch from cache or pubg api...
+        // ! fetch match_data from cache or pubg api...
+        // #region : fetch match_data from cache or api
+
         if (fs.existsSync(match_cache_file)) {
             // a cache file exists
 
@@ -235,14 +242,13 @@ app.get('/getplayermatches', async (req, res) => {
                 match_data = fs.readFileSync(match_cache_file, {encoding: 'utf8'});
                 match_data = JSON.parse(match_data);
     
-                console.log(i +  '. ' + getDate() + ' (cached) ' , match_data);       
-
+                //console.log(i +  '. ' + getDate() + ' (cached) ' , match_data);       
+                _cached = ('cached');
             }
             catch (err) 
             {
                 console.log('match cache read error: ' + err + ' -> for cache file ' + match_cache_file);
             }
-
         } 
         else {
             // no cache file exists. fetch from the pubg api...
@@ -256,7 +262,6 @@ app.get('/getplayermatches', async (req, res) => {
                         Accept: 'application/vnd.api+json'
                     }
                 });
-
             }
             catch (error) 
             {
@@ -266,9 +271,8 @@ app.get('/getplayermatches', async (req, res) => {
                     console.log('could not fetch match from pubg api: ' + match_url + player_data.relationships.matches.data[i].id)
                 }
 
-                continue; // get next match if this one fails? does any data need to be sent back to the client? probably not.
+                continue; // ? get next match if this one fails? does any data need to be sent back to the client? probably not.
             }
-
             
 
             // create cache file for this match response...
@@ -287,12 +291,25 @@ app.get('/getplayermatches', async (req, res) => {
 
             match_data = pubgapi_match_response.data;
 
-            console.log(i +  '. ' + getDate() + ' (fetched) ' , match_data);       
+            //console.log(i +  '. ' + getDate() + ' (fetched) ' , match_data);       
+            _cached = '(fetched)';
 
         }
+        //#endregion fetch
+        
 
+        console.log(i + '. ' + _cached + ": " + match_data.data.attributes.gameMode + ', ' + getTimeSinceMatch(match_data.data.attributes.createdAt) + ', matchType: ' + match_data.data.attributes.matchType);
+        console.log(match_data);
 
+        matches_array[match_arr_index] = { 
+            'timeSinceMatch': getMatchTimeDistance(match_data.data.attributes.createdAt),
+            'duration': match_data.data.attributes.duration,
+            'gameMode': match_data.data.attributes.gameMode, 
+            'matchType': match_data.data.attributes.matchType,
+            'mapName': match_data.data.attributes.mapName,
 
+         };
+        match_arr_index++;
 
     }   // matches loop
 
@@ -301,7 +318,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
     
-    // # if no matches, then the client should be aware
+    // $ if no matches, then the client should be aware
     var response_data = { 'totalMatches' : player_data.relationships.matches.data.length };
 
     res.json(response_data);
@@ -395,8 +412,33 @@ function clearCache() {
 
 
 function getDate() {
-
     // https://momentjs.com/timezone/docs/
-    return moment().tz("America/Chicago").format('YYYY.MM.DD_hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);    
 
+    return moment().tz("America/Chicago").format('YYYY.MM.DD_hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
 }   
+
+function getTimeSinceMatch(strDate) {
+    // return x minutes, hours, or days
+
+    const diffTime      = Math.abs(Date.now() - Date.parse(strDate));
+    const diffMinutes   = Math.ceil(diffTime / (1000 * 60));
+    const diffHours     = Math.ceil(diffTime / (1000 * 60 * 60));
+    const diffDays      = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    //console.log(diffTime + " milliseconds");
+    //console.log(diffMinutes + " minutes");
+    //console.log(diffHours + " hours");
+    //console.log(diffDays + " days");
+
+
+    if (diffMinutes < 60) {
+        return diffMinutes + ' minutes ago';
+    }
+    else if (diffHours < 24) {
+        return diffHours + ' hours ago';
+    }
+    else {
+        return diffDays + ' days ago';
+    }
+
+}

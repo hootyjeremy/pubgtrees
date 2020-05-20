@@ -19,8 +19,8 @@ var match_offset	= 0;
 var total_matches 	= 0;
 
 
-// # FLOOD PREVENTION
-// # NEED TO BE ABLE TO SUPPRESS GETTING MATCHES UNTIL A RESPONSE COMES BACK
+// $ FLOOD PREVENTION
+// $ NEED TO BE ABLE TO SUPPRESS GETTING MATCHES UNTIL A RESPONSE COMES BACK
 async function GetPlayerMatches() {
 
 	match_offset = (match_offset < 0) ? 0 : match_offset;
@@ -54,7 +54,7 @@ async function GetPlayerMatches() {
 		}
 	})
 
-	// # check for response errors here
+	// $ check for response errors here
 
 
 	prevPlatform 	= strPlatform;
@@ -71,7 +71,7 @@ async function GetPlayerMatches() {
 	
 	// disable buttons if they need to be disabled...
 	btnPrevious.disabled 	= (match_offset < 10) 						? true : false ;
-	btnNext.disabled 		= (match_offset + 10 > total_matches - 1) 	? true : false ;	// # verify this is hitting the ceiling properly
+	btnNext.disabled 		= (match_offset + 10 > total_matches - 1) 	? true : false ;	// $ verify this is hitting the ceiling properly
 
 
 
