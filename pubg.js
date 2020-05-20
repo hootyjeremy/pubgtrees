@@ -85,11 +85,21 @@ app.get('/getplayermatches', async (req, res) => {
     var match_url = base_url + 'matches/';
     //console.log('match_url: ' + match_url);
 
-
     // player_url: 'https://api.pubg.com/shards/steam/players?filter[playerNames]=hooty__'
     //console.log('player_url: ' + player_url);
 
-
+    // cache structure:
+    // ./cache/matches
+    // ./cache/players/psn
+    // ./cache/players/stadia
+    // ./cache/players/steam
+    // ./cache/players/tournament
+    // ./cache/players/xbox
+    // ./cache/players/psn/404
+    // ./cache/players/stadia/404
+    // ./cache/players/steam/404
+    // ./cache/players/tournament/404
+    // ./cache/players/xbox/404
 
 
     // ------------------------------------------------------->
@@ -204,8 +214,6 @@ app.get('/getplayermatches', async (req, res) => {
     console.log('player_data -> ', player_data);
 
 
-
-
     // ------------------------------------------------------->
     // ! MATCH DATA ->
 
@@ -302,7 +310,7 @@ app.get('/getplayermatches', async (req, res) => {
         console.log(match_data);
 
         matches_array[match_arr_index] = { 
-            'timeSinceMatch': getMatchTimeDistance(match_data.data.attributes.createdAt),
+            'timeSinceMatch': getTimeSinceMatch(match_data.data.attributes.createdAt),
             'duration': match_data.data.attributes.duration,
             'gameMode': match_data.data.attributes.gameMode, 
             'matchType': match_data.data.attributes.matchType,
