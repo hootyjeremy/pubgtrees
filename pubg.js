@@ -1,14 +1,12 @@
 const express       = require('express');
 const bodyParser    = require('body-parser');
-const fetch         = require('node-fetch');    // https://stackoverflow.com/questions/48433783/referenceerror-fetch-is-not-defined
 const axios         = require('axios');
-const moment        = require('moment');
-//const path      = require('path');
+const moment        = require('moment-timezone');   //require('moment');
 const app           = express();
 const port          = 3000;
 const fs            = require('fs');
 const glob          = require('glob');
-const chalk         = require('chalk');     // https://www.npmjs.com/package/chalk
+const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
 
 
 const apiKey        = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02ODAwLTAxMzgtZTQ4Ny0wNjc0ZmE5YWVjOGYiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0IjoxNTg3Njk1MTM1LCJwdWIiOiJibHVlaG9sZSIsInRpdGxlIjoicHViZyIsImFwcCI6Im1pbmlzdGVya2F0YW9rIn0.HiuLi97rFSW-ho5zE1XBYmpV9E6M0Nj90qXIY1TWsco';
@@ -26,7 +24,7 @@ var strLine         = "--------------------------------------------";
 
 // ---------------------------->
 // ! Cache Purging...
-//setInterval(clearCache, 5000);
+setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
 
 
 app.use(bodyParser.json());
@@ -171,7 +169,7 @@ app.get('/getplayermatches', async (req, res) => {
                 if (error.response.status == 404) {
                     fs.writeFile(player_cache_file_404, 'not found', function (err) {
                         if (err) {
-                            console.log('error writing 404 cache file: ' + player_cache_file_404);
+                            console.log(err +  ' -> error writing 404 cache file: ' + player_cache_file_404);
                         }
                         else {
                             console.log('wrote 404 cache file: ' + player_cache_file_404);
@@ -319,11 +317,16 @@ app.get('/getplayermatches', async (req, res) => {
 // ! Purge cache files...
 function clearCache() {
 
+    console.log(chalk.blue(getDate() + ' purging cache files...'));
+
     const cacheGlobPattern = './cache/**/*.*';
+    const playersCacheGlobPattern   = './cache/players/**/*.*';
+    const matchesCacheGlobPattern   = './cache/matches/**/*.*';
 
     //console.log(getDate() + ' -> '  + cacheGlobPattern);
 
-    glob(cacheGlobPattern, function (err, files) {
+    // check players cache...
+    glob(playersCacheGlobPattern, function (err, files) {
         if (err){
             console.log(chalk.yellow(getDate() +  " purge glob error: " + err));
         } else {
@@ -336,26 +339,65 @@ function clearCache() {
                 //curr time: 1589928871171 
                 //birthtime: 1589928825360.3643
 
-                // purge cache files older than 30 minutes (1,800,000 seconds)
-                if (Date.now() - stat.birthtimeMs > 600000) {
+                // purge cache files older than 30 minutes (1,800,000 milliseconds)
+                // 10 minutes = 600,000 milliseconds
+                if (Date.now() - stat.birthtimeMs > 1800000) { 
 
-                    // 600,000 = 10 minutes
+                    
                     fs.unlink(file, (err) =>{
                         if (err) {
                             console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
                         } else {
-                            console.log(chalk.green( getDate() + ' purged cache file because of retention -> ' + file));
+                            console.log(chalk.green( getDate() + ' purged player cache file because of retention -> ' + file));
                         }
                     })
                 }
             })
         }
     })
+
+
+    // check matches cache for files to purge...
+    glob(matchesCacheGlobPattern, function (err, files) {
+        if (err){
+            console.log(chalk.yellow(getDate() +  " purge glob error: " + err));
+        } else {
+            //console.log(files);
+
+            files.forEach(file => {
+                const stat = fs.statSync(file);
+
+                //console.log('curr time: ' + Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
+                //curr time: 1589928871171 
+                //birthtime: 1589928825360.3643
+
+                // purge match cache files older than 3 days...
+                // 24 * 60 * 60 =  86,400 seconds per day
+                // 86,400 * 3   = 259,200 seconds per 3 days
+                // 259,200 * 1,000 = 259,200,000 milliseconds per 3 days
+                if (Date.now() - stat.birthtimeMs > 259200000) {
+
+                    // 600,000 = 10 minutes
+                    fs.unlink(file, (err) =>{
+                        if (err) {
+                            console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
+                        } else {
+                            console.log(chalk.green( getDate() + ' purged match cache file because of retention -> ' + file));
+                        }
+                    })
+                }
+            })
+        }
+    })
+
 }
 
 
 
 
 function getDate() {
-    return moment().toISOString().substring(11,23);
+
+    // https://momentjs.com/timezone/docs/
+    return moment().tz("America/Chicago").format('YYYY.MM.DD_hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);    
+
 }   
