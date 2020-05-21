@@ -23,7 +23,7 @@ const strLine   = "--------------------------------------------";
 
 // ---------------------------->
 // ! Cache Purging...
-setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
+//setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
 
 
 app.use(bodyParser.json());
@@ -305,9 +305,14 @@ app.get('/getplayermatches', async (req, res) => {
 
         }
         //#endregion fetch
+        //
 
+        
 
-        // ! filter out irregular games
+        //#region // ! Loop through match's included[] array
+        //
+
+        // filter out irregular games
 		if (
 			match_data.data.attributes.gameMode != "solo"   &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
 			match_data.data.attributes.gameMode != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
@@ -322,11 +327,6 @@ app.get('/getplayermatches', async (req, res) => {
 			continue;
         }
 
-        
-        // $ need to go through included[] array and figure out participant data
-
-        //#region // ! Loop through match's included[] array
-        //
 
         var damageDealt, kills, winPlace, timeSurvived, participantID, match_telemetry_url;
         var dctParticipantNames     = [];   // [ participantID, name ] in the match so you can resolve playerID's
@@ -400,9 +400,6 @@ app.get('/getplayermatches', async (req, res) => {
             }
         } // .included[j] loop
 
-        //
-        //#endregion (included[j] loop ) --------------------------------------------------------------------------------->
-
 
 		// ! resolve roster teammate names
         // loop through participants:roster until you find the player's rosterId
@@ -437,6 +434,11 @@ app.get('/getplayermatches', async (req, res) => {
         }
        
 
+        //
+        //#endregion (match data) --------------------------------------------------------------------------------->
+        //
+
+
         matchArray[matchIndex] = { 
             'timeSinceMatch':   getTimeSinceMatch(match_data.data.attributes.createdAt),
             'duration':         match_data.data.attributes.duration,
@@ -449,7 +451,7 @@ app.get('/getplayermatches', async (req, res) => {
         console.log(i + '. ' + _cached + ": " + matchArray[matchIndex].gameMode + ', ' + matchArray[matchIndex].mapName + ', ' + matchArray[matchIndex].timeSinceMatch + 
         ', matchType: ' + matchArray[matchIndex].matchType + ', [' + printTeamRoster(dctTeamRoster) + ']');
 
-        console.log(match_data);
+        //console.log(match_data);        
 
         matchIndex++;
 
@@ -459,10 +461,12 @@ app.get('/getplayermatches', async (req, res) => {
     //console.log(getDate() + ' after get matches');
 
 
+    //console.log(matchArray);
 
     // $ if no matches, then the client should be aware
     var response_data = { 
-        'totalMatches' : player_data.relationships.matches.data.length,
+        'totalMatches'  : player_data.relationships.matches.data.length,
+        'matches'       : matchArray,
 
     };
 

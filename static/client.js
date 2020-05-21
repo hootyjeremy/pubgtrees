@@ -58,12 +58,13 @@ async function GetPlayerMatches() {
 
 	// $ check for response errors here
 
-	console.log(getDate() + ' axios_response: ' + JSON.stringify(axios_response.data));
-
+	//console.log(getDate() + ' axios_response: ' + JSON.stringify(axios_response.data));
+	console.dir(axios_response.data);
 
 	total_matches 	= axios_response.data.totalMatches;
 	console.log('match_floor:     ' + match_floor + ' of ' + total_matches);
 
+	// $ it's time to start working on vue table rows 
 
 	//console.log('axios_response.data... ');
 	//console.log('match_floor: ' + match_floor + ', total_matches: ' + total_matches);
