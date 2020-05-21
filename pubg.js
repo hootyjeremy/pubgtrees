@@ -23,7 +23,7 @@ const strLine   = "--------------------------------------------";
 
 // ---------------------------->
 // ! Cache Purging...
-//setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
+setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
 
 
 app.use(bodyParser.json());
@@ -53,15 +53,12 @@ app.get('/', (req, res) => {
 // ------------------------------------------------------------->
 app.get('/getplayermatches', async (req, res) => {
 
-    var match_offset = new Number(req.query.match_offset);  // i don't know why this is catching a string. maybe the query converts it?
-
-    
+    var match_floor = new Number(req.query.match_floor);  // i don't know why this is catching a string. maybe the query converts it?
+    const strPlayerName = req.query.player_name;
 
     console.log(strLine);
-
     console.log('/getplayer called -> ' + req.query.platform + '/' + req.query.player_name);
-    console.log('match_offset: ' + match_offset);
-
+    console.log('match_floor: ' + match_floor);
 
     // console.log('request ip: ' + req.ip);
     // console.log('req.query.endpoint:     ' + req.query.endpoint);
@@ -75,14 +72,14 @@ app.get('/getplayermatches', async (req, res) => {
 
     var base_url    = "https://api.pubg.com/shards/";
     var player_url  = '';
+    var match_url   = '';
 
-    var player_data; // player_data is the data portion of the full pubgapi_player_response (whether from api or cache)
+    var player_data;            // player_data is the data portion of the full pubgapi_player_response (whether from api or cache)
     var blPlayerCacheExists;
 
     base_url   += req.query.platform + '/';
     player_url  = base_url + req.query.endpoint + '?filter[playerNames]=' + req.query.player_name;
-
-    var match_url = base_url + 'matches/';
+    match_url   = base_url + 'matches/';
     //console.log('match_url: ' + match_url);
 
     // player_url: 'https://api.pubg.com/shards/steam/players?filter[playerNames]=hooty__'
@@ -108,20 +105,23 @@ app.get('/getplayermatches', async (req, res) => {
     //
 
     const player_cache_file     = './cache/players/' + req.query.platform + '/'     + req.query.player_name + '.json';
-    const player_cache_file_404 = './cache/players/' + req.query.platform + '/404/' + req.query.player_name + '.txt';
+    //const player_cache_file_404 = './cache/players/' + req.query.platform + '/404/' + req.query.player_name + '.txt';
+
 
     // ---------------------------------------------------------->
-    // ! 404 -> verify that the searched player 404 file doesn't exist...
-    if (fs.existsSync(player_cache_file_404)) {
-        // if this file exists, then we know the pubg api already returned a 404 player not found. this will prevent from spamming the pubg api for non existent players.
+    // ? filename searches are not case sensitive so Hooty__ == hooty__ therefore need to come up with another way to cache 404 not found players. 
+    // ? or just not worry about it since you will get that info from pubg api anyway
+    // 404 -> verify that the searched player 404 file doesn't exist...
+    // if (fs.existsSync(player_cache_file_404)) {
+    //     // if this file exists, then we know the pubg api already returned a 404 player not found. this will prevent from spamming the pubg api for non existent players.
 
-        console.log('404: player does not exist -> ' + req.query.platform + '/' + req.query.player_name);
+    //     console.log('404: player does not exist -> ' + req.query.platform + '/' + req.query.player_name);
 
-        var _response_json = { pubg_response_status: 404, pubg_response_statusText: 'Not Found' };
+    //     var _response_json = { pubg_response_status: 404, pubg_response_statusText: 'Not Found' };
 
-        res.send(_response_json);
-        return;
-    }
+    //     res.send(_response_json);
+    //     return;
+    // }
 
 
     // -------------------------------------------------------------->
@@ -145,7 +145,10 @@ app.get('/getplayermatches', async (req, res) => {
         blPlayerCacheExists = false;
 
         //console.log('error reading cache file: ' + player_cache_file);
-        console.log('player cache file read error: ' + err.code);
+
+        if (err.code != "ENOENT") {
+            console.log('player cache file read error: ' + err.code);
+        }
     }
 
 
@@ -177,16 +180,16 @@ app.get('/getplayermatches', async (req, res) => {
 
                 
                 // if the player is not found, then create an entry in the 404 cache folder
-                if (error.response.status == 404) {
-                    fs.writeFile(player_cache_file_404, 'not found', function (err) {
-                        if (err) {
-                            console.log(err +  ' -> error writing 404 cache file: ' + player_cache_file_404);
-                        }
-                        else {
-                            console.log('wrote 404 cache file: ' + player_cache_file_404);
-                        }
-                    })
-                }
+                // if (error.response.status == 404) {
+                //     fs.writeFile(player_cache_file_404, 'not found', function (err) {
+                //         if (err) {
+                //             console.log(err +  ' -> error writing 404 cache file: ' + player_cache_file_404);
+                //         }
+                //         else {
+                //             console.log('wrote 404 cache file: ' + player_cache_file_404);
+                //         }
+                //     })
+                // }
 
                 res.send(_response_json);
                 return;
@@ -210,27 +213,24 @@ app.get('/getplayermatches', async (req, res) => {
     }
     //#endregion ---------------------------------------------------------------------------------------------->
 
-
     console.log('player_data -> ', player_data);
-
 
     // ------------------------------------------------------->
     // ! MATCH DATA ->
 
-    // only want to pull 10 matches at a time depending on match_offset, but also no more than the end of matches
-    const match_ceiling = (match_offset + 10 > player_data.relationships.matches.data.length) ? player_data.relationships.matches.data.length : match_offset + 10 ; 
-
+    // only want to pull 10 matches at a time depending on match_floor, but also no more than the end of matches
+    var match_ceiling = (match_floor + 10 > player_data.relationships.matches.data.length) ? player_data.relationships.matches.data.length : match_floor + 10 ; 
     //console.log(getDate() + ' before get matches');
 
     //console.log('matches.length: ' + player_data.relationships.matches.data.length);
-    //console.log('match_offset:   ' + match_offset);
+    //console.log('match_floor:   ' + match_floor);
     //console.log('match_ceiling:  ' + match_ceiling);
 
-    var matches_array   = [];    // an array of json objects about each match
-    var match_arr_index = 0;
+    var matchArray  = [];    // an array of json objects about each match
+    var matchIndex  = 0;
 
     // matches loop...
-    for (let i = match_offset; i < match_ceiling; i++) {
+    for (let i = match_floor; i < match_ceiling; i++) {
         // $ need to recalculate match_celing when skipping unwanted gameMode types
         //console.log(i + '. ' + getDate() + ' -> match_url: ' + match_url + player_data.relationships.matches.data[i].id);
 
@@ -239,8 +239,9 @@ app.get('/getplayermatches', async (req, res) => {
         var match_data;
         var _cached;
 
-        // ! fetch match_data from cache or pubg api...
-        // #region : fetch match_data from cache or api
+
+        // #region : // ! fetch match_data from cache or api
+        //
 
         if (fs.existsSync(match_cache_file)) {
             // a cache file exists
@@ -304,30 +305,166 @@ app.get('/getplayermatches', async (req, res) => {
 
         }
         //#endregion fetch
-        
 
-        console.log(i + '. ' + _cached + ": " + match_data.data.attributes.gameMode + ', ' + getTimeSinceMatch(match_data.data.attributes.createdAt) + ', matchType: ' + match_data.data.attributes.matchType);
+
+        // ! filter out irregular games
+		if (
+			match_data.data.attributes.gameMode != "solo"   &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
+			match_data.data.attributes.gameMode != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
+			match_data.data.attributes.gameMode != "squad" 	&&	match_data.data.attributes.gameMode != "squad-fpp"    ) {
+            console.log('skipping match gameMode: ' + match_data.data.attributes.gameMode);
+            
+            // recalculate match_ceiling if you skip a match. 
+            // if (match_ceiling + 1 <= player_data.relationships.matches.data.length) {
+            //     match_ceiling++;
+            // }
+
+			continue;
+        }
+
+        
+        // $ need to go through included[] array and figure out participant data
+
+        //#region // ! Loop through match's included[] array
+        //
+
+        var damageDealt, kills, winPlace, timeSurvived, participantID, match_telemetry_url;
+        var dctParticipantNames     = [];   // [ participantID, name ] in the match so you can resolve playerID's
+        var arrRosters              = [];   // [ rosterId, [roster participantIDs] ]  -> match participant ID's to their roster
+		var dctParticipantRoster    = []; 	// [ participantId, rosterId ]
+		var dctTeamRoster 			= [];	// [ name, participantId ]
+		var participantIndex 		= 0;
+		var rosterIndex 			= 0;
+		var participantRosterIndex  = 0;
+		var teamRosterIndex 		= 0;
+
+        for (let j = 0; j < match_data.included.length; j++) {
+
+            const included = match_data.included[j];
+
+
+            if (included.type == 'participant') {
+
+                // death types: byplayer, byzone (blue only?), alive (won without dying), suicide
+
+                //console.log('[' + j + '] deathType: ' + included.attributes.stats.deathType + ', ' + included.attributes.stats.name);
+
+                // is this the selected player?
+                if (included.attributes.stats.name == strPlayerName) {
+                    //console.log(j + '. this participant is the selected player: ' + strPlayerName + ', ' + included.attributes.stats.playerId);
+                    participantID   = included.id;
+                    damageDealt     = parseInt(included.attributes.stats.damageDealt);
+					kills 			= included.attributes.stats.kills;
+					winPlace 		= included.attributes.stats.winPlace;
+                    timeSurvived 	= ConvertSecondsToMinutes(included.attributes.stats.timeSurvived);                
+                }
+
+                dctParticipantNames[participantIndex] = { 'participantID': included.id, 'name': included.attributes.stats.name };
+    			participantIndex++;
+            }
+            else if (included.type == 'roster') {
+   				// since you don't know your participantID until after looping through .included[] once, you can't always find your roster of teammates on the first round.
+				// build an array of all rosters this match and after this .inluded[] loop, find out your teammates names
+
+				var _roster_participants = [];
+
+				// enter all participants of each included.relationships.participants.data[].id
+				for (let p = 0; p < included.relationships.participants.data.length; p++) {
+					_roster_participants[p] = included.relationships.participants.data[p].id;
+
+					// get [participantId, rosterId]
+					dctParticipantRoster[participantRosterIndex] = { 'participantID': included.relationships.participants.data[p].id, 'rosterID': included.id };
+					participantRosterIndex++;
+				}
+
+				// add participant array to rosters array
+				arrRosters[rosterIndex] = { 'rosterID': included.id, 'rosterParticipants': _roster_participants } ;
+				rosterIndex++;
+            }
+            else if (included.type == 'asset') {
+                // get telemetry url from asset...
+
+                const telemetry_url_cache = './cache/telemetry/' + player_data.relationships.matches.data[i].id + '.json';
+                const telemetry_json = { 'matchID': player_data.relationships.matches.data[i].id, 'telemetry_url': included.attributes.URL };
+
+                // cache the telemetry url for when the user asks for it. if they want to analyze a match, get it's url here. 
+                // if the cache doesn't exist, try the cached match file. if that doesn't exist, fetch match from the pubg api.
+                fs.writeFile(telemetry_url_cache, JSON.stringify(telemetry_json, null, 2) , function (err) {
+                    if (err) {
+                        console.log(err +  ' -> error writing telemetry url cache: ' + telemetry_url_cache);
+                    }
+                })
+            }
+            else {
+                console.log(chalk.yellow(j + ' included type is not participant, roster, or asset. this is unexpected.'));
+            }
+        } // .included[j] loop
+
+        //
+        //#endregion (included[j] loop ) --------------------------------------------------------------------------------->
+
+
+		// ! resolve roster teammate names
+        // loop through participants:roster until you find the player's rosterId
+        var _rosterID = '';
+
+        for (let j = 0; j < dctParticipantRoster.length; j++) {
+            if (dctParticipantRoster[j].participantID == participantID) {
+                _rosterID = dctParticipantRoster[j].rosterID;
+                break;
+            }
+        }
+
+        // now that you have _rosterId for the player, search arrRosters for the participantIDs
+		for (let j = 0; j < arrRosters.length; j++) {
+			if (arrRosters[j].rosterID == _rosterID) {
+				_participants = arrRosters[j].rosterParticipants;
+				break;
+			}
+		}
+
+		// now that you have the teammates' participant IDs (including the selected player's), resolve their names
+		for (let j = 0; j < _participants.length; j++) {
+			// resolve name of participantId as long as it isn't the selected player
+			for (let k = 0; k < dctParticipantNames.length; k++) {
+				//console.log(_participants[j] + ", " + dctParticipantNames[k][0] + ", " + dctParticipantNames[k][1]);
+
+				if (_participants[j] == dctParticipantNames[k].participantID) {
+					dctTeamRoster[teamRosterIndex] = { 'name': dctParticipantNames[k].name, 'participantID':  dctParticipantNames[k].participantID };
+					teamRosterIndex++;
+				}
+			}
+        }
+       
+
+        matchArray[matchIndex] = { 
+            'timeSinceMatch':   getTimeSinceMatch(match_data.data.attributes.createdAt),
+            'duration':         match_data.data.attributes.duration,
+            'gameMode':         match_data.data.attributes.gameMode, 
+            'matchType':        match_data.data.attributes.matchType,   // official vs. competitive
+            'mapName':          GetTranslatedMapName(match_data.data.attributes.mapName),
+            'teamRoster':       dctTeamRoster,
+         };
+
+        console.log(i + '. ' + _cached + ": " + matchArray[matchIndex].gameMode + ', ' + matchArray[matchIndex].mapName + ', ' + matchArray[matchIndex].timeSinceMatch + 
+        ', matchType: ' + matchArray[matchIndex].matchType + ', [' + printTeamRoster(dctTeamRoster) + ']');
+
         console.log(match_data);
 
-        matches_array[match_arr_index] = { 
-            'timeSinceMatch': getTimeSinceMatch(match_data.data.attributes.createdAt),
-            'duration': match_data.data.attributes.duration,
-            'gameMode': match_data.data.attributes.gameMode, 
-            'matchType': match_data.data.attributes.matchType,
-            'mapName': match_data.data.attributes.mapName,
+        matchIndex++;
 
-         };
-        match_arr_index++;
-
-    }   // matches loop
+    }   // matches[i] loop
 
 
     //console.log(getDate() + ' after get matches');
 
 
-    
+
     // $ if no matches, then the client should be aware
-    var response_data = { 'totalMatches' : player_data.relationships.matches.data.length };
+    var response_data = { 
+        'totalMatches' : player_data.relationships.matches.data.length,
+
+    };
 
     res.json(response_data);
 
@@ -338,12 +475,19 @@ app.get('/getplayermatches', async (req, res) => {
 
 
 
-// ! Purge cache files...
+// ! ------------------------------------------------------------------------------------------------------>
+// ! Helper functions
+// ! 
+
+// Purge cache files...
 function clearCache() {
 
     console.log(chalk.blue(getDate() + ' purging cache files...'));
 
-    const cacheGlobPattern = './cache/**/*.*';
+    // Purge ----------------------------------------------------->
+    //#region ...
+    //
+
     const playersCacheGlobPattern   = './cache/players/**/*.*';
     const matchesCacheGlobPattern   = './cache/matches/**/*.*';
 
@@ -372,7 +516,7 @@ function clearCache() {
                         if (err) {
                             console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
                         } else {
-                            console.log(chalk.green( getDate() + ' purged player cache file because of retention -> ' + file));
+                            console.log(chalk.green( getDate() + ' purged player file -> ' + file));
                         }
                     })
                 }
@@ -396,27 +540,26 @@ function clearCache() {
                 //birthtime: 1589928825360.3643
 
                 // purge match cache files older than 3 days...
-                // 24 * 60 * 60 =  86,400 seconds per day
-                // 86,400 * 3   = 259,200 seconds per 3 days
-                // 259,200 * 1,000 = 259,200,000 milliseconds per 3 days
-                if (Date.now() - stat.birthtimeMs > 259200000) {
+                // 24 * 60 * 60     =  86,400 seconds per day
+                // 86,400 * 3       = 259,200 seconds per 3 days
+                // 259,200 * 1,000  = 259,200,000 milliseconds per 3 days
+                if (Date.now() - stat.birthtimeMs > 1800000) {  // testing 10 minutes
 
                     // 600,000 = 10 minutes
                     fs.unlink(file, (err) =>{
                         if (err) {
                             console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
                         } else {
-                            console.log(chalk.green( getDate() + ' purged match cache file because of retention -> ' + file));
+                            console.log(chalk.green( getDate() + ' purged match file -> ' + file));
                         }
                     })
                 }
             })
         }
     })
+    //#endregion
 
 }
-
-
 
 
 function getDate() {
@@ -424,6 +567,7 @@ function getDate() {
 
     return moment().tz("America/Chicago").format('YYYY.MM.DD_hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
 }   
+
 
 function getTimeSinceMatch(strDate) {
     // return x minutes, hours, or days
@@ -449,4 +593,62 @@ function getTimeSinceMatch(strDate) {
         return diffDays + ' days ago';
     }
 
+}
+
+
+function GetTranslatedMapName(map_name) {
+	switch (map_name) {
+		case "Desert_Main":
+			map_name = "Miramar";
+			break;
+		case "DihorOtok_Main":
+			map_name = "Vikendi";
+			break;
+		case "Erangel_Main":
+			map_name = "Erangel";
+			break;
+		case "Baltic_Main":
+			map_name = "Erangel";
+			break;
+		case "Range_Main":
+			map_name = "Camp Jackal";
+			break;
+		case "Savage_Main":
+			map_name = "Sanhok";
+			break;
+		case "Summerland_Main":
+			map_name = "Karakin";
+			break;
+		default:
+	}
+
+	return map_name;
+}
+
+
+function ConvertSecondsToMinutes(seconds) {
+	var sec = parseInt(seconds);
+
+	// https://stackoverflow.com/a/25279399/1940465
+	var date = new Date(0);
+	date.setSeconds(sec); // specify value for SECONDS here
+
+	//console.log(date.toISOString());
+
+	var timeString = date.toISOString().substr(14, 5);
+
+	//console.log(timeString)
+
+	return timeString;
+}
+
+
+function printTeamRoster(dctRoster) {
+    var strRoster = ''
+
+    dctRoster.forEach(element => {
+        strRoster += element.name + ', ';
+    })
+
+    return strRoster;
 }
