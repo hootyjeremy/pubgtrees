@@ -547,7 +547,59 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //     }
     // })
 
+    console.log('searching telemetry...');
 
+    // arr_T = [];
+    // arr_Tindex = 0;
+
+    var ai_deaths       = 0;
+    var human_deaths    = 0;
+
+    for (let i = 0; i < telemetry_response.data.length; i++){
+        //console.log('_T: ' + telemetry_response.data[i]._T);
+
+        var i_string = new String(i);
+        // _T types...
+        // if (!arr_T.includes(telemetry_response.data[i]._T)) {
+        //     arr_T[arr_Tindex] = telemetry_response.data[i]._T;
+        //     arr_Tindex++;
+        // }
+
+        // if (telemetry_response.data[i]._T == 'LogPlayerCreate') {
+        //     console.log('LogPlayerCreate: ' + telemetry_response.data[i]._D + ' -> ' + telemetry_response.data[i].character.accountId + ', ' + telemetry_response.data[i].character.name );
+        // }
+
+
+
+
+        if (telemetry_response.data[i]._T == 'LogPlayerKill') {
+            try {
+                var killer_player_type = (telemetry_response.data[i].killer.accountId.includes('account')) ? 'human' : 'ai   ';
+                var victim_player_type = (telemetry_response.data[i].victim.accountId.includes('account')) ? 'human' : 'ai   ';
+
+                if (telemetry_response.data[i].victim.accountId.includes('account')) {
+                    human_deaths++;
+                }
+                else {
+                    ai_deaths++;
+                }
+
+                // console.log(i + ', ' + telemetry_response.data[i]._T + ': Killer: ' + telemetry_response.data[i].killer.accountId.padEnd(40, ' ') + ' [' + telemetry_response.data[i].killer.name.padEnd(20, ' ') + 
+                // ' -> victim: ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + '] ' + telemetry_response.data[i].victim.accountId);
+                console.log('(' + i_string.padStart(5, ' ') + ') ' + telemetry_response.data[i]._T + ': ' + ' [' + telemetry_response.data[i].killer.name.padEnd(20, ' ') + 
+                ' -> ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type);
+            }
+            catch (err) {
+                console.log('(' + i_string.padStart(5, ' ') + ') error: ' + err);
+            }
+
+        }
+    }  
+
+    //console.dir(arr_T);
+    console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);
+
+    console.log('done searching telemetry.');
 
     res.send();
 
