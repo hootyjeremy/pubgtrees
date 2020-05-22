@@ -1,13 +1,12 @@
-
 // ! VUE STUFF ------------------------------------------------------------------->
 
 
-Vue.component('custom_row', {
-	props: ['match_prop'],
-	methods: {
-	},	
-	template:  ``
-})
+// Vue.component('custom_row', {
+// 	props: ['match_prop'],
+// 	methods: {
+// 	},	
+// 	template:  ``
+// })
 
 var vm = new Vue({
 	el: "#vueapp",
@@ -21,8 +20,7 @@ var vm = new Vue({
 		getMatchData: function (matches_array) {
 			this.match_data = matches_array;
 
-			//console.log('getMatchData()');
-			console.dir(this.match_data);
+			//console.dir(this.match_data);
         },
         resolveMatchType: function (match_type) {
 			if (match_type == 'competitive') {
@@ -75,7 +73,6 @@ var vm = new Vue({
 			//console.log('analyzeMatch() -> ' + _matchID);
 
 			GetTelemetry(_matchID);
-
 
 		}
     },

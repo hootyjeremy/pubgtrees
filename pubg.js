@@ -5,6 +5,7 @@ const moment        = require('moment-timezone');   //require('moment');
 const app           = express();
 const port          = 3000;
 const fs            = require('fs');
+const path          = require('path');
 const glob          = require('glob');
 const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
 
@@ -240,6 +241,7 @@ app.get('/getplayermatches', async (req, res) => {
         var _cached;
 
 
+        // -------------------------------------------------->
         // #region : // ! fetch match_data from cache or api
         //
 
@@ -265,7 +267,6 @@ app.get('/getplayermatches', async (req, res) => {
             try 
             {
                 // match_url + id: https://api.pubg.com/shards/steam/matches/ba57018d-6e6f-46ea-bcd4-ebd8bbcefd28
-
                 pubgapi_match_response = await axios.get(match_url + player_data.relationships.matches.data[i].id, {
                     headers: {
                         Accept: 'application/vnd.api+json'
@@ -275,14 +276,12 @@ app.get('/getplayermatches', async (req, res) => {
             catch (error) 
             {
                 // handle fetch errors...
-
                 if (error.response.status != 200) {
                     console.log('could not fetch match from pubg api: ' + match_url + player_data.relationships.matches.data[i].id)
                 }
 
                 continue; // ? get next match if this one fails? does any data need to be sent back to the client? probably not.
-            }
-            
+            }            
 
             // create cache file for this match response...
             fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 2), function (err) {
@@ -297,7 +296,6 @@ app.get('/getplayermatches', async (req, res) => {
             })
 
             //console.log(i + '. ' + getDate(), pubgapi_match_response.data);
-
             match_data = pubgapi_match_response.data;
 
             //console.log(i +  '. ' + getDate() + ' (fetched) ' , match_data);       
@@ -308,11 +306,11 @@ app.get('/getplayermatches', async (req, res) => {
         //
 
         
-
+        // -------------------------------------------------->
         //#region // ! Loop through match's included[] array
         //
 
-        // filter out irregular games
+        // filter out irregular games (and the training map)
 		if (
 			(match_data.data.attributes.gameMode != "solo"  &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
 			match_data.data.attributes.gameMode  != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
@@ -387,7 +385,7 @@ app.get('/getplayermatches', async (req, res) => {
             else if (included.type == 'asset') {
                 // get telemetry url from asset...
 
-                const telemetry_url_cache = './cache/telemetry/' + player_data.relationships.matches.data[i].id + '.json';
+                const telemetry_url_cache = './cache/matches/' + player_data.relationships.matches.data[i].id + '.telemetry.json';
                 const telemetry_json = { 'matchID': player_data.relationships.matches.data[i].id, 'telemetry_url': included.attributes.URL };
 
                 // cache the telemetry url for when the user asks for it. if they want to analyze a match, get it's url here. 
@@ -442,6 +440,7 @@ app.get('/getplayermatches', async (req, res) => {
         //
 
 
+        // ? you could probably send the telmetry url to the client here instead of having to maintain a telemetryUrlCache file
         matchArray[matchIndex] = { 
             'strPlayerName':    strPlayerName,
             'timeSinceMatch':   getTimeSinceMatch(match_data.data.attributes.createdAt),
@@ -457,8 +456,8 @@ app.get('/getplayermatches', async (req, res) => {
             'matchID':          match_data.data.id,
          };
 
-        console.log(i + '. ' + _cached + ": " + matchArray[matchIndex].gameMode + ', ' + matchArray[matchIndex].mapName + ', ' + matchArray[matchIndex].timeSinceMatch + 
-        ', matchType: ' + matchArray[matchIndex].matchType + ', [' + printTeamRoster(dctTeamRoster) + ']');
+        console.log(i + '. ' + _cached + ": " + matchArray[matchIndex].timeSinceMatch + ', ' + matchArray[matchIndex].gameMode + ', ' + matchArray[matchIndex].mapName + ', ' + 
+        ', [' + printTeamRoster(dctTeamRoster) + ']');
 
         console.log(match_data);        
 
@@ -470,22 +469,85 @@ app.get('/getplayermatches', async (req, res) => {
     //console.log(getDate() + ' after get matches');
     //console.log(matchArray);
 
-    // $ if no matches, then the client should be aware
+    // $ if no matches, then the client should be made aware
     var response_data = { 
         'totalMatches'  : player_data.relationships.matches.data.length,
         'matches'       : matchArray,
     };
 
     res.json(response_data);
-
 })
 
 
 
 app.get('/getmatchtelemetry', async (req, res) => {
     console.log('/getmatchtelemetry');
-    console.log('req.query.platform:     ' + req.query.platform + '/' + req.query.player_name);
-    console.log('req.query.matchID:      ' + req.query.matchID);
+    console.log('player: ' + req.query.platform + '/' + req.query.player_name + ', matchID: ' + req.query.matchID);
+
+    // $ the telemetry url should always exist as long as a match cache exists since it is created at the same time.
+    // $ for now, i'm not doing anything if the telemetry url cache doesn't exist. need to implement that later.
+    // $ the only reason it shouldn't exist is if the client leaves the screen open for longer than the match purge time (24 hours?)
+
+    const telemetryUrlCacheFile = './cache/matches/' + req.query.matchID + '.telemetry.json';
+    var   telemetry_url; 
+
+    if (fs.existsSync(telemetryUrlCacheFile)) {
+        // cache file for match-telemetry exists
+        //console.log('telemetry url cache file exists: ' + telemetryUrlCacheFile);
+
+        try {
+            var data = fs.readFileSync(telemetryUrlCacheFile, {encoding: 'utf8'});
+            data = JSON.parse(data);
+            
+            telemetry_url = data.telemetry_url;
+    
+            //console.log('telemetry: ' + telemetry_url);
+            }
+        catch (err) {
+            console.log('error reading telemetryUrlCacheFile: ' + err + ' -> for file ' + telemetryUrlCacheFile);
+        }
+    }
+    else {
+        console.log('no telemetry url cache file for: ' + telemetryUrlCacheFile);
+
+        // $ fetch match and then telemetry url from pubg api...
+    }
+
+
+
+    // $ fetch the actual telemetry here (from cache or pubg api)
+    var telemetry_response; 
+
+    try {
+        telemetry_response = await axios.get(telemetry_url, {
+            headers: {
+                Accept: 'application/vnd.api+json'
+            }
+        });
+
+        console.dir(telemetry_response.data);
+    }
+    catch (error) {
+        if (error.response.status != 200) {
+            console.log('could not fetch telemetry url from pubg api: ' + telemetry_url);
+            console.log(error.response.status + ': ' + error.response.statusText);
+        }
+    }
+
+
+    // https://telemetry-cdn.playbattlegrounds.com/bluehole-pubg/steam/2020/05/20/10/23/e6d1e557-9a83-11ea-a919-266ad624e35b-telemetry.json
+    // $ telemetry is 23 megabytes??? i don't think i'll cache this stuff unless it's only here for a few minutes
+    // const telemetryCacheFile = './cache/telemetry/' + path.parse(telemetry_url).base;
+    // fs.writeFile(telemetryCacheFile, JSON.stringify(telemetry_response.data, null, 2), function (err) {
+    //     if (err) {
+    //         console.log(chalk.yellow('error writing telemetryCacheFile: ' + telemetryCacheFile));
+    //         console.log(err);
+    //     } else {
+    //         // no errror
+    //     }
+    // })
+
+
 
     res.send();
 
@@ -528,8 +590,8 @@ function clearCache() {
                 //birthtime: 1589928825360.3643
 
                 // purge cache files older than 30 minutes (1,800,000 milliseconds)
-                // 10 minutes = 600,000 milliseconds
-                if (Date.now() - stat.birthtimeMs > 1800000) { 
+                // 15 minutes = 900,000 milliseconds
+                if (Date.now() - stat.birthtimeMs > 900000) { 
 
                     
                     fs.unlink(file, (err) =>{
@@ -563,7 +625,8 @@ function clearCache() {
                 // 24 * 60 * 60     =  86,400 seconds per day
                 // 86,400 * 3       = 259,200 seconds per 3 days
                 // 259,200 * 1,000  = 259,200,000 milliseconds per 3 days
-                if (Date.now() - stat.birthtimeMs > 1800000) {  // testing 10 minutes
+                // 86,400,000 = 24 hours?
+                if (Date.now() - stat.birthtimeMs > 86400000) {  // testing 24 hours
 
                     // 600,000 = 10 minutes
                     fs.unlink(file, (err) =>{

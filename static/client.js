@@ -45,6 +45,10 @@ async function GetPlayerMatches() {
 
 	btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = true;
 
+	document.getElementById('fetching').style.display 	= "block";	// turn this on
+	document.getElementById('vueapp').style.display 	= "none";
+
+
 	const axios_response = await axios.get(hooty_server_url + '/getplayermatches', {
 		params: {
 			'endpoint'		: 'players', 
@@ -100,8 +104,9 @@ async function GetPlayerMatches() {
 
 	// show prev/next buttons
 	document.getElementById('btnPreviousMatches').style.display	= "block";
-	document.getElementById('btnNextMatches').style.display	= "block";
-	document.getElementById('vueapp').style.display = "block";
+	document.getElementById('btnNextMatches').style.display		= "block";
+	document.getElementById('vueapp').style.display 			= "block";
+	document.getElementById('fetching').style.display 			= "none";	// turn this back off
 
 
 }
@@ -147,6 +152,8 @@ function btnSearchPlayer_Click() {
 
 	match_floor = 0;
 
+	//vm.getMatchData([]); // clear out the table while fetching...
+
 	prelim();
 }
 
@@ -157,6 +164,10 @@ function btnNext_Click() {
 	}
 
 	match_floor += 10;
+
+
+	//vm.getMatchData([]); // clear out the table while fetching...
+
 
 	prelim();
 }
@@ -169,6 +180,8 @@ function btnPrevious_Click() {
 
 	match_floor -= 10;
 
+	//vm.getMatchData([]); // clear out the table while fetching...
+
 	prelim();
 }
 
@@ -177,6 +190,7 @@ function prelim() {
 	//strPlatform 	= document.querySelector('input[name="platform"]:checked').value;
 	strPlatform 	= document.querySelector("#slcPlatform option:checked").value;
 	strPlayerName 	= document.getElementById("inputPlayerName").value;
+
 
 	//console.log("btnSearchPlayer_Click() handler. name: " + document.getElementById("inputPlayerName").value);
 	console.log(strLine);

@@ -66,6 +66,18 @@ div {
 <button id="btnSearchPlayer" onclick="btnSearchPlayer_Click()">Search</button>
 <br><br>
 
+<div id="fetching" style="display:none;">
+	fetching...
+</div>
+
+<br>
+<table>
+	<tr> 
+		<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none;">Previous 10</button></td> 
+		<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none;">Next 10 Matches</button></td>  
+	</tr>
+</table>
+
 
 <script>
 	// Trigger search button click on hitting ENTER in the input text box...
@@ -123,13 +135,6 @@ div {
 	</table>
 
 	<br>
-	<br>
-	<table>
-		<tr> 
-			<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none;">Previous 10</button></td> 
-			<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none;">Next 10 Matches</button></td>  
-		</tr>
-	</table>
 	 
 	<br>
 </div>
