@@ -446,12 +446,13 @@ app.get('/getplayermatches', async (req, res) => {
             'matchType':        match_data.data.attributes.matchType,   // official vs. competitive
             'mapName':          GetTranslatedMapName(match_data.data.attributes.mapName),
             'teamRoster':       dctTeamRoster,
+            'matchID':          match_data.data.id,
          };
 
         console.log(i + '. ' + _cached + ": " + matchArray[matchIndex].gameMode + ', ' + matchArray[matchIndex].mapName + ', ' + matchArray[matchIndex].timeSinceMatch + 
         ', matchType: ' + matchArray[matchIndex].matchType + ', [' + printTeamRoster(dctTeamRoster) + ']');
 
-        //console.log(match_data);        
+        console.log(match_data);        
 
         matchIndex++;
 
@@ -459,21 +460,27 @@ app.get('/getplayermatches', async (req, res) => {
 
 
     //console.log(getDate() + ' after get matches');
-
-
     //console.log(matchArray);
 
     // $ if no matches, then the client should be aware
     var response_data = { 
         'totalMatches'  : player_data.relationships.matches.data.length,
         'matches'       : matchArray,
-
     };
 
     res.json(response_data);
 
 })
 
+
+
+app.get('/getmatchtelemetry', async (req, res) => {
+    console.log('/getmatchtelemetry');
+    console.log('req.query.platform:     ' + req.query.platform);
+    console.log('req.query.player_name:  ' + req.query.player_name);
+    console.log('req.query.matchID:     ' + req.query.matchID);
+
+})
 
 
 

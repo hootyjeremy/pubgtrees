@@ -6,50 +6,34 @@
 </head>
 
 <body>
-<title>pubg match stuff</title>
+<title>pubg match test</title>
 
-<style type="text/css">
-	body {
-		background-color: #303030;
-		color: #cad3f1;
-		font-family: Verdana, Arial, Helvetica, sans-serif;
-		font-size: 14px;
-	}
+<!-- <link rel="stylesheet" type="text/css" href="static/style.css" /> -->
 
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap" rel="stylesheet">
 
-	/* unvisited link */
-	a:link {
-		color: #ffde40;
-	}
+<style>
 
-	/* visited link */
-	a:visited {
-		color: #DE8D00;
-	}
+body {
+    font-family: 'Roboto Condensed', Calibri, sans-serif;
+    font-size: 14px;
+    color: #d0d0d0;
+    background-color: #292933;
+}
 
-	/* mouse over link */
-	a:hover {
-		color: #EBB014;
-	}
+div {
+	border:1px; 
+	border-color:#303030; 
+	border-style:solid;
+}
 
-	/* selected link */
-	a:active {
-		color: #EBB014;
-	}
-
-
-
-	td, th {
-		border: 4px;
-		padding: 4px;
-	}
 </style>
 
 
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> <!-- Dev Version -->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://momentjs.com/downloads/moment.min.js"></script>
 <script src="static/hf.js" 		type="text/javascript">	</script>
-<script src="static/client.js" 	type="text/javascript">	</script>
 
 
 
@@ -79,11 +63,8 @@
 
 <input  id="inputPlayerName" placeholder="Player name" onsubmit="btnSearchPlayer_Click()" value="hooty__">
 <button id="btnSearchPlayer" onclick="btnSearchPlayer_Click()">Search</button>
-
 <br><br>
 
-<button id="btnPreviousMatches" onclick="btnPrevious_Click()">Previous 10</button>
-<button id="btnNextMatches"     onclick="btnNext_Click()"    >Next 10 Matches</button>
 
 <script>
 	// Trigger search button click on hitting ENTER in the input text box...
@@ -99,18 +80,28 @@
 </script>
 
 
-<table>
-	<tbody id='matchesTable'></tbody>
-</table>
+
+<div id='vueapp'>
+	<br>
+	<table>
+		<custom_row v-for='match in match_data' :match_prop='match' :key='match.matchID'></custom_row>
+	</table>
+
+	<br>
+	<br>
+	<table>
+		<tr> 
+			<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none;">Previous 10</button></td> 
+			<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none;">Next 10 Matches</button></td>  
+		</tr>
+	</table>
+	 
+	<br>
+</div>
 
 
 
-<br>
-<br>
-<a href="javascript:void(0);" onclick="ClickedSomething();">Hello to you</a>
-<br>
-<a href="javascript:void(0)"; onclick="InjectTest();">Inject Test</a>
-
+<script src="static/client.js" 	type="text/javascript">	</script>
 
 
 </center>

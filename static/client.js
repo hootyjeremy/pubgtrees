@@ -64,7 +64,15 @@ async function GetPlayerMatches() {
 	total_matches 	= axios_response.data.totalMatches;
 	console.log('match_floor:     ' + match_floor + ' of ' + total_matches);
 
+
+
 	// $ it's time to start working on vue table rows 
+
+	vm.getMatchData(axios_response.data.matches);
+
+
+
+
 
 	//console.log('axios_response.data... ');
 	//console.log('match_floor: ' + match_floor + ', total_matches: ' + total_matches);
@@ -90,6 +98,29 @@ async function GetPlayerMatches() {
 
 
 
+	// show prev/next buttons
+	document.getElementById('btnPreviousMatches').style.display 	= "block";
+	document.getElementById('btnNextMatches').style.display 		= "block";
+
+
+
+}
+
+
+// ! Analyze Telemetry ----------------------------------------------------------->
+async function GetTelemetry(_matchID) {
+	console.log('GetTelemetry() -> ' + _matchID + ', ' + strPlatform + '/' + strPlayerName);
+
+	// get telemetry for this match for this platform/player
+	const axios_response = await axios.get(hooty_server_url + '/getmatchtelemetry', {
+		params: {
+			'platform'		:  strPlatform,
+			'player_name' 	:  strPlayerName,
+			'matchID'		: _matchID,
+		}
+	})
+
+	// $ check for response errors here
 
 }
 
@@ -97,6 +128,69 @@ async function GetPlayerMatches() {
 
 
 
+// ! VUE STUFF ------------------------------------------------------------------->
+
+
+Vue.component('custom_row', {
+	props: ['match_prop'],
+	methods: {
+		printRoster: function (match) {
+			
+			var strRoster = '';
+
+			for (let i = 0; i < match.length; i++){
+				strRoster += match[i].name;
+
+				if (i + 1 < match.length) {
+					strRoster += ', ';
+				}
+			}
+		
+			return strRoster;
+		},
+		resolveMatchType: function (match_type) {
+			if (match_type == 'competitive') {
+				return 'Ranked'
+			}
+			else {
+				return 'Unranked'
+			}
+		},
+		analyzeMatch: function (_matchID) {
+			//console.log('analyzeMatch() -> ' + _matchID);
+
+			GetTelemetry(_matchID);
+
+
+		}
+	},	
+	template:  `<tr style="height:22px; border:1px; border-color:#303030; outline: thin solid"> 					
+					<td style="padding: 10px; text-align:left;">{{match_prop.timeSinceMatch}}</td> 
+					<td style="padding: 10px; text-align:left;">{{match_prop.mapName}}</td>
+					<td style="padding: 10px; text-align:left;">{{match_prop.gameMode}}</td> 
+					<td style="padding: 10px; text-align:left;">{{resolveMatchType(match_prop.matchType)}}</td>
+					<td style="padding: 10px; text-align:left;">{{printRoster(match_prop.teamRoster)}}</td>
+					<td style="padding: 10px; text-align:left;"> <button v-on:click="analyzeMatch(match_prop.matchID)">View</button> </td>
+				</tr>`
+})
+
+var vm = new Vue({
+	el: "#vueapp",
+	data: {
+		match_data: [],
+		strTeamRoster: '',
+	},
+	created: function () {
+	},
+	methods: {
+		getMatchData: function (matches_array) {
+			this.match_data = matches_array;
+
+			//console.log('getMatchData()');
+			console.dir(this.match_data);
+		}
+	},
+})
 
 
 
@@ -153,3 +247,16 @@ function prelim() {
 }
 
 
+function _printRoster(roster) {
+	var strRoster;
+
+	roster.forEach(element => {
+		strRoster += element + ', ';
+	});
+
+	return strRoster;
+}
+
+function ClickedSomething(_matchID) {
+	console.log('ClickedSomething() -> ' + _matchID);
+}
