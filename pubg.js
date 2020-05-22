@@ -23,7 +23,7 @@ const strLine   = "--------------------------------------------";
 
 // ---------------------------->
 // ! Cache Purging...
-//setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
+setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
 
 
 app.use(bodyParser.json());
