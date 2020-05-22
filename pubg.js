@@ -314,10 +314,12 @@ app.get('/getplayermatches', async (req, res) => {
 
         // filter out irregular games
 		if (
-			match_data.data.attributes.gameMode != "solo"   &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
-			match_data.data.attributes.gameMode != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
-			match_data.data.attributes.gameMode != "squad" 	&&	match_data.data.attributes.gameMode != "squad-fpp"    ) {
-            console.log('skipping match gameMode: ' + match_data.data.attributes.gameMode);
+			(match_data.data.attributes.gameMode != "solo"  &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
+			match_data.data.attributes.gameMode  != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
+            match_data.data.attributes.gameMode  != "squad" &&	match_data.data.attributes.gameMode != "squad-fpp") ||
+            match_data.data.attributes.mapName == "Range_Main"  ) {
+
+            console.log('skipping match gameMode or map: ' + match_data.data.attributes.gameMode + ', ' + match_data.data.attributes.mapName);
             
             // recalculate match_ceiling if you skip a match. 
             // if (match_ceiling + 1 <= player_data.relationships.matches.data.length) {
@@ -355,6 +357,7 @@ app.get('/getplayermatches', async (req, res) => {
                     participantID   = included.id;
                     damageDealt     = parseInt(included.attributes.stats.damageDealt);
 					kills 			= included.attributes.stats.kills;
+					DBNOs 			= included.attributes.stats.DBNOs;
 					winPlace 		= included.attributes.stats.winPlace;
                     timeSurvived 	= ConvertSecondsToMinutes(included.attributes.stats.timeSurvived);                
                 }
@@ -446,6 +449,10 @@ app.get('/getplayermatches', async (req, res) => {
             'matchType':        match_data.data.attributes.matchType,   // official vs. competitive
             'mapName':          GetTranslatedMapName(match_data.data.attributes.mapName),
             'teamRoster':       dctTeamRoster,
+            'damageDealt':      damageDealt,
+            'kills':            kills,
+            'DBNOs':            DBNOs,
+            'winPlace':         winPlace,
             'matchID':          match_data.data.id,
          };
 

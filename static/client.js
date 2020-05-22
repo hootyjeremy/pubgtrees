@@ -168,6 +168,13 @@ Vue.component('custom_row', {
 					<td style="padding: 10px; text-align:left;">{{match_prop.timeSinceMatch}}</td> 
 					<td style="padding: 10px; text-align:left;">{{match_prop.mapName}}</td>
 					<td style="padding: 10px; text-align:left;">{{match_prop.gameMode}}</td> 
+
+					<td style="padding: 10px; text-align:left;">#{{match_prop.winPlace}}</td> 
+					<td style="padding: 10px; text-align:left;">{{match_prop.damageDealt}}</td> 
+					<td style="padding: 10px; text-align:left;">{{match_prop.kills}}</td> 
+					<td style="padding: 10px; text-align:left;">{{match_prop.DBNOs}}</td> 
+
+
 					<td style="padding: 10px; text-align:left;">{{resolveMatchType(match_prop.matchType)}}</td>
 					<td style="padding: 10px; text-align:left;">{{printRoster(match_prop.teamRoster)}}</td>
 					<td style="padding: 10px; text-align:left;"> <button v-on:click="analyzeMatch(match_prop.matchID)">View</button> </td>
