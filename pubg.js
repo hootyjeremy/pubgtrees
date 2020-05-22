@@ -443,6 +443,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
         matchArray[matchIndex] = { 
+            'strPlayerName':    strPlayerName,
             'timeSinceMatch':   getTimeSinceMatch(match_data.data.attributes.createdAt),
             'duration':         match_data.data.attributes.duration,
             'gameMode':         match_data.data.attributes.gameMode, 
@@ -483,9 +484,10 @@ app.get('/getplayermatches', async (req, res) => {
 
 app.get('/getmatchtelemetry', async (req, res) => {
     console.log('/getmatchtelemetry');
-    console.log('req.query.platform:     ' + req.query.platform);
-    console.log('req.query.player_name:  ' + req.query.player_name);
-    console.log('req.query.matchID:     ' + req.query.matchID);
+    console.log('req.query.platform:     ' + req.query.platform + '/' + req.query.player_name);
+    console.log('req.query.matchID:      ' + req.query.matchID);
+
+    res.send();
 
 })
 

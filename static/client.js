@@ -99,9 +99,9 @@ async function GetPlayerMatches() {
 
 
 	// show prev/next buttons
-	document.getElementById('btnPreviousMatches').style.display 	= "block";
-	document.getElementById('btnNextMatches').style.display 		= "block";
-
+	document.getElementById('btnPreviousMatches').style.display	= "block";
+	document.getElementById('btnNextMatches').style.display	= "block";
+	document.getElementById('vueapp').style.display = "block";
 
 
 }
@@ -122,82 +122,14 @@ async function GetTelemetry(_matchID) {
 
 	// $ check for response errors here
 
+	console.log('telemetry response: ', axios_response);
+
 }
 
 
 
 
 
-// ! VUE STUFF ------------------------------------------------------------------->
-
-
-Vue.component('custom_row', {
-	props: ['match_prop'],
-	methods: {
-		printRoster: function (match) {
-			
-			var strRoster = '';
-
-			for (let i = 0; i < match.length; i++){
-				strRoster += match[i].name;
-
-				if (i + 1 < match.length) {
-					strRoster += ', ';
-				}
-			}
-		
-			return strRoster;
-		},
-		resolveMatchType: function (match_type) {
-			if (match_type == 'competitive') {
-				return 'Ranked'
-			}
-			else {
-				return 'Unranked'
-			}
-		},
-		analyzeMatch: function (_matchID) {
-			//console.log('analyzeMatch() -> ' + _matchID);
-
-			GetTelemetry(_matchID);
-
-
-		}
-	},	
-	template:  `<tr style="height:22px; border:1px; border-color:#303030; outline: thin solid"> 					
-					<td style="padding: 10px; text-align:left;">{{match_prop.timeSinceMatch}}</td> 
-					<td style="padding: 10px; text-align:left;">{{match_prop.mapName}}</td>
-					<td style="padding: 10px; text-align:left;">{{match_prop.gameMode}}</td> 
-
-					<td style="padding: 10px; text-align:left;">#{{match_prop.winPlace}}</td> 
-					<td style="padding: 10px; text-align:left;">{{match_prop.damageDealt}}</td> 
-					<td style="padding: 10px; text-align:left;">{{match_prop.kills}}</td> 
-					<td style="padding: 10px; text-align:left;">{{match_prop.DBNOs}}</td> 
-
-
-					<td style="padding: 10px; text-align:left;">{{resolveMatchType(match_prop.matchType)}}</td>
-					<td style="padding: 10px; text-align:left;">{{printRoster(match_prop.teamRoster)}}</td>
-					<td style="padding: 10px; text-align:left;"> <button v-on:click="analyzeMatch(match_prop.matchID)">View</button> </td>
-				</tr>`
-})
-
-var vm = new Vue({
-	el: "#vueapp",
-	data: {
-		match_data: [],
-		strTeamRoster: '',
-	},
-	created: function () {
-	},
-	methods: {
-		getMatchData: function (matches_array) {
-			this.match_data = matches_array;
-
-			//console.log('getMatchData()');
-			console.dir(this.match_data);
-		}
-	},
-})
 
 
 

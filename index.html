@@ -15,23 +15,25 @@
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> <!-- Dev Version -->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://momentjs.com/downloads/moment.min.js"></script>
-<script src="static/hf.js" 		type="text/javascript">	</script>
+<script src="static/hf.js" type="text/javascript"></script>
 
 
 <style>
 body {
     font-family: 'Roboto Condensed', Calibri, sans-serif;
     font-size: 14px;
-    color: #d0d0d0;
-    background-color: #292933;
+    color: #e0e0e0;
+    background-color: #343438;
 }
 
+</style>
+<!--
 div {
 	border:1px; 
-	border-color:#303030; 
+	border-color:#d0d0d0; 
 	border-style:solid;
 }
-</style>
+-->
 
 
 
@@ -79,11 +81,45 @@ div {
 </script>
 
 
+<script src="static/client.js" 	type="text/javascript">	</script>
 
-<div id='vueapp'>
+<div id='vueapp' style="display:none;">
 	<br>
+
 	<table>
-		<custom_row v-for='match in match_data' :match_prop='match' :key='match.matchID'></custom_row>
+		<thead>
+			<tr>
+				<th>Age</th>
+				<th>Map</th>
+				<th>Type</th>
+				<th>Place</th>
+				<th style="padding: 10px;">Dmg</th>
+				<th style="padding: 10px;">Kills</th>
+				<th style="padding: 10px;">Knocks</th>
+				<th>Mode</th>
+				<th>Team</th>
+				<th>Inspect</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr style="border:1px; border-color:#303030; outline: thin solid"
+			  	v-for='match in match_data' :match_prop='match' :key='match.matchID'
+			> 					
+				<td style="padding: 10px; text-align:left;">{{match.timeSinceMatch}}</td> 
+				<td style="padding: 10px; text-align:left;">{{match.mapName}}</td>
+				<td style="padding: 10px; text-align:center;">{{resolveMatchType(match.matchType)}}</td>
+
+				<td style="padding: 10px; text-align:center;">#{{match.winPlace}}</td> 
+				<td style="padding: 10px; text-align:center;">{{match.damageDealt}}</td> 
+				<td style="padding: 10px; text-align:center;">{{match.kills}}</td> 
+				<td style="padding: 10px; text-align:center;">{{resolveKnocks(match.gameMode, match.DBNOs)}}</td> 
+
+
+				<td style="padding: 10px; text-align:left;">{{match.gameMode}}</td> 
+				<td style="padding: 10px; text-align:left;">{{printRoster(match.teamRoster, match.strPlayerName)}}</td>
+				<td style="padding: 10px; text-align:left;"> <button v-on:click="analyzeMatch(match.matchID)">View</button> </td>
+			</tr>
+		</tbody>
 	</table>
 
 	<br>
@@ -98,9 +134,12 @@ div {
 	<br>
 </div>
 
+<script src="static/vuestuff.js" type="text/javascript"></script>
 
 
-<script src="static/client.js" 	type="text/javascript">	</script>
+
+
+
 
 
 </center>
