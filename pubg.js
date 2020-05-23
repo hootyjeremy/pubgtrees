@@ -578,6 +578,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                 var victim_player_type = (telemetry_response.data[i].victim.accountId.includes('account')) ? 'human' : 'ai   ';
                 
+                // $ damage causer
+                // https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageCauserName.json
 
                 // if the player didn't die to a killer (environment)
                 if (telemetry_response.data[i].killer == null) {
