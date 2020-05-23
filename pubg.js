@@ -456,10 +456,10 @@ app.get('/getplayermatches', async (req, res) => {
             'matchID':          match_data.data.id,
          };
 
-        console.log(i + '. ' + _cached + ": " + matchArray[matchIndex].timeSinceMatch + ', ' + matchArray[matchIndex].gameMode + ', ' + matchArray[matchIndex].mapName + ', ' + 
-        ', [' + printTeamRoster(dctTeamRoster) + ']');
+        console.log(i + '. ' + _cached + ": " + matchArray[matchIndex].timeSinceMatch + ', ' + matchArray[matchIndex].gameMode + ', ' + matchArray[matchIndex].mapName + 
+                    ', [' + printTeamRoster(dctTeamRoster) + ']');
 
-        console.log(match_data);        
+        //console.log(match_data);
 
         matchIndex++;
 
@@ -574,20 +574,56 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
         if (telemetry_response.data[i]._T == 'LogPlayerKill') {
             try {
-                var killer_player_type = (telemetry_response.data[i].killer.accountId.includes('account')) ? 'human' : 'ai   ';
-                var victim_player_type = (telemetry_response.data[i].victim.accountId.includes('account')) ? 'human' : 'ai   ';
+                // $ verify that fields exist or are defined before looking at them so that this doesn't throw errors
 
-                if (telemetry_response.data[i].victim.accountId.includes('account')) {
-                    human_deaths++;
+                var victim_player_type = (telemetry_response.data[i].victim.accountId.includes('account')) ? 'human' : 'ai   ';
+                
+
+                // if the player didn't die to a killer (environment)
+                if (telemetry_response.data[i].killer == null) {
+                    var killer_player_type = 'environment??';
+
+                    console.log('(' + i_string.padStart(5, ' ') + ') ' + telemetry_response.data[i]._T + ': ' + ' [' + telemetry_response.data[i].damageTypeCategory.padEnd(20, ' ') + 
+                                ' -> ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type + ' (environment death?)');
+
                 }
                 else {
-                    ai_deaths++;
+                    // if they did die to a player killer
+
+                    var killer_player_type = (telemetry_response.data[i].killer.accountId.includes('account')) ? 'human' : 'ai   ';
+                    var damage_info = '';
+                    var suicide = '';
+
+                    if (telemetry_response.data[i].victim.accountId.includes('account')) {
+                        human_deaths++;
+                    }
+                    else {
+                        ai_deaths++;
+                    }
+    
+                    // suicide
+                    if (telemetry_response.data[i].killer.accountId == telemetry_response.data[i].victim.accountId) {
+                        suicide = '*suicide*'; 
+                    }
+
+
+                    // damage info
+                    damage_info = telemetry_response.data[i].damageTypeCategory;
+
+                    if (telemetry_response.data[i].damageTypeCategory != 'Damage_Groggy' && telemetry_response.data[i].damageTypeCategory != 'Damage_Instant_Fall' ){
+                        damage_info += '/' + telemetry_response.data[i].damageCauserName;
+                    }
+
+
+
+                    // console.log(i + ', ' + telemetry_response.data[i]._T + ': Killer: ' + telemetry_response.data[i].killer.accountId.padEnd(40, ' ') + ' [' + telemetry_response.data[i].killer.name.padEnd(20, ' ') + 
+                    // ' -> victim: ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + '] ' + telemetry_response.data[i].victim.accountId);
+                    console.log('(' + i_string.padStart(5, ' ') + ') ' + telemetry_response.data[i]._T + ': ' + ' [' + telemetry_response.data[i].killer.name.padEnd(20, ' ') + 
+                                ' -> ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type + ' ' + suicide + ' ' + damage_info);
                 }
 
-                // console.log(i + ', ' + telemetry_response.data[i]._T + ': Killer: ' + telemetry_response.data[i].killer.accountId.padEnd(40, ' ') + ' [' + telemetry_response.data[i].killer.name.padEnd(20, ' ') + 
-                // ' -> victim: ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + '] ' + telemetry_response.data[i].victim.accountId);
-                console.log('(' + i_string.padStart(5, ' ') + ') ' + telemetry_response.data[i]._T + ': ' + ' [' + telemetry_response.data[i].killer.name.padEnd(20, ' ') + 
-                ' -> ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type);
+
+
             }
             catch (err) {
                 console.log('(' + i_string.padStart(5, ' ') + ') error: ' + err);
