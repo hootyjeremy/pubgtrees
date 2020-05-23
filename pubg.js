@@ -9,6 +9,8 @@ const path          = require('path');
 const glob          = require('glob');
 const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
 
+const hf            = require('./static/hf_server'); // helper functions
+
 
 // ! Global variables...
 var   apiKey    = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02ODAwLTAxMzgtZTQ4Ny0wNjc0ZmE5YWVjOGYiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0Ijo'
@@ -101,8 +103,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
     // ------------------------------------------------------->
-    // ! PLAYER DATA ->
-    //#region : fetch player_data
+    //#region // ! [Region] fetch player_data
     //
 
     const player_cache_file     = './cache/players/' + req.query.platform + '/'     + req.query.player_name + '.json';
@@ -214,6 +215,7 @@ app.get('/getplayermatches', async (req, res) => {
     }
     //#endregion ---------------------------------------------------------------------------------------------->
 
+
     console.log('player_data -> ', player_data);
 
     // ------------------------------------------------------->
@@ -242,7 +244,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
         // -------------------------------------------------->
-        // #region : // ! fetch match_data from cache or api
+        // #region // ! [Region] fetch match_data from cache or api
         //
 
         if (fs.existsSync(match_cache_file)) {
@@ -303,11 +305,10 @@ app.get('/getplayermatches', async (req, res) => {
 
         }
         //#endregion fetch
-        //
 
         
         // -------------------------------------------------->
-        //#region // ! Loop through match's included[] array
+        //#region // ! [Region] Loop through match's included[] array
         //
 
         // filter out irregular games (and the training map)
@@ -437,7 +438,6 @@ app.get('/getplayermatches', async (req, res) => {
 
         //
         //#endregion (match data) --------------------------------------------------------------------------------->
-        //
 
 
         // ? you could probably send the telmetry url to the client here instead of having to maintain a telemetryUrlCache file
@@ -447,7 +447,7 @@ app.get('/getplayermatches', async (req, res) => {
             'duration':         match_data.data.attributes.duration,
             'gameMode':         match_data.data.attributes.gameMode, 
             'matchType':        match_data.data.attributes.matchType,   // official vs. competitive
-            'mapName':          GetTranslatedMapName(match_data.data.attributes.mapName),
+            'mapName':          hf.GetTranslatedMapName(match_data.data.attributes.mapName),
             'teamRoster':       dctTeamRoster,
             'damageDealt':      damageDealt,
             'kills':            kills,
@@ -481,8 +481,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
 app.get('/getmatchtelemetry', async (req, res) => {
-    console.log('/getmatchtelemetry');
-    console.log('player: ' + req.query.platform + '/' + req.query.player_name + ', matchID: ' + req.query.matchID);
+    console.log('/getmatchtelemetry -> player: ' + req.query.platform + '/' + req.query.player_name + ', matchID: ' + req.query.matchID);
 
     // $ the telemetry url should always exist as long as a match cache exists since it is created at the same time.
     // $ for now, i'm not doing anything if the telemetry url cache doesn't exist. need to implement that later.
@@ -490,6 +489,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     const telemetryUrlCacheFile = './cache/matches/' + req.query.matchID + '.telemetry.json';
     var   telemetry_url; 
+
+    // ---------------------------------------------------->
+    //#region // ! [Region] Fetch Telemetry
+    //
+
 
     if (fs.existsSync(telemetryUrlCacheFile)) {
         // cache file for match-telemetry exists
@@ -534,6 +538,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
         }
     }
 
+    //
+    //#endregion (fetch telemetry data) ------------------------------------------------------------------------>
+
+
 
     // https://telemetry-cdn.playbattlegrounds.com/bluehole-pubg/steam/2020/05/20/10/23/e6d1e557-9a83-11ea-a919-266ad624e35b-telemetry.json
     // $ telemetry is 23 megabytes??? i don't think i'll cache this stuff unless it's only here for a few minutes
@@ -554,9 +562,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     var ai_deaths       = 0;
     var human_deaths    = 0;
+    var ai_count = 0;
+    var human_count = 0;
+    var blBeforeMatchStart = true;
 
     for (let i = 0; i < telemetry_response.data.length; i++){
         //console.log('_T: ' + telemetry_response.data[i]._T);
+
+        var record = telemetry_response.data[i];
 
         var i_string = new String(i);
         // _T types...
@@ -569,63 +582,98 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     console.log('LogPlayerCreate: ' + telemetry_response.data[i]._D + ' -> ' + telemetry_response.data[i].character.accountId + ', ' + telemetry_response.data[i].character.name );
         // }
 
+        
+
+        // before the match starts, get teamId of each player and bot
+        if (blBeforeMatchStart) {
+            if (record._T == 'LogItemPickup' && record.item.itemId == 'Item_Back_B_01_StartParachutePack_C' ) {
+
+                if (hf.isBot(record.character.accountId)) { //} telemetry_response.data[i].character.accountId.includes('account.')){
+                    ai_count++;
+                }
+                else {
+                    human_count++;
+                }
+
+                console.log('teamId: ' + record.character.teamId + ', ' + hf.strIsHumanOrBot(record.character.accountId) + 
+                            ' ' + record.character.name);
+            }
+        }
 
 
 
-        if (telemetry_response.data[i]._T == 'LogPlayerKill') {
+        if (record._T == 'LogMatchStart') {
+            console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ' -> ' + hf.GetTranslatedMapName(record.mapName));
+
+            console.log('humans: ' + human_count + ', bots: ' + ai_count);
+
+            blBeforeMatchStart = false;            
+        }
+        else if (record._T == 'LogPlayerCreate') {
+            '(' + i_string.padStart(5, ' ') + ') ' + record._T
+        }
+
+
+
+        if (record._T == 'LogVehicleLeave') {
+
+           if (record.vehicle.vehicleId == 'DummyTransportAircraft_C') {
+                console.log('(' + i_string.padStart(5, ' ') + ') ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name + ' left plane');
+            }
+        }
+
+
+
+        if (record._T == 'LogPlayerKill') {
             try {
                 // $ verify that fields exist or are defined before looking at them so that this doesn't throw errors
 
-                var victim_player_type = (telemetry_response.data[i].victim.accountId.includes('account')) ? 'human' : 'ai   ';
+                var victim_player_type = hf.strIsHumanOrBot(record.victim.accountId); //  (record.victim.accountId.includes('account')) ? 'human' : 'ai   ';
                 
                 // $ damage causer
                 // https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageCauserName.json
 
                 // if the player didn't die to a killer (environment)
-                if (telemetry_response.data[i].killer == null) {
-                    var killer_player_type = 'environment??';
+                if (record.killer == null) {
+                    var killer_player_type = 'environment';
 
-                    console.log('(' + i_string.padStart(5, ' ') + ') ' + telemetry_response.data[i]._T + ': ' + ' [' + telemetry_response.data[i].damageTypeCategory.padEnd(20, ' ') + 
-                                ' -> ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type + ' (environment death?)');
+                    console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ': ' + ' [*' + record.damageTypeCategory.padEnd(19, ' ') + 
+                                ' -> ' + record.victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type + ' *environment*');
 
                 }
                 else {
                     // if they did die to a player killer
 
-                    var killer_player_type = (telemetry_response.data[i].killer.accountId.includes('account')) ? 'human' : 'ai   ';
+                    var killer_player_type = hf.strIsHumanOrBot(record.killer.accountId); // (record.killer.accountId.includes('account')) ? 'human' : 'ai   ';
                     var damage_info = '';
                     var suicide = '';
 
-                    if (telemetry_response.data[i].victim.accountId.includes('account')) {
-                        human_deaths++;
+                    if (hf.isBot(record.victim.accountId)) { // record.victim.accountId.includes('account')) {
+                        ai_deaths++;
                     }
                     else {
-                        ai_deaths++;
+                        human_deaths++;
                     }
     
                     // suicide
-                    if (telemetry_response.data[i].killer.accountId == telemetry_response.data[i].victim.accountId) {
+                    if (record.killer.accountId == record.victim.accountId) {
                         suicide = '*suicide*'; 
                     }
 
 
                     // damage info
-                    damage_info = telemetry_response.data[i].damageTypeCategory;
+                    damage_info = record.damageTypeCategory;
 
-                    if (telemetry_response.data[i].damageTypeCategory != 'Damage_Groggy' && telemetry_response.data[i].damageTypeCategory != 'Damage_Instant_Fall' ){
-                        damage_info += '/' + telemetry_response.data[i].damageCauserName;
+                    if (record.damageTypeCategory != 'Damage_Groggy' && record.damageTypeCategory != 'Damage_Instant_Fall' ){
+                        damage_info += '/' + hf.translateDamageCauserName(record.damageCauserName);
                     }
 
 
-
-                    // console.log(i + ', ' + telemetry_response.data[i]._T + ': Killer: ' + telemetry_response.data[i].killer.accountId.padEnd(40, ' ') + ' [' + telemetry_response.data[i].killer.name.padEnd(20, ' ') + 
-                    // ' -> victim: ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + '] ' + telemetry_response.data[i].victim.accountId);
-                    console.log('(' + i_string.padStart(5, ' ') + ') ' + telemetry_response.data[i]._T + ': ' + ' [' + telemetry_response.data[i].killer.name.padEnd(20, ' ') + 
-                                ' -> ' + telemetry_response.data[i].victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type + ' ' + suicide + ' ' + damage_info);
+                    // console.log(i + ', ' + record._T + ': Killer: ' + record.killer.accountId.padEnd(40, ' ') + ' [' + record.killer.name.padEnd(20, ' ') + 
+                    // ' -> victim: ' + record.victim.name.padEnd(20, ' ') + '] ' + record.victim.accountId);
+                    console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ': ' + ' [' + record.killer.name.padEnd(20, ' ') + 
+                                ' -> ' + record.victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type + ' ' + damage_info + ' ' + suicide);
                 }
-
-
-
             }
             catch (err) {
                 console.log('(' + i_string.padStart(5, ' ') + ') error: ' + err);
@@ -654,14 +702,17 @@ app.get('/getmatchtelemetry', async (req, res) => {
 // Purge cache files...
 function clearCache() {
 
-    console.log(chalk.blue(getDate() + ' purging cache files...'));
+    //console.log(chalk.blue(getDate() + ' purging cache files...'));
+
 
     // Purge ----------------------------------------------------->
-    //#region ...
+    //#region // ! [Region] Purge Cache
     //
 
     const playersCacheGlobPattern   = './cache/players/**/*.*';
     const matchesCacheGlobPattern   = './cache/matches/**/*.*';
+
+    var purge_count = 0;
 
     //console.log(getDate() + ' -> '  + cacheGlobPattern);
 
@@ -684,11 +735,12 @@ function clearCache() {
                 if (Date.now() - stat.birthtimeMs > 900000) { 
 
                     
-                    fs.unlink(file, (err) =>{
+                    fs.unlinkSync(file, (err) =>{
                         if (err) {
                             console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
                         } else {
                             console.log(chalk.green( getDate() + ' purged player file -> ' + file));
+                            purge_count++;
                         }
                     })
                 }
@@ -719,11 +771,12 @@ function clearCache() {
                 if (Date.now() - stat.birthtimeMs > 86400000) {  // testing 24 hours
 
                     // 600,000 = 10 minutes
-                    fs.unlink(file, (err) =>{
+                    fs.unlinkSync(file, (err) =>{
                         if (err) {
                             console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
                         } else {
-                            console.log(chalk.green( getDate() + ' purged match file -> ' + file));
+                            console.log(chalk.green(getDate() + ' purged match file -> ' + file));
+                            purge_count++;
                         }
                     })
                 }
@@ -731,6 +784,14 @@ function clearCache() {
         }
     })
     //#endregion
+
+
+    if (purge_count > 0) {
+        console.log(chalk.green(getDate() + ' ' + purge_count + ' cache files purged'));
+    }
+    else {
+        console.log(chalk.green(getDate() + ' no files to purge.'));
+    }
 
 }
 
@@ -768,35 +829,6 @@ function getTimeSinceMatch(strDate) {
 
 }
 
-
-function GetTranslatedMapName(map_name) {
-	switch (map_name) {
-		case "Desert_Main":
-			map_name = "Miramar";
-			break;
-		case "DihorOtok_Main":
-			map_name = "Vikendi";
-			break;
-		case "Erangel_Main":
-			map_name = "Erangel";
-			break;
-		case "Baltic_Main":
-			map_name = "Erangel";
-			break;
-		case "Range_Main":
-			map_name = "Camp Jackal";
-			break;
-		case "Savage_Main":
-			map_name = "Sanhok";
-			break;
-		case "Summerland_Main":
-			map_name = "Karakin";
-			break;
-		default:
-	}
-
-	return map_name;
-}
 
 
 function ConvertSecondsToMinutes(seconds) {
