@@ -483,10 +483,6 @@ app.get('/getplayermatches', async (req, res) => {
 app.get('/getmatchtelemetry', async (req, res) => {
     console.log('/getmatchtelemetry -> player: ' + req.query.platform + '/' + req.query.player_name + ', matchID: ' + req.query.matchID);
 
-    // $ the telemetry url should always exist as long as a match cache exists since it is created at the same time.
-    // $ for now, i'm not doing anything if the telemetry url cache doesn't exist. need to implement that later.
-    // $ the only reason it shouldn't exist is if the client leaves the screen open for longer than the match purge time (24 hours?)
-
     const telemetryUrlCacheFile = './cache/matches/' + req.query.matchID + '.telemetry.json';
     var   telemetry_url; 
 
@@ -544,7 +540,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
     // https://telemetry-cdn.playbattlegrounds.com/bluehole-pubg/steam/2020/05/20/10/23/e6d1e557-9a83-11ea-a919-266ad624e35b-telemetry.json
-    // $ telemetry is 23 megabytes??? i don't think i'll cache this stuff unless it's only here for a few minutes
+    // ? telemetry is 23 megabytes??? i don't think i'll cache this stuff unless it's only here for a few minutes
     // const telemetryCacheFile = './cache/telemetry/' + path.parse(telemetry_url).base;
     // fs.writeFile(telemetryCacheFile, JSON.stringify(telemetry_response.data, null, 2), function (err) {
     //     if (err) {
@@ -555,7 +551,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //     }
     // })
 
-    console.log('searching telemetry...');
+    console.log('analyzing telemetry...');
 
     // arr_T = [];
     // arr_Tindex = 0;
@@ -568,6 +564,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     for (let i = 0; i < telemetry_response.data.length; i++){
         //console.log('_T: ' + telemetry_response.data[i]._T);
+
+        // $ run a filter here for record._T and only continue if it is one of the events we're looking for. if not, then skip/continue.
+        // ? but is that any faster than just running the if statements in sequence? probably not, actually.
 
         var record = telemetry_response.data[i];
 
@@ -595,8 +594,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     human_count++;
                 }
 
-                console.log('teamId: ' + record.character.teamId + ', ' + hf.strIsHumanOrBot(record.character.accountId) + 
-                            ' ' + record.character.name);
+                //console.log('teamId: ' + record.character.teamId + ', ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name);
             }
         }
 
@@ -609,52 +607,92 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             blBeforeMatchStart = false;            
         }
-        else if (record._T == 'LogPlayerCreate') {
+
+        if (record._T == 'LogMatchEnd') {
+            console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ' (get final stats here)');
+            console.log(record);
+        }
+
+        if (record._T == 'LogPlayerCreate') {
             '(' + i_string.padStart(5, ' ') + ') ' + record._T
         }
 
 
 
-        if (record._T == 'LogVehicleLeave') {
+        // bots and humans leaving the plane
+        // if (record._T == 'LogVehicleLeave') {
 
-           if (record.vehicle.vehicleId == 'DummyTransportAircraft_C') {
-                console.log('(' + i_string.padStart(5, ' ') + ') ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name + ' left plane');
+        //    if (record.vehicle.vehicleId == 'DummyTransportAircraft_C') {
+        //         console.log('(' + i_string.padStart(5, ' ') + ') ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name + ' left plane');
+        //     }
+        // }
+
+
+        // player knocks
+        if (record._T == 'LogPlayerMakeGroggy') {
+            //console.log(record);
+            
+            // knocked by player or environment?
+            if (!record.attacker.name == '') {
+                // this is a knock by a player or bot
+                console.log('(' + i_string.padStart(5, ' ') + ') LogPlayerKnock:   [' + record.attacker.name.padEnd(16, ' ') + ' v ' + record.victim.name.padEnd(16, ' ') + ']  ' +
+                hf.strIsHumanOrBot(record.attacker.accountId).padEnd(5, ' ') + ' v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' ') + ' ' + 
+                hf.translatedDamageTypeCategory(record.damageTypeCategory) + '/' + hf.translateDamageCauserName(record.damageCauserName));
+            }
+            else {
+                // this is an environment knock
+                console.log('(' + i_string.padStart(5, ' ') + ') LogPlayerKnock:   [*' + hf.translatedDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + ' v ' + 
+                record.victim.name.padEnd(16, ' ') + ']  environment v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' '));
             }
         }
 
 
+        // player rez
+        if (record._T == 'LogPlayerRevive') {
+            //console.log(record);
+            console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ':  [' + record.reviver.name.padEnd(16, ' ') + ' ^ ' + record.victim.name.padEnd(16, ' ') + ']');
+        }
 
+
+
+        // player kills
         if (record._T == 'LogPlayerKill') {
             try {
+
+                //console.log(record);
+
                 // $ verify that fields exist or are defined before looking at them so that this doesn't throw errors
 
-                var victim_player_type = hf.strIsHumanOrBot(record.victim.accountId); //  (record.victim.accountId.includes('account')) ? 'human' : 'ai   ';
+                var victim_player_type = hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' '); //  (record.victim.accountId.includes('account')) ? 'human' : 'ai   ';
                 
                 // $ damage causer
                 // https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageCauserName.json
 
+                // count deaths
+                if (hf.isBot(record.victim.accountId)) { // record.victim.accountId.includes('account')) {
+                    ai_deaths++;
+                }
+                else {
+                    human_deaths++;
+                }
+
+
                 // if the player didn't die to a killer (environment)
                 if (record.killer == null) {
-                    var killer_player_type = 'environment';
+                    var killer_player_type = '*env*';
 
-                    console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ': ' + ' [*' + record.damageTypeCategory.padEnd(19, ' ') + 
-                                ' -> ' + record.victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type + ' *environment*');
+                    console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ':   ' + ' [*' + hf.translatedDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + 
+                                ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type);
 
                 }
                 else {
                     // if they did die to a player killer
 
-                    var killer_player_type = hf.strIsHumanOrBot(record.killer.accountId); // (record.killer.accountId.includes('account')) ? 'human' : 'ai   ';
+                    var killer_player_type = hf.strIsHumanOrBot(record.killer.accountId).padEnd(5, ' '); // (record.killer.accountId.includes('account')) ? 'human' : 'ai   ';
                     var damage_info = '';
                     var suicide = '';
 
-                    if (hf.isBot(record.victim.accountId)) { // record.victim.accountId.includes('account')) {
-                        ai_deaths++;
-                    }
-                    else {
-                        human_deaths++;
-                    }
-    
+   
                     // suicide
                     if (record.killer.accountId == record.victim.accountId) {
                         suicide = '*suicide*'; 
@@ -662,17 +700,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
                     // damage info
-                    damage_info = record.damageTypeCategory;
+                    damage_info = hf.translatedDamageTypeCategory(record.damageTypeCategory);
 
-                    if (record.damageTypeCategory != 'Damage_Groggy' && record.damageTypeCategory != 'Damage_Instant_Fall' ){
+                    if (hf.translatedDamageTypeCategory(record.damageTypeCategory) != 'Damage_Groggy' && 
+                        hf.translatedDamageTypeCategory(record.damageTypeCategory) != 'Damage_Instant_Fall' ){
                         damage_info += '/' + hf.translateDamageCauserName(record.damageCauserName);
                     }
 
 
                     // console.log(i + ', ' + record._T + ': Killer: ' + record.killer.accountId.padEnd(40, ' ') + ' [' + record.killer.name.padEnd(20, ' ') + 
                     // ' -> victim: ' + record.victim.name.padEnd(20, ' ') + '] ' + record.victim.accountId);
-                    console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ': ' + ' [' + record.killer.name.padEnd(20, ' ') + 
-                                ' -> ' + record.victim.name.padEnd(20, ' ') + ']  ' + killer_player_type + ' -> '  + victim_player_type + ' ' + damage_info + ' ' + suicide);
+                    console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ':   ' + ' [' + record.killer.name.padEnd(16, ' ') + 
+                                ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type + ' ' + damage_info + ' ' + suicide);
                 }
             }
             catch (err) {
@@ -683,7 +722,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }  
 
     //console.dir(arr_T);
-    console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);
+    console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths + ' (why is this off? if bot deaths > bots spawned, are more bots spawning during game?)');
 
     console.log('done searching telemetry.');
 

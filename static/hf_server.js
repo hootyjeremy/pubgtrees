@@ -32,6 +32,19 @@ module.exports = {
 
         return found;     
     },
+    translatedDamageTypeCategory: function (dmgType) {
+        var found = 'not found';
+
+        // https://stackoverflow.com/questions/684672/how-do-i-loop-through-or-enumerate-a-javascript-object
+        for (let [key, value] of Object.entries(_damageTypeCategory)) {
+            if (key == dmgType) {
+                found = value;
+                break;
+            }
+        }
+
+        return found;   
+    },
     isBot: function (accountId) {
         if (accountId.includes('account.')){
             return false;
@@ -54,6 +67,7 @@ module.exports = {
 
 
 
+// https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/mapName.json
 var _mapName = {
     "Desert_Main": "Miramar",
     "DihorOtok_Main": "Vikendi",
@@ -64,7 +78,36 @@ var _mapName = {
     "Summerland_Main": "Karakin"
 }
 
+// https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageTypeCategory.json
+var _damageTypeCategory = {
+    "Damage_BlueZone": "Bluezone",
+    "Damage_Drown": "Drowning",
+    "Damage_Explosion_BlackZone": "Blackzone",
+    "Damage_Explosion_Breach": "Breach Explosion",
+    "Damage_Explosion_JerryCan": "Jerrycan Explosion",
+    "Damage_Explosion_Grenade": "Grenade Explosion",
+    "Damage_Explosion_PanzerFaustBackBlast": "Panzerfaust Backblast",
+    "Damage_Explosion_PanzerFaustWarhead": "Panzerfaust Explosion",
+    "Damage_Explosion_RedZone": "Redzone",
+    "Damage_Explosion_StickyBomb": "Sticky Bomb Explosion",
+    "Damage_Explosion_Vehicle": "Vehicle Explosion",
+    "Damage_Groggy": "Bleed-out",
+    "Damage_Gun": "Gun", // "Gun Damage"
+    "Damage_Instant_Fall": "Fall Damage",
+    "Damage_Melee": "Melee",
+    "Damage_MeleeThrow": "Melee Throw",
+    "Damage_Molotov": "Molotov",
+    "Damage_Punch": "Punch",
+    "Damage_TrainHit": "Train Damage",
+    "Damage_VehicleCrashHit": "Vehicle Crash",
+    "Damage_VehicleHit": "Vehicle",
+    "SpikeTrap": "Spike Trap"
+}
+
+//https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageCauserName.json
 var _damageCauserName = {
+    "AIPawn_Base_Male_C": "Bot",
+    "AIPawn_Base_Female_C": "Bot",
     "AquaRail_A_01_C": "Aquarail",
     "AquaRail_A_02_C": "Aquarail",
     "AquaRail_A_03_C": "Aquarail",
