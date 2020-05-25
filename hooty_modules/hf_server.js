@@ -7,7 +7,7 @@ module.exports = {
         console.log('calling exported function');
     },
     translateDamageCauserName: function (dmgName) {
-        var found = 'not found';
+        var found = 'damageCauserName not found: ' + dmgName;
 
         // https://stackoverflow.com/questions/684672/how-do-i-loop-through-or-enumerate-a-javascript-object
         for (let [key, value] of Object.entries(_damageCauserName)) {
@@ -17,9 +17,13 @@ module.exports = {
             }
         }
 
+        // if (found == 'damageCauserName not found: ' + dmgName) {
+        //     console.log();
+        // }
+
         return found;     
     },
-    GetTranslatedMapName: function (mapName) {
+    translateMapName: function (mapName) {
         var found = 'not found';
 
         // https://stackoverflow.com/questions/684672/how-do-i-loop-through-or-enumerate-a-javascript-object
@@ -32,8 +36,8 @@ module.exports = {
 
         return found;     
     },
-    translatedDamageTypeCategory: function (dmgType) {
-        var found = 'not found';
+    translateDamageTypeCategory: function (dmgType) {
+        var found = 'damageTypeCategory not found: ' + dmgType;
 
         // https://stackoverflow.com/questions/684672/how-do-i-loop-through-or-enumerate-a-javascript-object
         for (let [key, value] of Object.entries(_damageTypeCategory)) {
@@ -55,14 +59,39 @@ module.exports = {
     },
     strIsHumanOrBot: function (accountId) {
         // return string "(ai)" or "(human)" if it's a bot
-
         if (this.isBot(accountId)) {
             return ('BOT');
         }
         else {
             return 'HUMAN';
         }
-    }
+    },
+    getDurationFromDatesTimestamp: function (dateStart, dateEnd) {
+        var duration = Math.abs(Date.parse(dateEnd) - Date.parse(dateStart));
+
+        const diffSeconds   = Math.ceil(duration / 1000);
+        //const diffMinutes   = Math.ceil(duration / (1000 * 60));
+
+        var strTimestamp = this.ConvertSecondsToMinutes(diffSeconds);
+
+
+        return strTimestamp;
+    },
+    ConvertSecondsToMinutes: function (seconds) {
+        var sec = parseInt(seconds);
+    
+        // https://stackoverflow.com/a/25279399/1940465
+        var date = new Date(0);
+        date.setSeconds(sec); // specify value for SECONDS here
+    
+        //console.log(date.toISOString());
+    
+        var timeString = date.toISOString().substr(14, 5);
+    
+        //console.log(timeString)
+    
+        return timeString;
+    },
 }
 
 
@@ -91,8 +120,8 @@ var _damageTypeCategory = {
     "Damage_Explosion_RedZone": "Redzone",
     "Damage_Explosion_StickyBomb": "Sticky Bomb Explosion",
     "Damage_Explosion_Vehicle": "Vehicle Explosion",
-    "Damage_Groggy": "Bleed-out",
-    "Damage_Gun": "Gun", // "Gun Damage"
+    "Damage_Groggy": "Damage Groggy",
+    "Damage_Gun": "Gun",
     "Damage_Instant_Fall": "Fall Damage",
     "Damage_Melee": "Melee",
     "Damage_MeleeThrow": "Melee Throw",
@@ -128,9 +157,9 @@ var _damageCauserName = {
     "BP_M_Rony_A_03_C": "Rony",
     "BP_Mirado_A_02_C": "Mirado",
     "BP_Mirado_A_03_Esports_C": "Mirado",
-    "BP_Mirado_Open_03_C": "Mirado (open top)",
-    "BP_Mirado_Open_04_C": "Mirado (open top)",
-    "BP_MolotovFireDebuff_C": "Molotov Fire Damage",
+    "BP_Mirado_Open_03_C": "Mirado",
+    "BP_Mirado_Open_04_C": "Mirado",
+    "BP_MolotovFireDebuff_C": "Molotov",
     "BP_Motorbike_04_C": "Motorcycle",
     "BP_Motorbike_04_Desert_C": "Motorcycle",
     "BP_Motorbike_04_SideCar_C": "Motorcycle (w/ Sidecar)",
@@ -140,17 +169,18 @@ var _damageCauserName = {
     "BP_Niva_02_C": "Zima",
     "BP_Niva_03_C": "Zima",
     "BP_Niva_04_C": "Zima",
-    "BP_PickupTruck_A_01_C": "Pickup Truck (closed top)",
-    "BP_PickupTruck_A_02_C": "Pickup Truck (closed top)",
-    "BP_PickupTruck_A_03_C": "Pickup Truck (closed top)",
-    "BP_PickupTruck_A_04_C": "Pickup Truck (closed top)",
-    "BP_PickupTruck_A_05_C": "Pickup Truck (closed top)",
-    "BP_PickupTruck_A_esports_C": "Pickup Truck (closed top)",
-    "BP_PickupTruck_B_01_C": "Pickup Truck (open top)",
-    "BP_PickupTruck_B_02_C": "Pickup Truck (open top)",
-    "BP_PickupTruck_B_03_C": "Pickup Truck (open top)",
-    "BP_PickupTruck_B_04_C": "Pickup Truck (open top)",
-    "BP_PickupTruck_B_05_C": "Pickup Truck (open top)",
+    "BP_Niva_07_C": "Zima",
+    "BP_PickupTruck_A_01_C": "Pickup Truck",
+    "BP_PickupTruck_A_02_C": "Pickup Truck",
+    "BP_PickupTruck_A_03_C": "Pickup Truck",
+    "BP_PickupTruck_A_04_C": "Pickup Truck",
+    "BP_PickupTruck_A_05_C": "Pickup Truck",
+    "BP_PickupTruck_A_esports_C": "Pickup Truck",
+    "BP_PickupTruck_B_01_C": "Pickup Truck",
+    "BP_PickupTruck_B_02_C": "Pickup Truck",
+    "BP_PickupTruck_B_03_C": "Pickup Truck",
+    "BP_PickupTruck_B_04_C": "Pickup Truck",
+    "BP_PickupTruck_B_05_C": "Pickup Truck)",
     "BP_Scooter_01_A_C": "Scooter",
     "BP_Scooter_02_A_C": "Scooter",
     "BP_Scooter_03_A_C": "Scooter",
@@ -186,17 +216,17 @@ var _damageCauserName = {
     "PG117_A_01_C": "PG-117",
     "PlayerFemale_A_C": "Player",
     "PlayerMale_A_C": "Player",
-    "ProjGrenade_C": "Frag Grenade",
+    "ProjGrenade_C": "Grenade",
     "ProjMolotov_C": "Molotov Cocktail",
     "ProjMolotov_DamageField_Direct_C": "Molotov Cocktail Fire Field",
     "ProjStickyGrenade_C": "Sticky Bomb",
     "RedZoneBomb_C": "Redzone",
     "RedZoneBombingField": "Redzone",
     "TslDestructibleSurfaceManager": "Destructible Surface",
-    "Uaz_A_01_C": "UAZ (open top)",
+    "Uaz_A_01_C": "UAZ",
     "Uaz_Armored_C": "UAZ (armored)",
     "Uaz_B_01_C": "UAZ (soft top)",
-    "Uaz_B_01_esports_C": "UAZ (soft top)",
+    "Uaz_B_01_esports_C": "UAZ",
     "Uaz_C_01_C": "UAZ (hard top)",
     "WeapAK47_C": "AKM",
     "WeapAUG_C": "AUG A3",
@@ -226,6 +256,7 @@ var _damageCauserName = {
     "WeapMini14_C": "Mini 14",
     "WeapMk14_C": "Mk14 EBR",
     "WeapMk47Mutant_C": "Mk47 Mutant",
+    "WeapMosinNagant_C": "Mosin Nagant",
     "WeapMP5K_C": "MP5K",
     "WeapNagantM1895_C": "R1895",
     "WeapMosinNagant_C_9": "Mosin-Nagant",

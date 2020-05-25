@@ -26,7 +26,7 @@ var vm = new Vue({
 			if (match_type == 'competitive') {
 				return 'Ranked'
 			} else {
-				return 'Unranked'
+				return 'Normal'
 			}
         },
         resolveKnocks: function (mode, knocks) {
