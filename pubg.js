@@ -563,6 +563,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var matchStartTime      = null;
     var strRecordTimestamp  = null;
 
+    var arrDamageLog    = [];
+    var arrKillFeedLog  = [];
+
     var arrTeams    = [];   // [teamId, [players]]
     var arrKnocks   = [];   // [{ knocked_player, whodunit}]
     var arrDeaths   = [];   // [ { killer, [{victims}] } ]
@@ -572,7 +575,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //console.log('_T: ' + telemetry_response.data[i]._T);
 
         var record = telemetry_response.data[i];
-
+        var _recordLog = '';
+       
         var i_string = new String(i);
         // _T types...
         // if (!arr_T.includes(telemetry_response.data[i]._T)) {
@@ -646,22 +650,37 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     console.dir(record);
         // }
         // $ show damageCausers and types and stuff here...
-        // if (record._T == 'LogPlayerTakeDamage') {
-        //     //console.dir(record);
+        if (record._T == 'LogPlayerTakeDamage') {
+            //console.dir(record);
+            
+            strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
+            
+            try {
+                // $ if attacker is null, is that always bluezone or environment damage?
+                var _attackerName = (record.attacker == null) ? 'null' : record.attacker.name;
 
-        //     try {
-        //         // $ if attacker is null, is that always bluezone or environment damage?
-        //         var _attackerName = (record.attacker == null) ? 'null' : record.attacker.name;
+                //console.log('(' + i_string.padStart(5, ' ') + ') LogPlayerTakeDamage. attacker: ' + _attackerName + ', victim: ' + record.victim.name + 
+                //', damageCauserName: ' + record.damageCauserName + ', damageReason: ' + record.damageReason + ', damageTypeCategory: ' + record.damageTypeCategory);
 
-        //         console.log('(' + i_string.padStart(5, ' ') + ') LogPlayerTakeDamage. attacker: ' + _attackerName + ', victim: ' + record.victim.name + 
-        //         ', damageCauserName: ' + record.damageCauserName + ', damageReason: ' + record.damageReason + ', damageTypeCategory: ' + record.damageTypeCategory);
-        //         }
-        //     catch (error) {
-        //         console.error('(' + i_string.padStart(5, ' ') + ') : ' + ' + error');
+                // if not a solo, check for teammate damage
 
-        //     }
+                if (record.attacker != null && record.damageTypeCategory != 'Damage_Groggy' && record.damage > 0) {
+                    var _teammateDamage = (record.attacker.name != record.victim.name && record.attacker.teamId == record.victim.teamId) ? ' *teammate-damage*' : '';
+                    var _selfDamage = (record.attacker.name == record.victim.name) ? ' *self-damage*' : '';
 
-        // }
+
+                    arrDamageLog.push('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + _attackerName.padEnd(16, ' ') + '   ' + record.victim.name.padEnd(16, ' ') + ']  __' +
+                    hf.strIsHumanOrBot(record.attacker.accountId).padEnd(5, ' ') + ' * ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' ') + 
+                    ' attacker health: ' + parseInt(record.attacker.health) + ' vs. ' + 
+                    '(' + parseInt(record.victim.health) + '-' + parseInt(record.damage) + '=' + (parseInt(record.victim.health - record.damage)) + ') ' +
+                    hf.translateDamageTypeCategory(record.damageTypeCategory) + '/' + hf.translateDamageCauserName(record.damageCauserName) + '/' + record.damageReason + 
+                    _selfDamage + _teammateDamage);
+                }
+            }
+            catch (error) {
+                console.error('(' + i_string.padStart(5, ' ') + ') : ' + ' + error: ' + error.message);
+            }
+        }
 
 
 
@@ -685,16 +704,29 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // knocked by player or environment?
             if (!record.attacker.name == '') {
                 // this is a knock by a player or bot
-                console.log('(' + i_string.padStart(5, ' ') + ') '  + strRecordTimestamp + ' [' + record.attacker.name.padEnd(16, ' ') + ' v ' + record.victim.name.padEnd(16, ' ') + ']  ' +
-                hf.strIsHumanOrBot(record.attacker.accountId).padEnd(5, ' ') + ' v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' ') + ' ' + 
-                hf.translateDamageCauserName(record.damageCauserName) + selfKnock + teammateKnock);
+                // console.log('(' + i_string.padStart(5, ' ') + ') '  + strRecordTimestamp + ' [' + record.attacker.name.padEnd(16, ' ') + ' v ' + record.victim.name.padEnd(16, ' ') + ']  ' +
+                // hf.strIsHumanOrBot(record.attacker.accountId).padEnd(5, ' ') + ' v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' ') + ' ' + 
+                // hf.translateDamageCauserName(record.damageCauserName) + selfKnock + teammateKnock);
+
+                _recordLog = '(' + i_string.padStart(5, ' ') + ') '  + strRecordTimestamp + ' [' + record.attacker.name.padEnd(16, ' ') + ' v ' + record.victim.name.padEnd(16, ' ') + ']  ' +
+                                hf.strIsHumanOrBot(record.attacker.accountId).padEnd(5, ' ') + ' v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' ') + ' ' + 
+                                hf.translateDamageCauserName(record.damageCauserName) + selfKnock + teammateKnock
 
                 arrKnocks.push({'knocked_player': record.victim.name, 'whodunit': record.attacker.name});
+
+                arrKillFeedLog.push(_recordLog);
+                arrDamageLog.push(_recordLog)
             }
             else {
                 // this is an environment knock
-                console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + ' v ' + 
-                record.victim.name.padEnd(16, ' ') + ']  *env* v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' '));
+                // console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + ' v ' + 
+                // record.victim.name.padEnd(16, ' ') + ']  *env* v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' '));
+
+                _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + ' v ' + 
+                                record.victim.name.padEnd(16, ' ') + ']  *env* v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' ');
+
+                arrKillFeedLog.push(_recordLog);
+                arrDamageLog.push(_recordLog);
 
                 arrKnocks.push({'knocked_player': record.victim.name, 'whodunit': record.damageTypeCategory});
             }
@@ -705,9 +737,13 @@ app.get('/getmatchtelemetry', async (req, res) => {
         if (record._T == 'LogPlayerRevive') {
             //console.log(record);
             strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
-            console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.reviver.name.padEnd(16, ' ') + ' ^ ' + record.victim.name.padEnd(16, ' ') + ']');
 
-            //console.log('removing ' + record.victim.name + ' from knocks...');
+
+            //console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.reviver.name.padEnd(16, ' ') + ' ^ ' + record.victim.name.padEnd(16, ' ') + ']');
+            _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.reviver.name.padEnd(16, ' ') + ' ^ ' + record.victim.name.padEnd(16, ' ') + ']';
+
+            arrKillFeedLog.push(_recordLog);
+            arrDamageLog.push(_recordLog);
 
             // remove knocked player from list
             var remove_index = arrKnocks.findIndex(function(item, i) {
@@ -747,8 +783,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 if (record.killer == null) {
                     var killer_player_type = '*env*';
 
-                    console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + 
-                                ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type);
+                    // console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + 
+                    //             ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type);
+
+                    _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + 
+                                 ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type;
+
+                    arrKillFeedLog.push(_recordLog);
+                    arrDamageLog.push(_recordLog);
                 }
                 else {
                     // if they did die to a player killer
@@ -837,13 +879,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     }
 
 
-                    // console.log(i + ', ' + record._T + ': Killer: ' + record.killer.accountId.padEnd(40, ' ') + ' [' + record.killer.name.padEnd(20, ' ') + 
-                    // ' -> victim: ' + record.victim.name.padEnd(20, ' ') + '] ' + record.victim.accountId);
-                    console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.killer.name.padEnd(16, ' ') + 
-                                ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type + ' ' + damage_info + selfKill + thirst + teammateKill);
+                    // console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.killer.name.padEnd(16, ' ') + 
+                    //             ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type + ' ' + damage_info + selfKill + thirst + teammateKill);
+                    _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.killer.name.padEnd(16, ' ') + 
+                                    ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type + ' ' + damage_info + selfKill + thirst + teammateKill;
 
-                    //arrKillChartLog[killChartIndex] = strRecordTimestamp + ' [' + record.killer.name.padEnd(16, ' ') + ' x ' + record.victim.name.padEnd(16, ' ') + ']  '
-                    //killChartIndex++;
+
+                    arrKillFeedLog.push(_recordLog);
+                    arrDamageLog.push(_recordLog);
                 }
             }
             catch (err) {
@@ -855,6 +898,19 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
     //printKillChart(arrKillChartLog);
+
+    // ! print killfeed log
+    // console.log('KillFeed log...');
+    // for (let j = 0; j < arrKillFeedLog.length; j++) {
+    //     console.log(arrKillFeedLog[j]);
+    // }
+
+    // ! print damage log
+    console.log('LogPlayerTakeDamage Log...');
+    for (let j = 0; j < arrDamageLog.length; j++){
+        console.log(arrDamageLog[j]);
+    }
+
 
     //console.dir(arr_T);
     console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths + ' (why is this off? if bot deaths > bots spawned, are more bots spawning during game?)');
