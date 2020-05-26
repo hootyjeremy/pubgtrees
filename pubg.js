@@ -140,12 +140,12 @@ app.get('/getplayermatches', async (req, res) => {
 
         blPlayerCacheExists = true;
 
-        //console.log('blPlayerCacheExists: ' + blPlayerCacheExists);
+        console.log('blPlayerCacheExists: ' + blPlayerCacheExists);
     }
     catch (err) {
         blPlayerCacheExists = false;
 
-        //console.log('error reading cache file: ' + player_cache_file);
+        console.log('no player cache file: ' + player_cache_file);
 
         if (err.code != "ENOENT") {
             console.log('player cache file read error: ' + err.code);
@@ -563,16 +563,13 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var matchStartTime      = null;
     var strRecordTimestamp  = null;
 
-    var arrKnockedPlayers   = [];   // need to keep a tally of who is currently knocked. this way, self-kills are not incorrectly attributed.
-    //var arrKillChartLog     = [];
-    //var killChartIndex      = 0;
+    var arrTeams    = [];   // [teamId, [players]]
+    var arrKnocks   = [];   // [{ knocked_player, whodunit}]
+    var arrDeaths   = [];   // [ { killer, [{victims}] } ]
 
     // ! loop through each telemetry event...
     for (let i = 0; i < telemetry_response.data.length; i++){
         //console.log('_T: ' + telemetry_response.data[i]._T);
-
-        // $ run a filter here for record._T and only continue if it is one of the events we're looking for. if not, then skip/continue.
-        // ? but is that any faster than just running the if statements in sequence? probably not, actually.
 
         var record = telemetry_response.data[i];
 
@@ -588,9 +585,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // }
 
         
-        if (record._T == 'LogPlayerCreate') {
-            '(' + i_string.padStart(5, ' ') + ') ' + record._T
-        }
+        // if (record._T == 'LogPlayerCreate') {
+        //     '(' + i_string.padStart(5, ' ') + ') ' + record._T
+        // }
 
 
         // before the match starts, get teamId of each player and bot
@@ -604,12 +601,31 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     human_count++;
                 }
 
-                //console.log('teamId: ' + record.character.teamId + ', ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name);
+                // $ is there an existing teamId?
+
+                console.log('teamId: ' + record.character.teamId + ', ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name);
             }
         }
 
 
-        if (record._T == 'LogMatchStart') {
+        // bots and humans leaving the plane
+        // if (record._T == 'LogVehicleLeave') {
+
+        //     if (record.vehicle.vehicleId == 'DummyTransportAircraft_C') {
+
+        //         if (hf.isBot(record.character.accountId)) { //} telemetry_response.data[i].character.accountId.includes('account.')){
+        //             bot_count2++;
+        //         }
+        //         else {
+        //             human_count2++;
+        //         }
+
+        //          console.log('(' + i_string.padStart(5, ' ') + ') ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name + ' left plane');
+        //      }
+        //  }
+
+
+         if (record._T == 'LogMatchStart') {
             console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ' -> ' + hf.translateMapName(record.mapName));
 
             console.log('humans: ' + human_count + ', bots: ' + ai_count);
@@ -626,36 +642,62 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
-
-        // bots and humans leaving the plane
-        // if (record._T == 'LogVehicleLeave') {
-
-        //    if (record.vehicle.vehicleId == 'DummyTransportAircraft_C') {
-        //         console.log('(' + i_string.padStart(5, ' ') + ') ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name + ' left plane');
-        //     }
+        // if (record._T == 'LogPlayerAttack') {
+        //     console.dir(record);
         // }
+        // $ show damageCausers and types and stuff here...
+        // if (record._T == 'LogPlayerTakeDamage') {
+        //     //console.dir(record);
+
+        //     try {
+        //         // $ if attacker is null, is that always bluezone or environment damage?
+        //         var _attackerName = (record.attacker == null) ? 'null' : record.attacker.name;
+
+        //         console.log('(' + i_string.padStart(5, ' ') + ') LogPlayerTakeDamage. attacker: ' + _attackerName + ', victim: ' + record.victim.name + 
+        //         ', damageCauserName: ' + record.damageCauserName + ', damageReason: ' + record.damageReason + ', damageTypeCategory: ' + record.damageTypeCategory);
+        //         }
+        //     catch (error) {
+        //         console.error('(' + i_string.padStart(5, ' ') + ') : ' + ' + error');
+
+        //     }
+
+        // }
+
 
 
         // player knocks
         if (record._T == 'LogPlayerMakeGroggy') {
             //console.log(record);
             strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
-            
+
+            var teammateKnock = '';
+            var selfKnock = '';
+
+            if (record.attacker.name == record.victim.name) {
+                selfKnock = ' *self-knock*';
+            }
+            else if (record.attacker.teamId == record.victim.teamId) {
+                // if the knocker was on the same team, it's a teammate kill
+                teammateKnock = ' *teammate knock*';
+            }
+
+                                    
             // knocked by player or environment?
             if (!record.attacker.name == '') {
                 // this is a knock by a player or bot
                 console.log('(' + i_string.padStart(5, ' ') + ') '  + strRecordTimestamp + ' [' + record.attacker.name.padEnd(16, ' ') + ' v ' + record.victim.name.padEnd(16, ' ') + ']  ' +
                 hf.strIsHumanOrBot(record.attacker.accountId).padEnd(5, ' ') + ' v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' ') + ' ' + 
-                hf.translateDamageCauserName(record.damageCauserName));
+                hf.translateDamageCauserName(record.damageCauserName) + selfKnock + teammateKnock);
+
+                arrKnocks.push({'knocked_player': record.victim.name, 'whodunit': record.attacker.name});
             }
             else {
                 // this is an environment knock
                 console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + ' v ' + 
                 record.victim.name.padEnd(16, ' ') + ']  *env* v ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' '));
-            }
 
-            // add player to knocked array (until revived)
-            arrKnockedPlayers.push(record.victim.name);
+                arrKnocks.push({'knocked_player': record.victim.name, 'whodunit': record.damageTypeCategory});
+            }
         }
 
 
@@ -665,13 +707,17 @@ app.get('/getmatchtelemetry', async (req, res) => {
             strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
             console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.reviver.name.padEnd(16, ' ') + ' ^ ' + record.victim.name.padEnd(16, ' ') + ']');
 
-            // check if player is knocked at time of death...
-            const knocked_index = arrKnockedPlayers.indexOf(record.victim.name);
-            if (knocked_index > -1) {
-                //console.log('removing from knocked array: ' + record.victim.name);
-                arrKnockedPlayers.splice(knocked_index, 1); // https://stackoverflow.com/questions/5767325/how-can-i-remove-a-specific-item-from-an-array
-            }
+            //console.log('removing ' + record.victim.name + ' from knocks...');
+
+            // remove knocked player from list
+            var remove_index = arrKnocks.findIndex(function(item, i) {
+                // https://stackoverflow.com/questions/36419195/get-index-from-a-json-object-with-value/36419269
+                return item.knocked_player == record.victim.name;
+            })
+
+            arrKnocks.splice(remove_index, 1);
         }
+
 
 
         // player kills
@@ -682,12 +728,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                 //console.log(record);
 
-                // $ verify that fields exist or are defined before looking at them so that this doesn't throw errors
-
                 var victim_player_type = hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' '); //  (record.victim.accountId.includes('account')) ? 'human' : 'ai   ';
                 
 
-                // $ damage causer
+                // damage causer
                 // https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageCauserName.json
 
                 // count deaths
@@ -705,7 +749,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                     console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + 
                                 ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type);
-
                 }
                 else {
                     // if they did die to a player killer
@@ -714,30 +757,51 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     var damage_info = '';
                     var selfKill    = '';
                     var thirst      = '';
+                    var teammateKill = '';
 
    
                     // self-kill
+                    // self-kill while knocked by player                    
+                    // self-kill while knocked by environment
                     if (record.killer.accountId == record.victim.accountId) {
-                        // if they are currently knocked, then this is not a suicide (since environment knock bleedouts have victim and killer as the player)
+                        // this player died to themself (could have been self-kill or bled out while knocked)
 
-                        const knocked_index = arrKnockedPlayers.indexOf(record.victim.name);
-                        if (knocked_index > -1) {
-                            // victim is currently knocked. this is not a self-kill.
-                        }            
-                        else {
-                            selfKill = " *self-kill*"
+                        // if they were knocked, then attribute the kill to the knocker (player or environment)
+                        // if they were not knocked, then it's just a self-kill
+
+
+                        var knock_index = arrKnocks.findIndex(function(item, i) {
+                            return item.knocked_player == record.victim.name;
+                        })
+
+                        if (knock_index > -1) {
+                            // if they were knocked, who knocked them?
+                            selfKill = ' *(not self kill) died while knocked by ' + arrKnocks[knock_index].whodunit + '*';
                         }
+                        else {
+                            // they were not knocked while they died
+                            selfKill = ' *self-kill*';
+                        }
+
+                        selfKill += ' ' + hf.translateDamageTypeCategory(record.damageTypeCategory);
                     }
                     else {
-                        // if they were knocked when they were killed and it wasn't a bleed-out, then it's a thirst
-                        const knocked_index = arrKnockedPlayers.indexOf(record.victim.name);
-                        if (knocked_index > -1) {
-                            // victim is currently knocked. this is not a self-kill.
-                            thirst = " *thirst*"   // $ this is currently showing bleed-outs as thirsts. 
-                        }            
+                        // if they were killed while knocked and they didn't die to themselves, it's a thirst...
+                        var knock_index = arrKnocks.findIndex(function(item, i) {
+                            return item.knocked_player == record.victim.name;
+                        })
+
+                        if (knock_index > -1) {
+                            thirst = " *thirst*"
+                        }
+
+
+                        // if the killer was on the same team, it's a teammate kill
+                        if (record.killer.teamId == record.victim.teamId) {
+                            teammateKill = ' *teammate kill*';
+                        }
+    
                     }
-
-
 
 
 
@@ -776,7 +840,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // console.log(i + ', ' + record._T + ': Killer: ' + record.killer.accountId.padEnd(40, ' ') + ' [' + record.killer.name.padEnd(20, ' ') + 
                     // ' -> victim: ' + record.victim.name.padEnd(20, ' ') + '] ' + record.victim.accountId);
                     console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.killer.name.padEnd(16, ' ') + 
-                                ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type + ' ' + damage_info + selfKill + thirst);
+                                ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type + ' ' + damage_info + selfKill + thirst + teammateKill);
 
                     //arrKillChartLog[killChartIndex] = strRecordTimestamp + ' [' + record.killer.name.padEnd(16, ' ') + ' x ' + record.victim.name.padEnd(16, ' ') + ']  '
                     //killChartIndex++;
