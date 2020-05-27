@@ -313,11 +313,11 @@ app.get('/getplayermatches', async (req, res) => {
         // filter out irregular games (and the training map)
 		if (
 			(match_data.data.attributes.gameMode != "solo"  &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
-			match_data.data.attributes.gameMode  != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
-            match_data.data.attributes.gameMode  != "squad" &&	match_data.data.attributes.gameMode != "squad-fpp") ||
-            match_data.data.attributes.mapName == "Range_Main"  ) {
+			 match_data.data.attributes.gameMode != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
+             match_data.data.attributes.gameMode != "squad" &&	match_data.data.attributes.gameMode != "squad-fpp"   ) ||
+             match_data.data.attributes.mapName == "Range_Main"  ) {
 
-            console.log('skipping match gameMode or map: ' + match_data.data.attributes.gameMode + ', ' + match_data.data.attributes.mapName);
+            console.log('skipping match gameMode or training map: ' + match_data.data.attributes.gameMode + ', ' + match_data.data.attributes.mapName);
             
             // recalculate match_ceiling if you skip a match. 
             // if (match_ceiling + 1 <= player_data.relationships.matches.data.length) {
@@ -385,16 +385,16 @@ app.get('/getplayermatches', async (req, res) => {
             else if (included.type == 'asset') {
                 // get telemetry url from asset...
 
-                const telemetry_url_cache = './cache/matches/' + player_data.relationships.matches.data[i].id + '.telemetry.json';
-                const telemetry_json = { 'matchID': player_data.relationships.matches.data[i].id, 'telemetry_url': included.attributes.URL };
+                //const telemetry_url_cache = './cache/matches/' + player_data.relationships.matches.data[i].id + '.telemetry.json';
+                //const telemetry_json = { 'matchID': player_data.relationships.matches.data[i].id, 'telemetry_url': included.attributes.URL };
 
                 // cache the telemetry url for when the user asks for it. if they want to analyze a match, get it's url here. 
                 // if the cache doesn't exist, try the cached match file. if that doesn't exist, fetch match from the pubg api.
-                fs.writeFile(telemetry_url_cache, JSON.stringify(telemetry_json, null, 2) , function (err) {
-                    if (err) {
-                        console.log(err +  ' -> error writing telemetry url cache: ' + telemetry_url_cache);
-                    }
-                })
+                // fs.writeFile(telemetry_url_cache, JSON.stringify(telemetry_json, null, 2) , function (err) {
+                //     if (err) {
+                //         console.log(err +  ' -> error writing telemetry url cache: ' + telemetry_url_cache);
+                //     }
+                // })
             }
             else {
                 console.log(chalk.yellow(j + ' included type is not participant, roster, or asset. this is unexpected.'));
@@ -452,6 +452,7 @@ app.get('/getplayermatches', async (req, res) => {
             'kills':            kills,
             'DBNOs':            DBNOs,
             'winPlace':         winPlace,
+            'timeSurvived':     timeSurvived,
             'matchID':          match_data.data.id,
          };
 
@@ -482,37 +483,85 @@ app.get('/getplayermatches', async (req, res) => {
 app.get('/getmatchtelemetry', async (req, res) => {
     console.log('/getmatchtelemetry -> player: ' + req.query.platform + '/' + req.query.player_name + ', matchID: ' + req.query.matchID);
 
-    const telemetryUrlCacheFile = './cache/matches/' + req.query.matchID + '.telemetry.json';
-    var   telemetry_url; 
+    const match_url         = 'https://api.pubg.com/shards/' + req.query.platform + '/matches/' + req.query.matchID;
+    const match_cache_file  = './cache/matches/' + req.query.matchID + '.json';
+    var match_data, telemetry_url; 
+
 
     // ---------------------------------------------------->
     //#region // ! [Region] Fetch Telemetry
     //
 
-    if (fs.existsSync(telemetryUrlCacheFile)) {
-        // cache file for match-telemetry exists
-        //console.log('telemetry url cache file exists: ' + telemetryUrlCacheFile);
+    // get telemetry url from asset property of match_data. try match cache first. if not there, fetch the match from the pubg api and then cache the match.
 
-        try {
-            var data = fs.readFileSync(telemetryUrlCacheFile, {encoding: 'utf8'});
-            data = JSON.parse(data);
-            
-            telemetry_url = data.telemetry_url;
-    
-            //console.log('telemetry: ' + telemetry_url);
+    // check for match cache file first
+    if (fs.existsSync(match_cache_file)) {
+        try 
+        {
+            match_data = fs.readFileSync(match_cache_file, {encoding: 'utf8'});
+            match_data = JSON.parse(match_data);
+
+            //console.log('match_data (cached): ');
+            //console.log(match_data);
         }
-        catch (err) {
-            console.log('error reading telemetryUrlCacheFile: ' + err + ' -> for file ' + telemetryUrlCacheFile);
+        catch (err) 
+        {
+            console.log('error getting telemetry url while reading match cache file: ' + match_cache_file);
         }
     }
     else {
-        console.log('no telemetry url cache file for: ' + telemetryUrlCacheFile);
-        // $ fetch match and then telemetry url from pubg api...
+        // if the match cache file doesn't exist, get it from the pubg api, then get the telemetry url, and then cache the match.
+
+        var pubgapi_match_response;
+
+        try 
+        {
+            // match_url + id: https://api.pubg.com/shards/steam/matches/ba57018d-6e6f-46ea-bcd4-ebd8bbcefd28
+            pubgapi_match_response = await axios.get(match_url, {
+                headers: {
+                    Accept: 'application/vnd.api+json'
+                }
+            });
+
+            // create cache file for this match response...
+            fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 2), function (err) {
+                //console.log('writing match cache...');
+
+                if (err) {
+                    console.log('(gettelemetry) error writing match cache file: ' + match_cache_file);
+                }
+                else {
+                    //console.log('(gettelemetry) created match cache file: ' + match_cache_file);
+                }
+            })
+
+            match_data = pubgapi_match_response.data;
+            //console.log('match_data (fetched): ');
+            //console.log(match_data);
+        }
+        catch (error) 
+        {
+            // handle fetch errors...
+            if (error.response.status != 200) {
+                console.log('response: ' + error.response.status + ': ' + error.response.statusText + ' (could not fetch match from pubg api: ' + match_url + ')');
+            }
+        }
     }
 
 
 
-    // $ fetch the actual telemetry here (from cache or pubg api)
+    // get the telemetry url from the asset property of match_data
+    for (let i = 0; i < match_data.included.length; i++) {
+        if (match_data.included[i].type == 'asset') {
+            telemetry_url = match_data.included[i].attributes.URL;
+            continue;
+        }                
+    }
+
+
+
+    // ----------------------------------------------------
+    // fetch the actual telemetry here from the pubg api...
     var telemetry_response; 
 
     try {
@@ -535,17 +584,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //#endregion (fetch telemetry data) ------------------------------------------------------------------------>
 
 
-    // https://telemetry-cdn.playbattlegrounds.com/bluehole-pubg/steam/2020/05/20/10/23/e6d1e557-9a83-11ea-a919-266ad624e35b-telemetry.json
-    // ? telemetry is 23 megabytes??? i don't think i'll cache this stuff unless it's only here for a few minutes
-    // const telemetryCacheFile = './cache/telemetry/' + path.parse(telemetry_url).base;
-    // fs.writeFile(telemetryCacheFile, JSON.stringify(telemetry_response.data, null, 2), function (err) {
-    //     if (err) {
-    //         console.log(chalk.yellow('error writing telemetryCacheFile: ' + telemetryCacheFile));
-    //         console.log(err);
-    //     } else {
-    //         // no errror
-    //     }
-    // })
 
     console.log('analyzing telemetry...');
 
