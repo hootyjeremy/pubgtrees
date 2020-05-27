@@ -92,6 +92,30 @@ module.exports = {
     
         return timeString;
     },
+    getDistanceXYZ: function (location1, location2) {
+        // returns distance in meters
+        // https://documentation.pubg.com/en/telemetry-objects.html#location
+
+        var x1 = parseInt(location1.x);
+        var y1 = parseInt(location1.y);
+        var z1 = parseInt(location1.z);
+
+        var x2 = parseInt(location2.x);
+        var y2 = parseInt(location2.y);
+        var z2 = parseInt(location2.z);
+
+        //var distance = Math.hypot(x2 - x1, y2 - y1);
+
+        var distance = Math.sqrt( (Math.pow(x2 - x1, 2) + 
+                                   Math.pow(y2 - y1, 2) + 
+                                   Math.pow(z2 - z1, 2) * 1), 0.5 );
+
+
+
+        //console.log(distance);
+
+        return parseInt(distance / 100);    // return meters
+    },
 }
 
 
