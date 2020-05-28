@@ -145,7 +145,6 @@ async function GetTelemetry(_matchID) {
 				var killingStroke 	= (response.killingStroke 	== true) ? ' *kill/knock*' : '';
 				var teammateDamage 	= (response.teammateDamage 	== true) ? ' *teammate-damage*' : '';
 				var selfDamage 		= (response.selfDamage == true) ? ' *self-damage*' : '';
-				var thirst = 
 
 				line = 	response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + '   (' + 
 						response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' * ' + strBot(response.victim.isBot) + 
@@ -157,8 +156,14 @@ async function GetTelemetry(_matchID) {
 						response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' v ' + strBot(response.victim.isBot);
 			}
 			else if (response._T == 'LogPlayerKill') {
+				var _thirst = (response.isThirst) ? ' *thirst*' : '';
+				var _selfKill = (response.isSelfKill) ? ' *self-kill*': '';
+				var _teammateKill = (response.isTeammateKill) ? ' *teammate-kill*': '';
+				var _bleedOut = (response.isBleedOut) ? ' *bleed-out*': '';
+
 				line = 	response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + ' x (' + 
-						response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' x ' + strBot(response.victim.isBot);
+						response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' x ' + strBot(response.victim.isBot) +
+							_thirst + _selfKill + _teammateKill + _bleedOut;
 			}
 
 			console.log(line);
