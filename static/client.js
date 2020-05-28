@@ -145,6 +145,7 @@ async function GetTelemetry(_matchID) {
 				var killingStroke 	= (response.killingStroke 	== true) ? ' *kill/knock*' : '';
 				var teammateDamage 	= (response.teammateDamage 	== true) ? ' *teammate-damage*' : '';
 				var selfDamage 		= (response.selfDamage == true) ? ' *self-damage*' : '';
+				var thirst = 
 
 				line = 	response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + '   (' + 
 						response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' * ' + strBot(response.victim.isBot) + 
