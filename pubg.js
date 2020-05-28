@@ -483,8 +483,10 @@ app.get('/getplayermatches', async (req, res) => {
 app.get('/getmatchtelemetry', async (req, res) => {
     console.log('/getmatchtelemetry -> player: ' + req.query.platform + '/' + req.query.player_name + ', matchID: ' + req.query.matchID);
 
+    var   playerName        = req.query.player_name;
     const match_url         = 'https://api.pubg.com/shards/' + req.query.platform + '/matches/' + req.query.matchID;
     const match_cache_file  = './cache/matches/' + req.query.matchID + '.json';
+
     var match_data, telemetry_url; 
 
 
@@ -584,7 +586,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //#endregion (fetch telemetry data) ------------------------------------------------------------------------>
 
 
-
     console.log('analyzing telemetry...');
 
     // arr_T = [];
@@ -601,12 +602,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     var arrDamageLog    = [];   // for server side console logging
     var arrKillFeedLog  = [];
-    var playerActivity  = [];   // [name, [activity]]  the damage to and from a player, and kills/death
-
+    
     var arrTeams        = [];   // [teamId, [players]]
-    var arrPlayerTeam   = []; // [name, teamId]   // for reverse lookups
+    var arrPlayerTeam   = [];   // [name, teamId]   // for reverse lookups
     var arrKnocks       = [];   // [{ knocked_player, whodunit}]
     var arrDeaths       = [];   // [ { killer, [{victims}] } ]
+
+    // data for client response...
+    var clientPlayerCards   = [];               // [name, { activity }]  the damage to and from a player, and kills/death.
+    var arrPlayersDamageLog = [];   // [player_name, {playerDamageLog}]  -- this will be every player's damage/tagged log
+    var playerTeamId    = null;
+    var killerTeamId    = null;
+    var killerName      = null;
 
 
     // ! loop through each telemetry event...
@@ -632,6 +639,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     '(' + i_string.padStart(5, ' ') + ') ' + record._T
         // }
 
+        var playerDamageLog     = new Object();
+    
 
         // before the match starts, get teamId of each player and bot
         if (blBeforeMatchStart) {
@@ -648,11 +657,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 
                 // ! create arrTeams array
                 // [{ 'teamId': teamId, 'teammates': [{'playerName': name, 'isBot': bool}] }]
-                var team = new Object();
+                var team        = new Object();
                 team.teamId     = record.character.teamId;
                 team.teammates  = [];
 
-                var player = new Object();
+                var player      = new Object();
                 player.name     = record.character.name;
                 player.isBot    = hf.isBot(record.character.accountId);
                 
@@ -673,6 +682,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 // if there is no team for this teamId, create it...
                 if (!blTeamExists) {
                     arrTeams.push(team);
+                }
+
+
+                if (record.character.name == playerName) {
+                    playerTeamId = record.character.teamId;
                 }
 
 
@@ -748,7 +762,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     var _teammateDamage = (record.attacker.name != record.victim.name && record.attacker.teamId == record.victim.teamId) ? ' *teammate-damage*' : '';
                     var _selfDamage     = (record.attacker.name == record.victim.name) ? ' *self-damage*' : '';
                     var _killshot       = (parseInt(record.victim.health - record.damage) == 0) ? ' *killshot*' : '';
-                    var _distance       = hf.getDistanceXYZ(record.attacker.location, record.victim.location);                    
+                    var _distance       = hf.getDistanceXYZ(record.attacker.location, record.victim.location);
 
                     arrDamageLog.push('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + _attackerName.padEnd(16, ' ') + '   ' + record.victim.name.padEnd(16, ' ') + ']  __' +
                     hf.strIsHumanOrBot(record.attacker.accountId).padEnd(5, ' ') + ' * ' + hf.strIsHumanOrBot(record.victim.accountId).padEnd(5, ' ') + 
@@ -756,6 +770,46 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     ' (-' + parseInt(record.damage) + ' -> ' + (parseInt(record.victim.health - record.damage)) + ') distance: ' + _distance + 'm, ' + 
                     hf.translateDamageTypeCategory(record.damageTypeCategory) + '/' + hf.translateDamageCauserName(record.damageCauserName) + '/' + record.damageReason + 
                     _selfDamage + _teammateDamage + _killshot);
+
+
+
+                    // client stuff --------------------------------------->
+                    var _attacker   = new Object();
+                    var _victim     = new Object();
+
+                    playerDamageLog._T              = 'LogPlayerTakeDamage';
+                    playerDamageLog.matchTime       = strRecordTimestamp;
+                    playerDamageLog.killingStroke   = (parseInt(record.victim.health - record.damage) == 0) ? true : false;
+
+                    _attacker.name              = record.attacker.name;
+                    _attacker.isBot             = hf.isBot(record.attacker.accountId);
+                    _attacker.teamId            = record.attacker.teamId;
+                    _attacker.health            = record.attacker.health;
+
+                    _victim.name                = record.victim.name;
+                    _victim.isBot               = hf.isBot(record.victim.accountId);
+                    _victim.teamId              = record.victim.teamId;
+                    _victim.healthBeforeDamage  = record.victim.health;
+                    _victim.healthAfterDamage   = record.victim.health - record.damage;
+
+                    playerDamageLog.attacker    = _attacker;
+                    playerDamageLog.victim      = _victim;
+
+                    playerDamageLog.damage              = record.damage;
+                    playerDamageLog.distance            = _distance;
+                    playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.damageTypeCategory);
+                    playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.damageCauserName);
+                    playerDamageLog.damageReason        = record.damageReason;
+
+                    playerDamageLog.teammateDamage  = (record.attacker.name != record.victim.name && record.attacker.teamId == record.victim.teamId) ? true : false;
+                    playerDamageLog.selfDamage      = (record.attacker.name == record.victim.name) ?  true : false;
+
+                    // $ log teammate/self kills and knocks here?
+                    // $ log enemy kills here too?
+                    
+                    // $ what to do about environment damage and kills?
+
+                    arrPlayersDamageLog.push(playerDamageLog);
                 }
             }
             catch (error) {
@@ -781,7 +835,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 teammateKnock = ' *teammate knock*';
             }
 
-                                    
+
             // knocked by player or environment?
             if (!record.attacker.name == '') {
                 // this is a knock by a player or bot
@@ -797,6 +851,37 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                 arrKillFeedLog.push(_recordLog);
                 arrDamageLog.push(_recordLog)
+
+
+
+                // client stuff --------------------------------------->
+                var _attacker   = new Object();
+                var _victim     = new Object();
+                playerDamageLog._T              = 'LogPlayerMakeGroggy';
+                playerDamageLog.matchTime       = strRecordTimestamp;
+
+                _attacker.name              = record.attacker.name;
+                _attacker.isBot             = hf.isBot(record.attacker.accountId);
+                _attacker.teamId            = record.attacker.teamId;
+                _attacker.health            = record.attacker.health;
+                
+                _victim.name                = record.victim.name;
+                _victim.isBot               = hf.isBot(record.victim.accountId);
+                _victim.teamId              = record.victim.teamId;
+
+                playerDamageLog.attacker    = _attacker;
+                playerDamageLog.victim      = _victim;
+
+                playerDamageLog.damage              = record.damage;
+                playerDamageLog.distance            = hf.getDistanceXYZ(record.attacker.location, record.victim.location);
+                playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.damageTypeCategory);
+                playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.damageCauserName);
+                playerDamageLog.damageReason        = record.damageReason;
+
+                playerDamageLog.teammateKnock   = (record.attacker.name != record.victim.name && record.attacker.teamId == record.victim.teamId) ? true : false;
+                playerDamageLog.selfKnock       = (record.attacker.name == record.victim.name) ?  true : false;
+
+                arrPlayersDamageLog.push(playerDamageLog);
             }
             else {
                 // this is an environment knock
@@ -838,6 +923,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
         // player kills
         if (record._T == 'LogPlayerKill') {
+
+            // 
+            //#region  // ! [Region] 'LogPlayerKill'
+            // 
+
             try {
 
                 //strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
@@ -891,7 +981,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         // if they were knocked, then attribute the kill to the knocker (player or environment)
                         // if they were not knocked, then it's just a self-kill
 
-
                         var knock_index = arrKnocks.findIndex(function(item, i) {
                             return item.knocked_player == record.victim.name;
                         })
@@ -899,10 +988,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         if (knock_index > -1) {
                             // if they were knocked, who knocked them?
                             selfKill = ' *(not self kill) died while knocked by ' + arrKnocks[knock_index].whodunit + '*';
+
+                            playerDamageLog.isSelfKill = false;
                         }
                         else {
                             // they were not knocked while they died
                             selfKill = ' *self-kill*';
+
+                            playerDamageLog.isSelfKill = true;
                         }
 
                         selfKill += ' ' + hf.translateDamageTypeCategory(record.damageTypeCategory);
@@ -915,12 +1008,22 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                         if (knock_index > -1) {
                             thirst = " *thirst*"
+
+                            playerDamageLog.isThirst = true;
+                        }
+                        else {
+                            playerDamageLog.isThirst = false;
                         }
 
 
                         // if the killer was on the same team, it's a teammate kill
                         if (record.killer.teamId == record.victim.teamId) {
                             teammateKill = ' *teammate kill*';
+
+                            playerDamageLog.isTeammateKill = true;
+                        }
+                        else {
+                            playerDamageLog.isTeammateKill = false;
                         }
     
                     }
@@ -942,9 +1045,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
                              record.damageTypeCategory == 'Damage_Instant_Fall' ) {
                         // if they die from being groggy, then it's not a thirst.
                         thirst = '';
+                        playerDamageLog.isThirst = false; // reset if not a thirst
                         
                         if (record.damageTypeCategory == 'Damage_Groggy') {
                             damage_info = 'Bled-out';
+                            playerDamageLog.isBleedOut = true;
+                        }
+                        else { 
+                            playerDamageLog.isBleedOut = false;
                         }
                     }
 
@@ -956,6 +1064,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         record.damageTypeCategory == 'Damage_Instant_Fall' || 
                         record.damageTypeCategory == 'Damage_Explosion_RedZone') {
                             thirst = '';
+                            playerDamageLog.isThirst = false; // reset if not a thirst
                     }
 
 
@@ -967,19 +1076,60 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                     arrKillFeedLog.push(_recordLog);
                     arrDamageLog.push(_recordLog);
+
+
+
+                    // client stuff --------------------------------->
+                    // player kill / non-environment kill
+                    var _attacker   = new Object();
+                    var _victim     = new Object();
+                    playerDamageLog._T              = 'LogPlayerKill';
+                    playerDamageLog.matchTime       = strRecordTimestamp;
+
+                    _attacker.name      = record.killer.name;
+                    _attacker.isBot     = hf.isBot(record.killer.accountId);
+                    _attacker.teamId    = record.killer.teamId;
+                    _attacker.health    = record.killer.health;
+
+                    _victim.name        = record.victim.name;
+                    _victim.isBot       = hf.isBot(record.victim.accountId);
+                    _victim.teamId      = record.victim.teamId;
+
+                    playerDamageLog.attacker    = _attacker;
+                    playerDamageLog.victim      = _victim;
+
+                    playerDamageLog.damage              = record.damage;
+                    playerDamageLog.distance            = hf.getDistanceXYZ(record.killer.location, record.victim.location);
+                    playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.damageTypeCategory);
+                    playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.damageCauserName);
+                    playerDamageLog.damageReason        = record.damageReason;
+
+                    arrPlayersDamageLog.push(playerDamageLog);
                 }
             }
             catch (err) {
                 console.log('(' + i_string.padStart(5, ' ') + ') error: ' + err);
             }
 
+
+            //
+            //#endregion 'LogPlayerKill' ----------------------------------------
+
         }
-    }  
+
+
+        // enter this playerDamageLog into arrPlayersDamageLog
+
+        //debugger;
+
+    }   // i loop
 
 
 
     console.log('arrTeams:', arrTeams);
     console.log('arrPlayerTeam', arrPlayerTeam);
+
+
 
     // ! print killfeed log
     // console.log('KillFeed log...');
@@ -998,7 +1148,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
     console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);
     console.log('done searching telemetry.');
 
-    res.send(arrDamageLog); // $ send back some pertinent json
+
+    var hooty_response = { playerTeamId, arrPlayersDamageLog };
+    res.send(hooty_response);   // $ send back some pertinent json
 
 })
 

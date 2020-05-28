@@ -129,10 +129,52 @@ async function GetTelemetry(_matchID) {
 
 	console.log('telemetry response: ', axios_response);
 
+
+	// $ cycle the response data and output the player's data
+	for (i = 0; i < axios_response.data.arrPlayersDamageLog.length; i++) {
+		var response = axios_response.data.arrPlayersDamageLog[i];
+		var playerTeamId = axios_response.data.playerTeamId;
+
+		// (response.attacker.name == strPlayerName || response.victim.name == strPlayerName)
+		if (response.attacker.teamId == playerTeamId || response.victim.teamId == playerTeamId) {
+			//console.log(response);
+
+			var line = '';
+
+			if (response._T == 'LogPlayerTakeDamage') {
+				var killingStroke 	= (response.killingStroke 	== true) ? ' *kill/knock*' : '';
+				var teammateDamage 	= (response.teammateDamage 	== true) ? ' *teammate-damage*' : '';
+				var selfDamage 		= (response.selfDamage == true) ? ' *self-damage*' : '';
+
+				line = 	response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + '   (' + 
+						response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' * ' + strBot(response.victim.isBot) + 
+						' atckr health: ' + parseInt(response.attacker.health) + ' vs ' + parseInt(response.victim.healthBeforeDamage) + ', dmg: ' + parseInt(response.damage) + 
+						', ' + response.damageTypeCategory + '/' + 	response.damageCauserName + '/' + response.damageReason + ', distance: ' + response.distance + killingStroke + selfDamage + teammateDamage;
+			}
+			else if (response._T == 'LogPlayerMakeGroggy') {
+				line = 	response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + ' v (' + 
+						response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' v ' + strBot(response.victim.isBot);
+			}
+			else if (response._T == 'LogPlayerKill') {
+				line = 	response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + ' x (' + 
+						response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' x ' + strBot(response.victim.isBot);
+			}
+
+			console.log(line);
+		}
+	}
+
+	console.log('show winPlace and of how many teams there were');
 }
 
-
-
+function strBot(bot) {
+	if (bot) {
+		return 'BOT  ';
+	}
+	else {
+		return 'HUMAN';
+	}
+}
 
 
 
