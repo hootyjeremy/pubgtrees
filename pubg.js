@@ -528,7 +528,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 //console.log('writing match cache...');
 
                 if (err) {
-                    console.log('(gettelemetry) error writing match cache file: ' + match_cache_file);
+                    console.log('(getmatchtelemetry) error writing match cache file: ' + match_cache_file);
                 }
                 else {
                     //console.log('(gettelemetry) created match cache file: ' + match_cache_file);
@@ -554,7 +554,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     for (let i = 0; i < match_data.included.length; i++) {
         if (match_data.included[i].type == 'asset') {
             telemetry_url = match_data.included[i].attributes.URL;
-            continue;
+            break;
         }                
     }
 
@@ -599,12 +599,15 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var matchStartTime      = null;
     var strRecordTimestamp  = null;
 
-    var arrDamageLog    = [];
+    var arrDamageLog    = [];   // for server side console logging
     var arrKillFeedLog  = [];
+    var playerActivity  = [];   // [name, [activity]]  the damage to and from a player, and kills/death
 
-    var arrTeams    = [];   // [teamId, [players]]
-    var arrKnocks   = [];   // [{ knocked_player, whodunit}]
-    var arrDeaths   = [];   // [ { killer, [{victims}] } ]
+    var arrTeams        = [];   // [teamId, [players]]
+    var arrPlayerTeam   = []; // [name, teamId]   // for reverse lookups
+    var arrKnocks       = [];   // [{ knocked_player, whodunit}]
+    var arrDeaths       = [];   // [ { killer, [{victims}] } ]
+
 
     // ! loop through each telemetry event...
     for (let i = 0; i < telemetry_response.data.length; i++){
@@ -641,7 +644,37 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     human_count++;
                 }
 
-                // $ is there an existing teamId?
+                arrPlayerTeam.push({ 'name': record.character.name, 'teamId': record.character.teamId});
+                
+                // ! create arrTeams array
+                // [{ 'teamId': teamId, 'teammates': [{'playerName': name, 'isBot': bool}] }]
+                var team = new Object();
+                team.teamId     = record.character.teamId;
+                team.teammates  = [];
+
+                var player = new Object();
+                player.name     = record.character.name;
+                player.isBot    = hf.isBot(record.character.accountId);
+                
+                team.teammates.push(player);
+
+                var blTeamExists = false;
+
+                for (let j = 0; j < arrTeams.length; j++){
+
+                    if (arrTeams[j].teamId == team.teamId) {
+                        blTeamExists = true;
+
+                        arrTeams[j].teammates.push(player);
+                        break;
+                    }
+                }
+
+                // if there is no team for this teamId, create it...
+                if (!blTeamExists) {
+                    arrTeams.push(team);
+                }
+
 
                 console.log('teamId: ' + record.character.teamId + ', ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name);
             }
@@ -690,7 +723,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // if (record._T == 'LogPlayerAttack') {
         //     console.dir(record);
         // }
-        // $ show damageCausers and types and stuff here...
+        // show damageCausers and types and stuff here...
         if (record._T == 'LogPlayerTakeDamage') {
             //console.dir(record);
             
@@ -944,6 +977,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }  
 
 
+
+    console.log('arrTeams:', arrTeams);
+    console.log('arrPlayerTeam', arrPlayerTeam);
+
     // ! print killfeed log
     // console.log('KillFeed log...');
     // for (let j = 0; j < arrKillFeedLog.length; j++) {
@@ -951,7 +988,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     // }
 
     // ! print damage log
-    console.log('LogPlayerTakeDamage Log...');
+    console.log('arrDamageLog...');
     for (let j = 0; j < arrDamageLog.length; j++){
         console.log(arrDamageLog[j]);
     }
