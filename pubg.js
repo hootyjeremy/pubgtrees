@@ -496,6 +496,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     // get telemetry url from asset property of match_data. try match cache first. if not there, fetch the match from the pubg api and then cache the match.
 
+
     // check for match cache file first
     if (fs.existsSync(match_cache_file)) {
         try 
@@ -566,6 +567,13 @@ app.get('/getmatchtelemetry', async (req, res) => {
     // fetch the actual telemetry here from the pubg api...
     var telemetry_response; 
 
+
+
+    // $ when debugging, use cached telemetry file
+    // search for cached telemetry. if exists, load it
+    // if it doesn't exist, fetch it from pubg api and then cache it...
+
+
     try {
         telemetry_response = await axios.get(telemetry_url, {
             headers: {
@@ -615,6 +623,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var killerTeamId    = null;
     var killerName      = null;
 
+    var null_attacker = []; // for testing bluezone/redzone/blackzone
+
 
     // ! loop through each telemetry event...
     for (let i = 0; i < telemetry_response.data.length; i++){
@@ -641,6 +651,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
         var playerDamageLog     = new Object();
     
+
+        //#region // ! [Region (pre-match)]
+        //
 
         // before the match starts, get teamId of each player and bot
         if (blBeforeMatchStart) {
@@ -699,23 +712,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
             strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
         }
 
-
         // bots and humans leaving the plane
         // if (record._T == 'LogVehicleLeave') {
-
         //     if (record.vehicle.vehicleId == 'DummyTransportAircraft_C') {
-
         //         if (hf.isBot(record.character.accountId)) { //} telemetry_response.data[i].character.accountId.includes('account.')){
         //             bot_count2++;
         //         }
         //         else {
         //             human_count2++;
         //         }
-
         //          console.log('(' + i_string.padStart(5, ' ') + ') ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name + ' left plane');
         //      }
         //  }
-
 
          if (record._T == 'LogMatchStart') {
             console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ' -> ' + hf.translateMapName(record.mapName));
@@ -732,11 +740,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
             console.log(record);
         }
 
+        //
+        //#endregion pre-match ------------------------------------------------------------------------>
 
 
-        // if (record._T == 'LogPlayerAttack') {
-        //     console.dir(record);
-        // }
+        // --------------------------------------------->
         // show damageCausers and types and stuff here...
         if (record._T == 'LogPlayerTakeDamage') {
             //console.dir(record);
@@ -810,6 +818,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // $ what to do about environment damage and kills?
 
                     arrPlayersDamageLog.push(playerDamageLog);
+                }
+                else if (record.attacker == null) {
+                    //null_attacker.push(record.damageTypeCategory);
+                    // pretty much just bluezone and blackzone. why not redzone? because insta-knock?
                 }
             }
             catch (error) {
@@ -895,7 +907,31 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 arrDamageLog.push(_recordLog);
 
                 arrKnocks.push({'knocked_player': record.victim.name, 'whodunit': record.damageTypeCategory});
-            }
+
+
+                // client stuff (environment knock) --------------------------->
+                var _attacker   = new Object();
+                var _victim     = new Object();
+
+                playerDamageLog._T          = 'LogPlayerMakeGroggy';
+                playerDamageLog.matchTime   = strRecordTimestamp;
+                playerDamageLog.byPlayer    = false;
+
+                _attacker.name = '*' + hf.translateDamageTypeCategory(record.damageTypeCategory) + '*';
+                
+                _victim.name    = record.victim.name;
+                _victim.isBot   = hf.isBot(record.victim.accountId);
+                _victim.teamId  = record.victim.teamId;
+
+                playerDamageLog.attacker    = _attacker;
+                playerDamageLog.victim      = _victim;
+
+                playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.damageTypeCategory);
+                playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.damageCauserName);
+                playerDamageLog.damageReason        = record.damageReason;
+
+                arrPlayersDamageLog.push(playerDamageLog);
+        }
         }
 
 
@@ -917,6 +953,16 @@ app.get('/getmatchtelemetry', async (req, res) => {
             })
 
             arrKnocks.splice(remove_index, 1);
+
+
+            // client stuff ------------------------------->
+            playerDamageLog._T          = 'LogPlayerRevive';
+            playerDamageLog.matchTime   = strRecordTimestamp;
+            playerDamageLog.attacker    = record.reviver;   // need to switch this to attacker so client can find it instead of searching for "reviver" when only this even has that.
+            playerDamageLog.victim      = record.victim;
+
+            arrPlayersDamageLog.push(playerDamageLog);
+
         }
 
 
@@ -961,6 +1007,29 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                     arrKillFeedLog.push(_recordLog);
                     arrDamageLog.push(_recordLog);
+
+
+                    // client stuff (environment kill) ----------------------------->
+                    var _attacker   = new Object();
+                    var _victim     = new Object();
+                    playerDamageLog._T          = 'LogPlayerKill';
+                    playerDamageLog.matchTime   = strRecordTimestamp;
+                    playerDamageLog.byPlayer    = false;
+
+                    _attacker.name = '*' + hf.translateDamageTypeCategory(record.damageTypeCategory) + '*';
+                    
+                    _victim.name    = record.victim.name;
+                    _victim.isBot   = hf.isBot(record.victim.accountId);
+                    _victim.teamId  = record.victim.teamId;
+
+                    playerDamageLog.attacker    = _attacker;
+                    playerDamageLog.victim      = _victim;
+
+                    playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.damageTypeCategory);
+                    playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.damageCauserName);
+                    playerDamageLog.damageReason        = record.damageReason;
+
+                    arrPlayersDamageLog.push(playerDamageLog);
                 }
                 else {
                     // if they did die to a player killer
@@ -1083,8 +1152,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // player kill / non-environment kill
                     var _attacker   = new Object();
                     var _victim     = new Object();
-                    playerDamageLog._T              = 'LogPlayerKill';
-                    playerDamageLog.matchTime       = strRecordTimestamp;
+                    playerDamageLog._T          = 'LogPlayerKill';
+                    playerDamageLog.matchTime   = strRecordTimestamp;
+                    playerDamageLog.byPlayer    = true;
 
                     _attacker.name      = record.killer.name;
                     _attacker.isBot     = hf.isBot(record.killer.accountId);
@@ -1129,7 +1199,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     console.log('arrTeams:', arrTeams);
     console.log('arrPlayerTeam', arrPlayerTeam);
 
-
+    //console.log(null_attacker);
 
     // ! print killfeed log
     // console.log('KillFeed log...');
