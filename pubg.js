@@ -8,8 +8,9 @@ const path          = require('path');
 const glob          = require('glob');
 const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
 const hf            = require('./hooty_modules/hf_server'); // helper functions
-const port          = 3000;
+const port          = 8080;
 
+const PORT = process.env.PORT || 80;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 
 // ! Global variables...
 var   apiKey    = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02ODAwLTAxMzgtZTQ4Ny0wNjc0ZmE5YWVjOGYiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0Ijo'
@@ -34,9 +35,9 @@ setInterval(clearCache, 300000);    // check for cache clear every 5 minutes (30
 app.use('/', express.static(__dirname));    // so that root/pubg.js and root/index.html can be found
 
 // ------------------------------------------------------------->
-app.listen(port, () => {
+app.listen(PORT, () => {
     console.log(chalk.blue(strLine));
-    console.log(chalk.blue(getDate() + ' -> listening on port ' + port));
+    console.log(chalk.blue(getDate() + ' -> hooty-pubg server listening on port ' + PORT));
 });
 
 

@@ -3,7 +3,21 @@
 
 
 let strLine = "--------------------------------------------";
-let hooty_server_url 	= 'http://localhost:3000';
+
+let hooty_server_url 	= 'http://localhost:80';
+let defaultPlayer		= 'hooty__';
+
+// --------------------------------------------------------->
+// ! Deploy/Testing Version...
+const _deployVersion 	= false;
+
+if (_deployVersion){
+	hooty_server_url 	= 'https://hooty-pubgtest01.azurewebsites.net/';
+	defaultPlayer 		= '';
+}
+// --------------------------------------------------------->
+
+
 
 var strPlatform, strPlayerName;
 var prevPlatform, prevPlayerName;	// these are used to reset match_floor if searching for a new player
@@ -18,6 +32,10 @@ var telemetry_response_json;
 var match_floor		= 0;
 var total_matches 	= 0;
 
+function loadFunction() {
+	console.log('loadFunction()');
+	document.getElementById('btnSearchPlayer').value = defaultPlayer;
+}
 
 // $ FLOOD PREVENTION
 // $ NEED TO BE ABLE TO SUPPRESS GETTING MATCHES UNTIL A RESPONSE COMES BACK
@@ -36,7 +54,7 @@ async function GetPlayerMatches() {
 
 
 	console.log('client requesting from ' + hooty_server_url);
-	console.log('requesting player:     ' + strPlatform + ', ' + strPlayerName);
+	console.log('requesting player:     ' + strPlatform + '/' + strPlayerName);
 
 
 	const btnSearch 	= document.getElementById('btnSearchPlayer');
@@ -133,62 +151,65 @@ async function GetTelemetry(_matchID) {
 
 	// $ cycle the response data and output the player's data
 	for (i = 0; i < axios_response.data.arrPlayersDamageLog.length; i++) {
-		var response 		= axios_response.data.arrPlayersDamageLog[i];
+		var record 		= axios_response.data.arrPlayersDamageLog[i];
 		var playerTeamId 	= axios_response.data.playerTeamId;
 
-		// (response.attacker.teamId == playerTeamId || response.victim.teamId == playerTeamId)
-		if (response.attacker.name == strPlayerName || response.victim.name == strPlayerName) {
-			//console.log(response);
+		// (record.attacker.teamId == playerTeamId || record.victim.teamId == playerTeamId)
+		if (record.attacker.name == strPlayerName || record.victim.name == strPlayerName) {
+			//console.log(record);
 
 			var line = '';
+			var attackerTeamId  = new String(record.attacker.teamId);
+     			attackerTeamId 	= '(' + attackerTeamId.padStart(3, '0') + ')';
+			var victimTeamId 	= new String(record.victim.teamId);
+				victimTeamId  	= '(' + victimTeamId.padStart(3, '0') + ')';
 
-			if (response._T == 'LogPlayerTakeDamage') {
-				var killingStroke 	= (response.killingStroke 	== true) ? ' *kill/knock*' : '';
-				var teammateDamage 	= (response.teammateDamage 	== true) ? ' *teammate-damage*' : '';
-				var selfDamage 		= (response.selfDamage == true) ? ' *self-damage*' : '';
+			var attackerName   	= new String(record.attacker.name).padEnd(16, ' ');
+			var victimName		= new String(record.victim.name).padEnd(16, ' ');
 
-				line = 	response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + '   (' + 
-						response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' * ' + strBot(response.victim.isBot) + 
-						' atckr health: ' + parseInt(response.attacker.health) + ' vs ' + parseInt(response.victim.healthBeforeDamage) + ', dmg: ' + parseInt(response.damage) + 
-						', ' + response.damageTypeCategory + '/' + 	response.damageCauserName + '/' + response.damageReason + ', distance: ' + response.distance + killingStroke + selfDamage + teammateDamage;
+			if (record._T == 'LogPlayerTakeDamage') {
+				var killingStroke 	= (record.killingStroke 	== true) ? ' *kill/knock*' : '';
+				var teammateDamage 	= (record.teammateDamage 	== true) ? ' *teammate-damage*' : '';
+				var selfDamage 		= (record.selfDamage 		== true) ? ' *self-damage*' : '';
+
+				line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + '   ' + victimTeamId + ' ' + victimName + '] ' + 
+						strBot(record.attacker.isBot) + ' * ' + strBot(record.victim.isBot) + ' atckr health: ' + parseInt(record.attacker.health) + ' vs ' + 
+						parseInt(record.victim.healthBeforeDamage) + ', dmg: ' + parseInt(record.damage) + ', ' + record.damageTypeCategory + '/' +	record.damageCauserName + '/' + 
+						record.damageReason + ', distance: ' + record.distance + killingStroke + selfDamage + teammateDamage;
 			}
-			else if (response._T == 'LogPlayerMakeGroggy') {
-				if (response.byPlayer) {
+			else if (record._T == 'LogPlayerMakeGroggy') {
+				if (record.byPlayer) {
 					// knocked by player or bot
-					line = 	response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + ' v (' + 
-					response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' v ' + strBot(response.victim.isBot);
+					line = record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' v ' + victimTeamId + ' ' + victimName + '] ' + 
+						   strBot(record.attacker.isBot) + ' v ' + strBot(record.victim.isBot);
 				}
 				else {
 					// knocked by environment
-					line = 	response.matchTime + ' [' + response.attacker.name.padEnd(16, ' ') + '     v (' + response.victim.teamId + ') ' + 
-					response.victim.name.padEnd(16, ' ') + '] *env* v ' + strBot(response.victim.isBot);
+					line = 	record.matchTime + ' [' + record.attacker.name.padEnd(16, ' ') + '     v ' + victimTeamId + ' ' + victimName + '] *env* v ' + strBot(record.victim.isBot);
 				}
 			}
-			else if (response._T == 'LogPlayerKill') {
+			else if (record._T == 'LogPlayerKill') {
 
 				// $ bug here where knocked by environment and then bleed out, shows killer as self
 
-				if (response.byPlayer) {
+				if (record.byPlayer) {
 					// killed by player or bot
-					var _thirst 		= (response.isThirst) 		? ' *thirst*' : '';
-					var _selfKill 		= (response.isSelfKill) 	? ' *self-kill*': '';
-					var _teammateKill 	= (response.isTeammateKill) ? ' *teammate-kill*': '';
-					var _bleedOut 		= (response.isBleedOut) 	? ' *bleed-out*': '';
+					var _thirst 		= (record.isThirst) 		? ' *thirst*' : '';
+					var _selfKill 		= (record.isSelfKill) 	? ' *self-kill*': '';
+					var _teammateKill 	= (record.isTeammateKill) ? ' *teammate-kill*': '';
+					var _bleedOut 		= (record.isBleedOut) 	? ' *bleed-out*': '';
 	
-					line = 	response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + ' x (' + 
-							response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] ' + strBot(response.attacker.isBot) + ' x ' + strBot(response.victim.isBot) +
-								_thirst + _selfKill + _teammateKill + _bleedOut;
+					line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' x ' + victimTeamId + ' ' + victimName + '] ' + 
+							strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + _thirst + _selfKill + _teammateKill + _bleedOut;
 				}
 				else {
 					// environment kill
-					line = 	response.matchTime + ' [' + response.attacker.name.padEnd(16, ' ') + '     x (' + 
-							response.victim.teamId + ') ' + response.victim.name.padEnd(16, ' ') + '] *env* x ' + strBot(response.victim.isBot) + ' bleedout?';
+					line = 	record.matchTime + ' [' + attackerName + '     x ' + victimTeamId + ' ' + victimName + '] *env* x ' + strBot(record.victim.isBot) + ' bleedout?';
 				}
 			}
-			else if (response._T == 'LogPlayerRevive') {
+			else if (record._T == 'LogPlayerRevive') {
 				// not literally an "attacker" -> the attacker is the reviver. 
-				line = response.matchTime + ' [(' + response.attacker.teamId + ') ' + response.attacker.name.padEnd(16, ' ') + ' ^ (' + response.victim.teamId + ') ' + 
-				response.victim.name.padEnd(16, ' ') + ']';
+				line = record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' ^ ' + victimTeamId + ' ' + victimName + ']';
 			}
 
 

@@ -5,11 +5,6 @@
 	<style type="text/css"></style>
 </head>
 
-<body>
-<title>pubg match test</title>
-
-<!-- <link rel="stylesheet" type="text/css" href="static/style.css" /> -->
-
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap" rel="stylesheet">
 
@@ -17,6 +12,13 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://momentjs.com/downloads/moment.min.js"></script>
 <script src="static/hf.js" type="text/javascript"></script>
+
+
+<body>
+<title>pubg match test</title>
+
+<!-- <link rel="stylesheet" type="text/css" href="static/style.css" /> -->
+
 
 
 <style>
@@ -84,7 +86,7 @@ select {
 	<option value="xbox">Xbox</option>>
 </select>
 
-<input  id="inputPlayerName" placeholder="Player name" onsubmit="btnSearchPlayer_Click()" value="hooty__">
+<input  id="inputPlayerName" placeholder="Player name" onsubmit="btnSearchPlayer_Click()">
 <button id="btnSearchPlayer" onclick="btnSearchPlayer_Click()">Search</button>
 <br><br>
 
@@ -112,6 +114,16 @@ select {
 			document.getElementById("btnSearchPlayer").click();
 		}
 	});	
+
+
+	// window.addEventListener('load', (event) => {
+  	// 	console.log('page is fully loaded');
+	// });
+
+	window.addEventListener('load', (event) => {
+		//console.log('page is fully loaded');
+		document.getElementById('inputPlayerName').value = defaultPlayer;
+	});
 </script>
 
 

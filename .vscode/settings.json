@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/60e0bf1f-2e99-43c9-bdfc-4f6ac79a3da6/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/hooty-pubgtest01",
+    "appService.deploySubpath": "."
+}
