@@ -126,8 +126,9 @@ async function GetTelemetry(_matchID) {
 	})
 
 	// $ check for response errors here
+	// $ need wrapped responses
 
-	console.log('telemetry response: ', axios_response);
+	//console.log('telemetry response: ', axios_response);
 
 
 	// $ cycle the response data and output the player's data
@@ -159,11 +160,14 @@ async function GetTelemetry(_matchID) {
 				}
 				else {
 					// knocked by environment
-					line = 	response.matchTime + ' [' + response.attacker.name.padEnd(16, ' ') + '      v (' + response.victim.teamId + ') ' + 
+					line = 	response.matchTime + ' [' + response.attacker.name.padEnd(16, ' ') + '     v (' + response.victim.teamId + ') ' + 
 					response.victim.name.padEnd(16, ' ') + '] *env* v ' + strBot(response.victim.isBot);
 				}
 			}
 			else if (response._T == 'LogPlayerKill') {
+
+				// $ bug here where knocked by environment and then bleed out, shows killer as self
+
 				if (response.byPlayer) {
 					// killed by player or bot
 					var _thirst 		= (response.isThirst) 		? ' *thirst*' : '';

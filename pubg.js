@@ -16,7 +16,6 @@ var   apiKey    = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02
       apiKey   += 'xNTg3Njk1MTM1LCJwdWIiOiJibHVlaG9sZSIsInRpdGxlIjoicHViZyIsImFwcCI6Im1pbmlzdGVya2F0YW9rIn0.HiuLi97rFSW-ho5zE1XBYmpV9E6M0Nj90qXIY1TWsco';
 const strLine   = "--------------------------------------------";
 
-
 // ? what is this app receiving from the user?
 // ? what is this app requesting from the pubg api?
 // ? what is this app receiving  from the pubg api?
@@ -25,7 +24,8 @@ const strLine   = "--------------------------------------------";
 
 // ---------------------------->
 // ! Cache Purging...
-setInterval(clearCache, 300000); // check for cache clear every 5 minutes (300,000 milliseconds)
+const blCacheTelemetry = true;      // true, when debugging
+setInterval(clearCache, 300000);    // check for cache clear every 5 minutes (300,000 milliseconds)
 
 
 //app.use(bodyParser.json()); // $ probably don't need this anymore since you're not using POST/body parameters
@@ -254,7 +254,7 @@ app.get('/getplayermatches', async (req, res) => {
                 match_data = fs.readFileSync(match_cache_file, {encoding: 'utf8'});
                 match_data = JSON.parse(match_data);
     
-                //console.log(i +  '. ' + getDate() + ' (cached) ' , match_data);       
+                //console.log(i +  '. ' + getDate() + ' (cached) ' , match_data);
                 _cached = ('cached');
             }
             catch (err) 
@@ -296,13 +296,12 @@ app.get('/getplayermatches', async (req, res) => {
                 }
             })
 
-            //console.log(i + '. ' + getDate(), pubgapi_match_response.data);
             match_data = pubgapi_match_response.data;
 
-            //console.log(i +  '. ' + getDate() + ' (fetched) ' , match_data);       
+            //console.log(i +  '. ' + getDate() + ' (fetched) ' , match_data);
             _cached = '(fetched)';
-
         }
+        //
         //#endregion fetch
 
         
@@ -328,7 +327,7 @@ app.get('/getplayermatches', async (req, res) => {
         }
 
 
-        var damageDealt, kills, winPlace, timeSurvived, participantID, match_telemetry_url;
+        var damageDealt, kills, winPlace, timeSurvived, participantID;
         var dctParticipantNames     = [];   // [ participantID, name ] in the match so you can resolve playerID's
         var arrRosters              = [];   // [ rosterId, [roster participantIDs] ]  -> match participant ID's to their roster
 		var dctParticipantRoster    = []; 	// [ participantId, rosterId ]
@@ -573,6 +572,13 @@ app.get('/getmatchtelemetry', async (req, res) => {
     // search for cached telemetry. if exists, load it
     // if it doesn't exist, fetch it from pubg api and then cache it...
 
+    if (blCacheTelemetry) {
+        // check for cache
+    }
+    else {
+
+    }
+
 
     try {
         telemetry_response = await axios.get(telemetry_url, {
@@ -594,6 +600,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //#endregion (fetch telemetry data) ------------------------------------------------------------------------>
 
 
+    console.log(strLine);
     console.log('analyzing telemetry...');
 
     // arr_T = [];
@@ -623,6 +630,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var killerTeamId    = null;
     var killerName      = null;
 
+    var matchDetails    = []; // $ identify the map, humans/bots, player win place 
+
     var null_attacker = []; // for testing bluezone/redzone/blackzone
 
 
@@ -632,7 +641,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
         var record = telemetry_response.data[i];
         var _recordLog = '';
-       
+
+        var playerDamageLog = new Object();
+
+
         var i_string = new String(i);
         // _T types...
         // if (!arr_T.includes(telemetry_response.data[i]._T)) {
@@ -649,7 +661,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     '(' + i_string.padStart(5, ' ') + ') ' + record._T
         // }
 
-        var playerDamageLog     = new Object();
     
 
         //#region // ! [Region (pre-match)]
@@ -703,7 +714,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 }
 
 
-                console.log('teamId: ' + record.character.teamId + ', ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name);
+                //console.log('teamId: ' + record.character.teamId + ', ' + hf.strIsHumanOrBot(record.character.accountId) + ' ' + record.character.name);
             }
 
             strRecordTimestamp = '--:--';
@@ -749,6 +760,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
         if (record._T == 'LogPlayerTakeDamage') {
             //console.dir(record);
             
+            //#region //! [Region] LogPlayerTakeDamage...
+            //
+
+
             //strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
             
             try {
@@ -827,12 +842,20 @@ app.get('/getmatchtelemetry', async (req, res) => {
             catch (error) {
                 console.error('(' + i_string.padStart(5, ' ') + ') : ' + ' + error: ' + error.message);
             }
+
+            //
+            //#endregion
+
         }
 
 
 
         // player knocks
         if (record._T == 'LogPlayerMakeGroggy') {
+
+            //#region // ! [Region] LogPlayerMakeGroggy...
+            //
+
             //console.log(record);
             //strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
 
@@ -869,8 +892,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 // client stuff --------------------------------------->
                 var _attacker   = new Object();
                 var _victim     = new Object();
-                playerDamageLog._T              = 'LogPlayerMakeGroggy';
-                playerDamageLog.matchTime       = strRecordTimestamp;
+                playerDamageLog._T          = 'LogPlayerMakeGroggy';
+                playerDamageLog.matchTime   = strRecordTimestamp;
+                playerDamageLog.byPlayer    = true;
+
 
                 _attacker.name              = record.attacker.name;
                 _attacker.isBot             = hf.isBot(record.attacker.accountId);
@@ -931,7 +956,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 playerDamageLog.damageReason        = record.damageReason;
 
                 arrPlayersDamageLog.push(playerDamageLog);
-        }
+            }
+
+            //
+            //#endregion
+
         }
 
 
