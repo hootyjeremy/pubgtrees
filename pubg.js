@@ -8,9 +8,8 @@ const path          = require('path');
 const glob          = require('glob');
 const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
 const hf            = require('./hooty_modules/hf_server'); // helper functions
-const port          = 8080;
-
-const PORT = process.env.PORT || 80;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
+//const port          = 8080;
+const port = process.env.PORT || 80;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 
 // ! Global variables...
 var   apiKey    = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02ODAwLTAxMzgtZTQ4Ny0wNjc0ZmE5YWVjOGYiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0Ijo'
@@ -21,6 +20,11 @@ const strLine   = "--------------------------------------------";
 // ? what is this app requesting from the pubg api?
 // ? what is this app receiving  from the pubg api?
 // ? what is this app responding to the user with?
+
+
+// ---------------------------->
+// ! Deploy/Testing Version...
+const blTestingVersion = true;
 
 
 // ---------------------------->
@@ -35,9 +39,9 @@ setInterval(clearCache, 300000);    // check for cache clear every 5 minutes (30
 app.use('/', express.static(__dirname));    // so that root/pubg.js and root/index.html can be found
 
 // ------------------------------------------------------------->
-app.listen(PORT, () => {
+app.listen(port, () => {
     console.log(chalk.blue(strLine));
-    console.log(chalk.blue(getDate() + ' -> hooty-pubg server listening on port ' + PORT));
+    console.log(chalk.blue(getDate() + ' -> hooty-pubg server listening on port ' + port));
 });
 
 
@@ -55,6 +59,8 @@ app.get('/', (req, res) => {
 
 // ------------------------------------------------------------->
 app.get('/getplayermatches', async (req, res) => {
+
+    var pubgApiResponseInfo = null;   // will include this in response to the client
 
     var match_floor = new Number(req.query.match_floor);  // i don't know why this is catching a string. maybe the query converts it?
     const strPlayerName = req.query.player_name;
@@ -110,22 +116,6 @@ app.get('/getplayermatches', async (req, res) => {
     //const player_cache_file_404 = './cache/players/' + req.query.platform + '/404/' + req.query.player_name + '.txt';
 
 
-    // ---------------------------------------------------------->
-    // ? filename searches are not case sensitive so Hooty__ == hooty__ therefore need to come up with another way to cache 404 not found players. 
-    // ? or just not worry about it since you will get that info from pubg api anyway
-    // 404 -> verify that the searched player 404 file doesn't exist...
-    // if (fs.existsSync(player_cache_file_404)) {
-    //     // if this file exists, then we know the pubg api already returned a 404 player not found. this will prevent from spamming the pubg api for non existent players.
-
-    //     console.log('404: player does not exist -> ' + req.query.platform + '/' + req.query.player_name);
-
-    //     var _response_json = { pubg_response_status: 404, pubg_response_statusText: 'Not Found' };
-
-    //     res.send(_response_json);
-    //     return;
-    // }
-
-
     // -------------------------------------------------------------->
     // ! READ CACHE FILE -> if you can get the player cache from the file, then get it...
     try {
@@ -142,6 +132,8 @@ app.get('/getplayermatches', async (req, res) => {
         blPlayerCacheExists = true;
 
         console.log('blPlayerCacheExists: ' + blPlayerCacheExists);
+
+        pubgApiResponseInfo = { 'hootyserver': 'cached', 'status': null, 'statusText': 'no need to fetch from pubg api' };
     }
     catch (err) {
         blPlayerCacheExists = false;
@@ -171,6 +163,11 @@ app.get('/getplayermatches', async (req, res) => {
                     Accept: 'application/vnd.api+json'
                 }
             })
+
+            pubgApiResponseInfo = { 'hootyserver': 'fetched', 'status': pubgapi_player_response.status, 'statusText': pubgapi_player_response.statusText };
+
+            console.log('fetched player_url: ' + player_url);
+            console.log('pubgapi_player_response.headers.x-ratelimit-remaining: ' + pubgapi_player_response.headers['x-ratelimit-remaining'] + ' of ' + pubgapi_player_response.headers['x-ratelimit-limit']);
         }
         catch (error)
         {
@@ -178,22 +175,16 @@ app.get('/getplayermatches', async (req, res) => {
                 console.log('could not fetch player from pubg api: ' + player_url);
                 console.log('error.response.status: ' + error.response.status + ' -> error.response.statusText: ' + error.response.statusText);
 
-                var _response_json = { pubg_response_status: error.response.status, pubg_response_statusText: error.response.statusText };
+                //var _response_json = { pubg_response_status: error.response.status, pubg_response_statusText: error.response.statusText };
+                //res.send(_response_json);
 
-                
-                // if the player is not found, then create an entry in the 404 cache folder
-                // if (error.response.status == 404) {
-                //     fs.writeFile(player_cache_file_404, 'not found', function (err) {
-                //         if (err) {
-                //             console.log(err +  ' -> error writing 404 cache file: ' + player_cache_file_404);
-                //         }
-                //         else {
-                //             console.log('wrote 404 cache file: ' + player_cache_file_404);
-                //         }
-                //     })
-                // }
+                pubgApiResponseInfo = { 'hootyserver': 'fetched', 'status': error.response.status, 'statusText': error.response.statusText };
 
-                res.send(_response_json);
+                var response_data = { 
+                    'pubgResponse'  : pubgApiResponseInfo,
+                };
+
+                res.send(response_data);
                 return;
             }
         }
@@ -456,8 +447,11 @@ app.get('/getplayermatches', async (req, res) => {
             'matchID':          match_data.data.id,
          };
 
-        console.log(i + '. ' + _cached + ": " + matchArray[matchIndex].timeSinceMatch + ', ' + matchArray[matchIndex].gameMode + ', ' + matchArray[matchIndex].mapName + 
-                    ', [' + printTeamRoster(dctTeamRoster) + ']');
+
+        if (blTestingVersion) {
+            console.log(i + '. ' + _cached + ": " + matchArray[matchIndex].timeSinceMatch + ', ' + matchArray[matchIndex].gameMode + ', ' +
+                        matchArray[matchIndex].mapName + ', [' + printTeamRoster(dctTeamRoster) + ']');
+        }
 
         //console.log(match_data);
 
@@ -473,6 +467,7 @@ app.get('/getplayermatches', async (req, res) => {
     var response_data = { 
         'totalMatches'  : player_data.relationships.matches.data.length,
         'matches'       : matchArray,
+        'pubgResponse'  : pubgApiResponseInfo,
     };
 
     res.json(response_data);
@@ -482,6 +477,9 @@ app.get('/getplayermatches', async (req, res) => {
 
 app.get('/getmatchtelemetry', async (req, res) => {
     console.log('/getmatchtelemetry -> player: ' + req.query.platform + '/' + req.query.player_name + ', matchID: ' + req.query.matchID);
+
+    var pubgApiMatchResponseInfo = null;
+    var pubgApiTelemetryResponseInfo = null;
 
     var   playerName        = req.query.player_name;
     const match_url         = 'https://api.pubg.com/shards/' + req.query.platform + '/matches/' + req.query.matchID;
@@ -506,10 +504,16 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             //console.log('match_data (cached): ');
             //console.log(match_data);
+
+            pubgApiMatchResponseInfo = { 'hootyserver': 'match cached', 'status': null, 'statusText': 'no need to fetch from pubg api' };
         }
         catch (err) 
         {
             console.log('error getting telemetry url while reading match cache file: ' + match_cache_file);
+
+            pubgApiMatchResponseInfo = { 'hootyserver': 'match cache (error)', 'hootyserver_status': err.response.status, 'hootyserver_statusText': err.response.statusText, 'status': 200, 'statusText': 'no need to fetch from pubg api' };
+
+            // $ should send back an error response here...
         }
     }
     else {
@@ -526,6 +530,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 }
             });
 
+            match_data = pubgapi_match_response.data;
+
+            pubgApiMatchResponseInfo = { 'hootyserver': 'match fetched', 'status': pubgapi_match_response.status, 'statusText': pubgapi_match_response.statusText };
+
             // create cache file for this match response...
             fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 2), function (err) {
                 //console.log('writing match cache...');
@@ -538,7 +546,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 }
             })
 
-            match_data = pubgapi_match_response.data;
             //console.log('match_data (fetched): ');
             //console.log(match_data);
         }
@@ -548,6 +555,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
             if (error.response.status != 200) {
                 console.log('response: ' + error.response.status + ': ' + error.response.statusText + ' (could not fetch match from pubg api: ' + match_url + ')');
             }
+
+            pubgApiMatchResponseInfo = { 'hootyserver': 'match fetch (error)', 'status': error.response.status, 'statusText': error.response.statusText };
+
+            // $ should send an error response here...
         }
     }
 
@@ -588,13 +599,19 @@ app.get('/getmatchtelemetry', async (req, res) => {
             }
         });
 
-        console.dir(telemetry_response.data);
+        pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry fetched', 'status': telemetry_response.status, 'statusText': telemetry_response.statusText };
+
+        if (blTestingVersion) {
+            console.dir(telemetry_response.data);
+        }
     }
     catch (error) {
         if (error.response.status != 200) {
             console.log('could not fetch telemetry url from pubg api: ' + telemetry_url);
             console.log(error.response.status + ': ' + error.response.statusText);
         }
+
+        pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry fetch (error)', 'status': error.response.status, 'statusText': error.response.statusText };
     }
 
     //
@@ -1226,21 +1243,25 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
-    console.log('arrTeams:', arrTeams);
-    console.log('arrPlayerTeam', arrPlayerTeam);
 
-    //console.log(null_attacker);
-
-    // ! print killfeed log
-    // console.log('KillFeed log...');
-    // for (let j = 0; j < arrKillFeedLog.length; j++) {
-    //     console.log(arrKillFeedLog[j]);
-    // }
 
     // ! print damage log
-    console.log('arrDamageLog...');
-    for (let j = 0; j < arrDamageLog.length; j++){
-        console.log(arrDamageLog[j]);
+    if (!blTestingVersion){
+        console.log('arrTeams:', arrTeams);
+        console.log('arrPlayerTeam', arrPlayerTeam);
+    
+        //console.log(null_attacker);
+    
+        // ! print killfeed log
+        // console.log('KillFeed log...');
+        // for (let j = 0; j < arrKillFeedLog.length; j++) {
+        //     console.log(arrKillFeedLog[j]);
+        // }
+
+        console.log('arrDamageLog...');
+        for (let j = 0; j < arrDamageLog.length; j++){
+            console.log(arrDamageLog[j]);
+        }
     }
 
 
@@ -1249,8 +1270,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
     console.log('done searching telemetry.');
 
 
-    var hooty_response = { playerTeamId, arrPlayersDamageLog };
-    res.send(hooty_response);   // $ send back some pertinent json
+    var hooty_response = { playerTeamId, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
+    res.send(hooty_response);
 
 })
 

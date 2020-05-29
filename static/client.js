@@ -66,21 +66,37 @@ async function GetPlayerMatches() {
 	document.getElementById('fetching').style.display 	= "block";	// turn this on
 	document.getElementById('vueapp').style.display 	= "none";
 
+	var axios_response = null;
 
-	const axios_response = await axios.get(hooty_server_url + '/getplayermatches', {
-		params: {
-			'endpoint'		: 'players', 
-			'platform'		:  strPlatform,
-			'player_name' 	:  strPlayerName,
-			'match_floor'	:  match_floor,
-			'match_id'		: '',
-			'telemetry_id'	: '',
-		}
-	})
+	try {
+		axios_response = await axios.get(hooty_server_url + '/getplayermatches', {
+			params: {
+				'endpoint'		: 'players', 
+				'platform'		:  strPlatform,
+				'player_name' 	:  strPlayerName,
+				'match_floor'	:  match_floor,
+				'match_id'		: '',
+				'telemetry_id'	: '',
+			}
+		})
+	} catch (error) {
+		console.log('ERROR getting player: ' + error.response.status + ',' + error.response.statusText);
+	}
 
-	// $ check for response errors here
 
-	//console.log(getDate() + ' axios_response: ' + JSON.stringify(axios_response.data));
+	// ! check for any errors from the pubg api...
+	if (axios_response.data.pubgResponse.status != 200 && axios_response.data.pubgResponse.status != null) {
+		console.log('ERROR: could not find player in pubg api: ' + axios_response.data.status + ', ' + axios_response.data.statusText);
+
+		alert('could not find player in pubg api');
+		// $ need to reset the form and shit
+		btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
+		document.getElementById('fetching').style.display 	= "none";	// turn this on
+	
+		return;
+	}
+
+	console.log('axios_response...');
 	console.dir(axios_response.data);
 
 	total_matches 	= axios_response.data.totalMatches;
@@ -88,11 +104,7 @@ async function GetPlayerMatches() {
 
 
 
-	// $ it's time to start working on vue table rows 
-
 	vm.getMatchData(axios_response.data.matches);
-
-
 
 
 
@@ -109,14 +121,7 @@ async function GetPlayerMatches() {
 
 
 
-	// ! check for any errors from the pubg api...
-	//   if there was an error here, then there isn't much reason to do anything else other than display it
-	if (axios_response.data.pubg_response_status != undefined) {
-		// if pubg_response_statue is defined, then there was an error retrieving from the pubg api
-		if (axios_response.data.pubg_response_status != 200) {
-			console.log('pubg_response error: ' + axios_response.data.pubg_response_status + ' ' + axios_response.data.pubg_response_statusText);
-		}
-	}
+
 
 
 
@@ -134,24 +139,37 @@ async function GetPlayerMatches() {
 async function GetTelemetry(_matchID) {
 	console.log('GetTelemetry() -> ' + _matchID + ', ' + strPlatform + '/' + strPlayerName);
 
-	// get telemetry for this match for this platform/player
-	const axios_response = await axios.get(hooty_server_url + '/getmatchtelemetry', {
-		params: {
-			'platform'		:  strPlatform,
-			'player_name' 	:  strPlayerName,
-			'matchID'		: _matchID,
-		}
-	})
+	var axios_response = null;
 
-	// $ check for response errors here
-	// $ need wrapped responses
+	try {
+		// get telemetry for this match for this platform/player
 
-	//console.log('telemetry response: ', axios_response);
+		axios_response = await axios.get(hooty_server_url + '/getmatchtelemetry', {
+			params: {
+				'platform'		:  strPlatform,
+				'player_name' 	:  strPlayerName,
+				'matchID'		: _matchID,
+			}
+		})		
+	} 
+	catch (error) 
+	{
+		console.log('error getting telemetry from hootyserver: ' + error.response.status + ',' + error.response.statusText)
+	}	
+
+	console.log('hootyserver response:                     ' + axios_response.status + ', ' + axios_response.statusText);
+	console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_response.data.pubgApiMatchResponseInfo.hootyserver);
+	console.log('pubgApiMatchResponseInfo.status:          ' + axios_response.data.pubgApiMatchResponseInfo.status);
+	console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_response.data.pubgApiMatchResponseInfo.statusText);
+	console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_response.data.pubgApiTelemetryResponseInfo.hootyserver);
+	console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_response.data.pubgApiTelemetryResponseInfo.status);
+	console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_response.data.pubgApiTelemetryResponseInfo.statusText);
+
 
 
 	// $ cycle the response data and output the player's data
 	for (i = 0; i < axios_response.data.arrPlayersDamageLog.length; i++) {
-		var record 		= axios_response.data.arrPlayersDamageLog[i];
+		var record 			= axios_response.data.arrPlayersDamageLog[i];
 		var playerTeamId 	= axios_response.data.playerTeamId;
 
 		// (record.attacker.teamId == playerTeamId || record.victim.teamId == playerTeamId)
