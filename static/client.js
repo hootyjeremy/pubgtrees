@@ -165,6 +165,7 @@ async function GetTelemetry(_matchID) {
 
 		// (record.attacker.teamId == playerTeamId || record.victim.teamId == playerTeamId)
 		if (record.attacker.name == strPlayerName || record.victim.name == strPlayerName) {
+			// this is only concerning the player
 			//console.log(record);
 
 			var line = '';
@@ -199,14 +200,14 @@ async function GetTelemetry(_matchID) {
 			}
 			else if (record._T == 'LogPlayerKill') {
 
-				// $ bug here where knocked by environment and then bleed out, shows killer as self
+				// $ bug here where knocked by environment and then bleed out, shows killer as self. what is server side saying?
 
 				if (record.byPlayer) {
 					// killed by player or bot
 					var _thirst 		= (record.isThirst) 		? ' *thirst*' : '';
-					var _selfKill 		= (record.isSelfKill) 	? ' *self-kill*': '';
-					var _teammateKill 	= (record.isTeammateKill) ? ' *teammate-kill*': '';
-					var _bleedOut 		= (record.isBleedOut) 	? ' *bleed-out*': '';
+					var _selfKill 		= (record.isSelfKill) 		? ' *self-kill*': '';
+					var _teammateKill 	= (record.isTeammateKill) 	? ' *teammate-kill*': '';
+					var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
 	
 					line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' x ' + victimTeamId + ' ' + victimName + '] ' + 
 							strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + _thirst + _selfKill + _teammateKill + _bleedOut;
@@ -222,6 +223,62 @@ async function GetTelemetry(_matchID) {
 			}
 
 			console.log(line);
+		}
+		else if (record.victim.teamId == playerTeamId) {
+				// i want to know when a teammate is knocked or killed
+				// i want to know when a teammate is revived
+				
+				var line = null;
+				var attackerTeamId  = new String(record.attacker.teamId);
+					attackerTeamId 	= attackerTeamId.padStart(3, '0') + '.';
+				var victimTeamId 	= new String(record.victim.teamId);
+					victimTeamId  	= victimTeamId.padStart(3, '0') + '.';
+	
+				var attackerName   	= new String(record.attacker.name).padEnd(16, ' ');
+				var victimName		= new String(record.victim.name).padEnd(16, ' ');
+
+				if (record._T == 'LogPlayerMakeGroggy') {
+					// your teammate was knocked
+
+					if (record.byPlayer) {
+						// knocked by player or bot
+						line = record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' v ' + victimTeamId + ' ' + victimName + '] ' + 
+							   strBot(record.attacker.isBot) + ' v ' + strBot(record.victim.isBot) + ' *knock*';
+					}
+					else {
+						// knocked by environment
+						line = 	record.matchTime + ' [' + record.attacker.name.padEnd(16, ' ') + '     v ' + victimTeamId + ' ' + victimName + '] *env* v ' + strBot(record.victim.isBot);
+					}
+				}
+				else if (record._T == 'LogPlayerKill') {
+					// your teammate was killed
+
+					// $ bug here where knocked by environment and then bleed out, shows killer as self. what is server side saying?
+
+					if (record.byPlayer) {
+						// killed by player or bot
+						var _thirst 		= (record.isThirst) 		? ' *thirst*' : '';
+						var _selfKill 		= (record.isSelfKill) 		? ' *self-kill*': '';
+						var _teammateKill 	= (record.isTeammateKill) 	? ' *teammate-kill*': '';
+						var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
+		
+						line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' x ' + victimTeamId + ' ' + victimName + '] ' + 
+								strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + _thirst + _selfKill + _teammateKill + _bleedOut;
+					}
+					else {
+						// environment kill
+						line = 	record.matchTime + ' [' + attackerName + '     x ' + victimTeamId + ' ' + victimName + '] *env* x ' + strBot(record.victim.isBot) + ' bleedout?';
+					}
+				}
+				else if (record._T == 'LogPlayerRevive') {
+					// your teammate was revived
+
+					line = record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' ^ ' + victimTeamId + ' ' + victimName + '] *revive*';
+				}
+
+				if (line != null){
+					console.log(line);
+				}
 		}
 	}
 
