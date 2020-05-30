@@ -9,9 +9,9 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const _deployVersion 	= false;
+const blTestingVersion 	= true;
 
-if (_deployVersion){
+if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubgtest01.azurewebsites.net/';
 	defaultPlayer 		= '';
 }
@@ -103,9 +103,7 @@ async function GetPlayerMatches() {
 	console.log('match_floor:     ' + match_floor + ' of ' + total_matches);
 
 
-
 	vm.getMatchData(axios_response.data.matches);
-
 
 
 	//console.log('axios_response.data... ');
@@ -117,12 +115,6 @@ async function GetPlayerMatches() {
 	// disable buttons if they need to be disabled...
 	btnPrevious.disabled 	= (match_floor < 10) 						? true : false ;
 	btnNext.disabled 		= (match_floor + 10 > total_matches - 1) 	? true : false ;	// $ verify this is hitting the ceiling properly
-
-
-
-
-
-
 
 
 	// show prev/next buttons
@@ -150,21 +142,20 @@ async function GetTelemetry(_matchID) {
 				'player_name' 	:  strPlayerName,
 				'matchID'		: _matchID,
 			}
-		})		
+		})
 	} 
 	catch (error) 
 	{
 		console.log('error getting telemetry from hootyserver: ' + error.response.status + ',' + error.response.statusText)
 	}	
 
-	console.log('hootyserver response:                     ' + axios_response.status + ', ' + axios_response.statusText);
+	console.log('hootyserver.response:                     ' + axios_response.status + ', ' + axios_response.statusText);
 	console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_response.data.pubgApiMatchResponseInfo.hootyserver);
 	console.log('pubgApiMatchResponseInfo.status:          ' + axios_response.data.pubgApiMatchResponseInfo.status);
 	console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_response.data.pubgApiMatchResponseInfo.statusText);
 	console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_response.data.pubgApiTelemetryResponseInfo.hootyserver);
 	console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_response.data.pubgApiTelemetryResponseInfo.status);
 	console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_response.data.pubgApiTelemetryResponseInfo.statusText);
-
 
 
 	// $ cycle the response data and output the player's data
@@ -178,9 +169,9 @@ async function GetTelemetry(_matchID) {
 
 			var line = '';
 			var attackerTeamId  = new String(record.attacker.teamId);
-     			attackerTeamId 	= '(' + attackerTeamId.padStart(3, '0') + ')';
+     			attackerTeamId 	= attackerTeamId.padStart(3, '0') + '.';
 			var victimTeamId 	= new String(record.victim.teamId);
-				victimTeamId  	= '(' + victimTeamId.padStart(3, '0') + ')';
+				victimTeamId  	= victimTeamId.padStart(3, '0') + '.';
 
 			var attackerName   	= new String(record.attacker.name).padEnd(16, ' ');
 			var victimName		= new String(record.victim.name).padEnd(16, ' ');
@@ -191,7 +182,7 @@ async function GetTelemetry(_matchID) {
 				var selfDamage 		= (record.selfDamage 		== true) ? ' *self-damage*' : '';
 
 				line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + '   ' + victimTeamId + ' ' + victimName + '] ' + 
-						strBot(record.attacker.isBot) + ' * ' + strBot(record.victim.isBot) + ' atckr health: ' + parseInt(record.attacker.health) + ' vs ' + 
+						strBot(record.attacker.isBot) + ' * ' + strBot(record.victim.isBot) + ' ' + parseInt(record.attacker.health) + ' vs ' + 
 						parseInt(record.victim.healthBeforeDamage) + ', dmg: ' + parseInt(record.damage) + ', ' + record.damageTypeCategory + '/' +	record.damageCauserName + '/' + 
 						record.damageReason + ', distance: ' + record.distance + killingStroke + selfDamage + teammateDamage;
 			}

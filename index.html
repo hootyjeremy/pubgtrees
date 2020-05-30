@@ -137,6 +137,7 @@ select {
 			<tr>
 				<th>Age</th>
 				<th>Map</th>
+				<th>Humans</th>
 				<th>Mode</th>
 				<th>Place</th>
 				<th style="padding: 10px;">Dmg</th>
@@ -153,6 +154,7 @@ select {
 			> 					
 				<td style="padding: 10px; text-align:left;">{{match.timeSinceMatch}}</td> 
 				<td style="padding: 10px; text-align:left;">{{match.mapName}}</td>
+				<td style="padding: 10px; text-align:left;">{{match.participantCount}}</td>
 				<td style="padding: 10px; text-align:center;">{{resolveMatchType(match.matchType)}}</td>
 
 				<td style="padding: 10px; text-align:center;">#{{match.winPlace}}</td> 

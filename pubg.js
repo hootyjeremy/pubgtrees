@@ -11,6 +11,13 @@ const hf            = require('./hooty_modules/hf_server'); // helper functions
 //const port          = 8080;
 const port = process.env.PORT || 80;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 
+
+// ---------------------------->
+// ! Deploy/Testing Version...
+const blTestingVersion = true;
+
+
+
 // ! Global variables...
 var   apiKey    = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02ODAwLTAxMzgtZTQ4Ny0wNjc0ZmE5YWVjOGYiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0Ijo'
       apiKey   += 'xNTg3Njk1MTM1LCJwdWIiOiJibHVlaG9sZSIsInRpdGxlIjoicHViZyIsImFwcCI6Im1pbmlzdGVya2F0YW9rIn0.HiuLi97rFSW-ho5zE1XBYmpV9E6M0Nj90qXIY1TWsco';
@@ -20,11 +27,6 @@ const strLine   = "--------------------------------------------";
 // ? what is this app requesting from the pubg api?
 // ? what is this app receiving  from the pubg api?
 // ? what is this app responding to the user with?
-
-
-// ---------------------------->
-// ! Deploy/Testing Version...
-const blTestingVersion = true;
 
 
 // ---------------------------->
@@ -41,6 +43,7 @@ app.use('/', express.static(__dirname));    // so that root/pubg.js and root/ind
 // ------------------------------------------------------------->
 app.listen(port, () => {
     console.log(chalk.blue(strLine));
+    console.log(chalk.blue('test version: ' + blTestingVersion));
     console.log(chalk.blue(getDate() + ' -> hooty-pubg server listening on port ' + port));
 });
 
@@ -206,8 +209,9 @@ app.get('/getplayermatches', async (req, res) => {
     }
     //#endregion ---------------------------------------------------------------------------------------------->
 
-
-    console.log('player_data -> ', player_data);
+    if (blTestingVersion) {
+        console.log('player_data -> ', player_data);
+    }
 
     // ------------------------------------------------------->
     // ! MATCH DATA ->
@@ -352,7 +356,7 @@ app.get('/getplayermatches', async (req, res) => {
                 }
 
                 dctParticipantNames[participantIndex] = { 'participantID': included.id, 'name': included.attributes.stats.name };
-    			participantIndex++;
+                participantIndex++;
             }
             else if (included.type == 'roster') {
    				// since you don't know your participantID until after looping through .included[] once, you can't always find your roster of teammates on the first round.
@@ -445,6 +449,7 @@ app.get('/getplayermatches', async (req, res) => {
             'winPlace':         winPlace,
             'timeSurvived':     timeSurvived,
             'matchID':          match_data.data.id,
+            'participantCount': participantIndex,
          };
 
 
@@ -602,6 +607,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry fetched', 'status': telemetry_response.status, 'statusText': telemetry_response.statusText };
 
         if (blTestingVersion) {
+            //console.dir(telemetry_response);
             console.dir(telemetry_response.data);
         }
     }
@@ -765,8 +771,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
         }
 
         if (record._T == 'LogMatchEnd') {
-            console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ' (get final stats here)');
-            console.log(record);
+
+            if (blTestingVersion) {
+                console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ' (get final stats here)');
+                console.log(record);
+            }
         }
 
         //
@@ -1246,7 +1255,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
     // ! print damage log
-    if (!blTestingVersion){
+    if (blTestingVersion){
         console.log('arrTeams:', arrTeams);
         console.log('arrPlayerTeam', arrPlayerTeam);
     
@@ -1262,11 +1271,12 @@ app.get('/getmatchtelemetry', async (req, res) => {
         for (let j = 0; j < arrDamageLog.length; j++){
             console.log(arrDamageLog[j]);
         }
+
+        //console.dir(arr_T);
+        console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);
     }
 
 
-    //console.dir(arr_T);
-    console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);
     console.log('done searching telemetry.');
 
 
