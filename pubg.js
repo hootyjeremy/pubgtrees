@@ -829,7 +829,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                     playerDamageLog._T              = 'LogPlayerTakeDamage';
                     playerDamageLog.matchTime       = strRecordTimestamp;
-                    playerDamageLog.killingStroke   = (parseInt(record.victim.health - record.damage) == 0) ? true : false;
+                    playerDamageLog.killingStroke   = (record.victim.health - record.damage == 0) ? true : false;
 
                     _attacker.name              = record.attacker.name;
                     _attacker.isBot             = hf.isBot(record.attacker.accountId);

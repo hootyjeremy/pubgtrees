@@ -190,7 +190,7 @@ async function GetTelemetry(_matchID) {
 				if (record.byPlayer) {
 					// knocked by player or bot
 					line = record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' v ' + victimTeamId + ' ' + victimName + '] ' + 
-						   strBot(record.attacker.isBot) + ' v ' + strBot(record.victim.isBot);
+						   strBot(record.attacker.isBot) + ' v ' + strBot(record.victim.isBot) + ' *knock*';
 				}
 				else {
 					// knocked by environment
@@ -218,10 +218,8 @@ async function GetTelemetry(_matchID) {
 			}
 			else if (record._T == 'LogPlayerRevive') {
 				// not literally an "attacker" -> the attacker is the reviver. 
-				line = record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' ^ ' + victimTeamId + ' ' + victimName + ']';
+				line = record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' ^ ' + victimTeamId + ' ' + victimName + '] *revive*';
 			}
-
-
 
 			console.log(line);
 		}
