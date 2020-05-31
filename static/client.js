@@ -173,7 +173,6 @@ async function GetTelemetry(_matchID) {
      			attackerTeamId 	= attackerTeamId.padStart(3, '0') + '.';
 			var victimTeamId 	= new String(record.victim.teamId);
 				victimTeamId  	= victimTeamId.padStart(3, '0') + '.';
-
 			var attackerName   	= new String(record.attacker.name).padEnd(16, ' ');
 			var victimName		= new String(record.victim.name).padEnd(16, ' ');
 
@@ -191,11 +190,13 @@ async function GetTelemetry(_matchID) {
 				if (record.byPlayer) {
 					// knocked by player or bot
 					line = record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' v ' + victimTeamId + ' ' + victimName + '] ' + 
-						   strBot(record.attacker.isBot) + ' v ' + strBot(record.victim.isBot) + ' *knock*';
+						   strBot(record.attacker.isBot) + ' v ' + strBot(record.victim.isBot) + ' ' +  record.damageTypeCategory + '/' +	record.damageCauserName + '/' + 
+						   record.damageReason + ' *knock*';
 				}
 				else {
 					// knocked by environment
-					line = 	record.matchTime + ' [' + record.attacker.name.padEnd(16, ' ') + '     v ' + victimTeamId + ' ' + victimName + '] *env* v ' + strBot(record.victim.isBot);
+					line = 	record.matchTime + ' [' + record.attacker.name.padEnd(16, ' ') + '     v ' + victimTeamId + ' ' + victimName + '] *env* v ' + strBot(record.victim.isBot) +
+							' ' + record.damageTypeCategory + '/' +	record.damageCauserName + '/' + record.damageReason;
 				}
 			}
 			else if (record._T == 'LogPlayerKill') {
@@ -210,11 +211,13 @@ async function GetTelemetry(_matchID) {
 					var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
 	
 					line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' x ' + victimTeamId + ' ' + victimName + '] ' + 
-							strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + _thirst + _selfKill + _teammateKill + _bleedOut;
+							strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + ' ' +  record.damageTypeCategory + '/' +	record.damageCauserName + '/' + 
+							record.damageReason + _thirst + _selfKill + _teammateKill + _bleedOut;
 				}
 				else {
 					// environment kill
-					line = 	record.matchTime + ' [' + attackerName + '     x ' + victimTeamId + ' ' + victimName + '] *env* x ' + strBot(record.victim.isBot) + ' bleedout?';
+					line = 	record.matchTime + ' [' + attackerName + '     x ' + victimTeamId + ' ' + victimName + '] *env* x ' + strBot(record.victim.isBot) + ' ' + 
+							record.damageTypeCategory + '/' +	record.damageCauserName + '/' + record.damageReason + ' bleedout?';
 				}
 			}
 			else if (record._T == 'LogPlayerRevive') {
@@ -231,10 +234,8 @@ async function GetTelemetry(_matchID) {
 				var line = null;
 				var attackerTeamId  = new String(record.attacker.teamId);
 					attackerTeamId 	= attackerTeamId.padStart(3, '0') + '.';
-				var victimTeamId 	= new String(record.victim.teamId);
-				
-					victimTeamId  	= victimTeamId.padStart(3, '0') + '.';
-	
+				var victimTeamId 	= new String(record.victim.teamId);				
+					victimTeamId  	= victimTeamId.padStart(3, '0') + '.';	
 				var attackerName   	= new String(record.attacker.name).padEnd(16, ' ');
 				var victimName		= new String(record.victim.name).padEnd(16, ' ');
 
@@ -244,11 +245,13 @@ async function GetTelemetry(_matchID) {
 					if (record.byPlayer) {
 						// knocked by player or bot
 						line = record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' v ' + victimTeamId + ' ' + victimName + '] ' + 
-							   strBot(record.attacker.isBot) + ' v ' + strBot(record.victim.isBot) + ' *knock*';
+							   strBot(record.attacker.isBot) + ' v ' + strBot(record.victim.isBot) + ' ' + record.damageTypeCategory + '/' +	record.damageCauserName + '/' + 
+							   record.damageReason + ' *knock*';
 					}
 					else {
 						// knocked by environment
-						line = 	record.matchTime + ' [' + record.attacker.name.padEnd(16, ' ') + '     v ' + victimTeamId + ' ' + victimName + '] *env* v ' + strBot(record.victim.isBot);
+						line = 	record.matchTime + ' [' + record.attacker.name.padEnd(16, ' ') + '     v ' + victimTeamId + ' ' + victimName + '] *env* v ' + strBot(record.victim.isBot) + 
+								' ' + record.damageTypeCategory + '/' +	record.damageCauserName + '/' + record.damageReason;
 					}
 				}
 				else if (record._T == 'LogPlayerKill') {
@@ -264,11 +267,13 @@ async function GetTelemetry(_matchID) {
 						var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
 		
 						line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' x ' + victimTeamId + ' ' + victimName + '] ' + 
-								strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + _thirst + _selfKill + _teammateKill + _bleedOut;
+								strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + ' ' + record.damageTypeCategory + '/' +	record.damageCauserName + '/' + 
+								record.damageReason + _thirst + _selfKill + _teammateKill + _bleedOut;
 					}
 					else {
 						// environment kill
-						line = 	record.matchTime + ' [' + attackerName + '     x ' + victimTeamId + ' ' + victimName + '] *env* x ' + strBot(record.victim.isBot) + ' bleedout?';
+						line = 	record.matchTime + ' [' + attackerName + '     x ' + victimTeamId + ' ' + victimName + '] *env* x ' + strBot(record.victim.isBot) + ' ' + 
+								record.damageTypeCategory + '/' +	record.damageCauserName + '/' + record.damageReason + ' bleedout?';
 					}
 				}
 				else if (record._T == 'LogPlayerRevive') {

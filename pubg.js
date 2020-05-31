@@ -672,8 +672,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var killerTeamId    = null;
     var killerName      = null;
 
-    var matchDetails    = []; // $ identify the map, humans/bots, player win place 
-
+    var matchDetails    = []; // $ identify the map, humans/bots, player win place
     var null_attacker = []; // for testing bluezone/redzone/blackzone
 
 
@@ -685,7 +684,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
         var _recordLog = '';
 
         var playerDamageLog = new Object();
-
 
         var i_string = new String(i);
         // _T types...
@@ -800,15 +798,13 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //#endregion pre-match ------------------------------------------------------------------------>
 
 
-        // --------------------------------------------->
-        // show damageCausers and types and stuff here...
+
         if (record._T == 'LogPlayerTakeDamage') {
-            //console.dir(record);
             
             //#region //! [Region] LogPlayerTakeDamage...
             //
 
-
+            //console.dir(record);
             //strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
             
             try {
@@ -894,8 +890,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
         }
 
 
-
-        // player knocks
         if (record._T == 'LogPlayerMakeGroggy') {
 
             //#region // ! [Region] LogPlayerMakeGroggy...
@@ -1009,8 +1003,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
         }
 
 
-        // player rez
         if (record._T == 'LogPlayerRevive') {
+
+            //#region // ! [Region] LogPlayerRevive...
+            //
+
             //console.log(record);
             //strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
 
@@ -1037,14 +1034,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             arrPlayersDamageLog.push(playerDamageLog);
 
+            //
+            //#endregion -----------------------------
+
         }
 
 
-
-        // player kills
         if (record._T == 'LogPlayerKill') {
 
-            // 
             //#region  // ! [Region] 'LogPlayerKill'
             // 
 
@@ -1316,6 +1313,8 @@ function writeCacheFileJSON(filename, data) {
     fs.writeFileSync(filename, JSON.stringify(data, null, 0), function (err) {
         //console.log('writing match cache...');
 
+        // $ need to throw an error back to caller and let them handle it
+
         if (err) {
             console.log('error writing match cache file: ' + match_cache_file);
         }
@@ -1325,14 +1324,21 @@ function writeCacheFileJSON(filename, data) {
     })
 }
 
+function readCacheFileJSON(filename) {
+
+    try {
+        
+    } catch (error) {
+        
+    }
+
+    // return json data
+}
+
 
 // Purge cache files...
 function clearCache() {
 
-    //console.log(chalk.blue(getDate() + ' purging cache files...'));
-
-
-    // Purge ----------------------------------------------------->
     //#region // ! [Region] Purge Cache
     //
 
