@@ -7,6 +7,7 @@ const fs            = require('fs');
 const path          = require('path');
 const glob          = require('glob');
 const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
+const compression   = require('compression');       // http://expressjs.com/en/resources/middleware/compression.html
 const hf            = require('./hooty_modules/hf_server'); // helper functions
 //const port          = 8080;
 const port = process.env.PORT || 80;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
@@ -38,7 +39,9 @@ setInterval(clearCache, 300000);    // check for cache clear every 5 minutes (30
 //app.use(bodyParser.json()); // $ probably don't need this anymore since you're not using POST/body parameters
 
 // alias, literal
+app.use(compression());
 app.use('/', express.static(__dirname));    // so that root/pubg.js and root/index.html can be found
+
 
 // ------------------------------------------------------------->
 app.listen(port, () => {

@@ -77,6 +77,9 @@ async function GetPlayerMatches() {
 				'match_floor'	:  match_floor,
 				'match_id'		: '',
 				'telemetry_id'	: '',
+			},
+			headers: {
+				'Content-Encoding': 'gzip',
 			}
 		})
 	} catch (error) {
@@ -141,6 +144,9 @@ async function GetTelemetry(_matchID) {
 				'platform'		:  strPlatform,
 				'player_name' 	:  strPlayerName,
 				'matchID'		: _matchID,
+			},
+			headers: {
+				'Content-Encoding': 'gzip',
 			}
 		})
 	} 
