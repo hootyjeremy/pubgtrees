@@ -195,14 +195,15 @@ app.get('/getplayermatches', async (req, res) => {
 
         // ----------------------------->
         // ! WRITE CACHE FILE -> write player's cache file...
-        fs.writeFile(player_cache_file, JSON.stringify(pubgapi_player_response.data, null, 2), function (err) {
-            if (err) {
-                console.log('error writing cache file: ' + player_cache_file);
-            }
-            else {
-                //console.log('created player cache file: ' + player_cache_file);
-            }
-        });
+        writeCacheFileJSON(player_cache_file, pubgapi_player_response.data);
+        // fs.writeFile(player_cache_file, JSON.stringify(pubgapi_player_response.data, null, 2), function (err) {
+        //     if (err) {
+        //         console.log('error writing cache file: ' + player_cache_file);
+        //     }
+        //     else {
+        //         //console.log('created player cache file: ' + player_cache_file);
+        //     }
+        // });
 
 
         player_data = pubgapi_player_response.data.data[0];
@@ -281,16 +282,19 @@ app.get('/getplayermatches', async (req, res) => {
             }            
 
             // create cache file for this match response...
-            fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 2), function (err) {
-                //console.log('writing match cache...');
+            //fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 2), function (err) {
+            // fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 0), function (err) {
+            //     //console.log('writing match cache...');
 
-                if (err) {
-                    console.log('error writing match cache file: ' + match_cache_file);
-                }
-                else {
-                    //console.log('created match cache file: ' + match_cache_file);
-                }
-            })
+            //     if (err) {
+            //         console.log('error writing match cache file: ' + match_cache_file);
+            //     }
+            //     else {
+            //         //console.log('created match cache file: ' + match_cache_file);
+            //     }
+            // })
+
+            writeCacheFileJSON(match_cache_file, pubgapi_match_response.data);
 
             match_data = pubgapi_match_response.data;
 
@@ -489,8 +493,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var   playerName        = req.query.player_name;
     const match_url         = 'https://api.pubg.com/shards/' + req.query.platform + '/matches/' + req.query.matchID;
     const match_cache_file  = './cache/matches/' + req.query.matchID + '.json';
+    var   telemetry_cache_file = null;
 
-    var match_data, telemetry_url; 
+
+    var match_data, telemetry_url;
 
 
     // ---------------------------------------------------->
@@ -498,7 +504,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //
 
     // get telemetry url from asset property of match_data. try match cache first. if not there, fetch the match from the pubg api and then cache the match.
-
 
     // check for match cache file first
     if (fs.existsSync(match_cache_file)) {
@@ -510,7 +515,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             //console.log('match_data (cached): ');
             //console.log(match_data);
 
-            pubgApiMatchResponseInfo = { 'hootyserver': 'match cached', 'status': null, 'statusText': 'no need to fetch from pubg api' };
+            pubgApiMatchResponseInfo = { 'hootyserver': 'match (cached)', 'status': null, 'statusText': 'no need to fetch from pubg api' };
         }
         catch (err) 
         {
@@ -537,19 +542,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             match_data = pubgapi_match_response.data;
 
-            pubgApiMatchResponseInfo = { 'hootyserver': 'match fetched', 'status': pubgapi_match_response.status, 'statusText': pubgapi_match_response.statusText };
+            pubgApiMatchResponseInfo = { 'hootyserver': 'match (fetched)', 'status': pubgapi_match_response.status, 'statusText': pubgapi_match_response.statusText };
 
             // create cache file for this match response...
-            fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 2), function (err) {
-                //console.log('writing match cache...');
-
-                if (err) {
-                    console.log('(getmatchtelemetry) error writing match cache file: ' + match_cache_file);
-                }
-                else {
-                    //console.log('(gettelemetry) created match cache file: ' + match_cache_file);
-                }
-            })
+            writeCacheFileJSON(match_cache_file, pubgapi_match_response.data);
 
             //console.log('match_data (fetched): ');
             //console.log(match_data);
@@ -572,7 +568,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
     // get the telemetry url from the asset property of match_data
     for (let i = 0; i < match_data.included.length; i++) {
         if (match_data.included[i].type == 'asset') {
-            telemetry_url = match_data.included[i].attributes.URL;
+            telemetry_url           = match_data.included[i].attributes.URL;
+            telemetry_cache_file    = './cache/telemetry/' + path.parse(telemetry_url).base;
             break;
         }                
     }
@@ -581,43 +578,64 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     // ----------------------------------------------------
     // fetch the actual telemetry here from the pubg api...
-    var telemetry_response; 
+    var telemetry_response = null;
 
-
-
-    // $ when debugging, use cached telemetry file
     // search for cached telemetry. if exists, load it
     // if it doesn't exist, fetch it from pubg api and then cache it...
 
-    if (blCacheTelemetry) {
-        // check for cache
+
+    if (fs.existsSync(telemetry_cache_file)) {
+        // read from the cache file
+
+        try 
+        {
+            telemetry_response = fs.readFileSync(telemetry_cache_file, {encoding: 'utf8'});
+            telemetry_response = JSON.parse(telemetry_response);
+
+            pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry (cached)', 'status': null, 'statusText': 'no need to fetch from pubg api' };
+        }
+        catch (err)
+        {
+            console.log('error reading telemetry cache file: ' + telemetry_cache_file);
+            console.log('-> error: ' + err);
+
+            pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry cache read error', 'hootyserver_status': err.response.status, 'hootyserver_statusText': err.response.statusText,
+                                             'status': 200, 'statusText': 'no need to fetch from pubg api' };
+
+            // $ should send back a repsonse with this error here?
+        }
     }
     else {
+        // if no cache file, fetch it and then cache it
 
-    }
+        try {
+            telemetry_response = await axios.get(telemetry_url, {
+                headers: {
+                    'Accept': 'application/vnd.api+json',
+                    'Accept-Encoding': 'gzip'
+                }
+            });
+        
+            // create cache file for this telemetry response...    
+            writeCacheFileJSON(telemetry_cache_file, telemetry_response.data);
+    
+            telemetry_response = telemetry_response.data;
 
-
-    try {
-        telemetry_response = await axios.get(telemetry_url, {
-            headers: {
-                Accept: 'application/vnd.api+json'
+            pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry (fetched)', 'status': telemetry_response.status, 'statusText': telemetry_response.statusText };
+    
+            if (blTestingVersion) {
+                //console.dir(telemetry_response);
+                console.dir(telemetry_response.data);
             }
-        });
-
-        pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry fetched', 'status': telemetry_response.status, 'statusText': telemetry_response.statusText };
-
-        if (blTestingVersion) {
-            //console.dir(telemetry_response);
-            console.dir(telemetry_response.data);
         }
-    }
-    catch (error) {
-        if (error.response.status != 200) {
-            console.log('could not fetch telemetry url from pubg api: ' + telemetry_url);
-            console.log(error.response.status + ': ' + error.response.statusText);
+        catch (error) {
+            if (error.response.status != 200) {
+                console.log('could not fetch telemetry url from pubg api: ' + telemetry_url);
+                console.log(error.response.status + ': ' + error.response.statusText);
+            }
+    
+            pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry fetch (error)', 'status': error.response.status, 'statusText': error.response.statusText };
         }
-
-        pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry fetch (error)', 'status': error.response.status, 'statusText': error.response.statusText };
     }
 
     //
@@ -660,10 +678,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
     // ! loop through each telemetry event...
-    for (let i = 0; i < telemetry_response.data.length; i++){
+    for (let i = 0; i < telemetry_response.length; i++){
         //console.log('_T: ' + telemetry_response.data[i]._T);
 
-        var record = telemetry_response.data[i];
+        var record = telemetry_response[i];
         var _recordLog = '';
 
         var playerDamageLog = new Object();
@@ -1293,6 +1311,20 @@ app.get('/getmatchtelemetry', async (req, res) => {
 // ! Helper functions
 // ! 
 
+function writeCacheFileJSON(filename, data) {
+
+    fs.writeFileSync(filename, JSON.stringify(data, null, 0), function (err) {
+        //console.log('writing match cache...');
+
+        if (err) {
+            console.log('error writing match cache file: ' + match_cache_file);
+        }
+        else {
+            //console.log('created match cache file: ' + match_cache_file);
+        }
+    })
+}
+
 
 // Purge cache files...
 function clearCache() {
@@ -1306,6 +1338,7 @@ function clearCache() {
 
     const playersCacheGlobPattern   = './cache/players/**/*.*';
     const matchesCacheGlobPattern   = './cache/matches/**/*.*';
+    const telemetryCacheGlobPattern = './cache/telemetry/**/*.*'
 
     var purge_count = 0;
 
@@ -1378,7 +1411,46 @@ function clearCache() {
             })
         }
     })
-    //#endregion
+
+
+    // check matches cache for files to purge...
+    glob(telemetryCacheGlobPattern, function (err, files) {
+        if (err){
+            console.log(chalk.yellow(getDate() +  " purge glob error: " + err));
+        } else {
+            //console.log(files);
+
+            files.forEach(file => {
+                const stat = fs.statSync(file);
+
+                //console.log('curr time: ' + Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
+                //curr time: 1589928871171 
+                //birthtime: 1589928825360.3643
+
+                // purge match cache files older than 3 days...
+                // 24 * 60 * 60     =  86,400 seconds per day
+                // 86,400 * 3       = 259,200 seconds per 3 days
+                // 259,200 * 1,000  = 259,200,000 milliseconds per 3 days
+                // 86,400,000 = 24 hours?
+                if (Date.now() - stat.birthtimeMs > 86400000) {  // testing 24 hours
+
+                    // 600,000 = 10 minutes
+                    fs.unlinkSync(file, (err) =>{
+                        if (err) {
+                            console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
+                        } else {
+                            console.log(chalk.green(getDate() + ' purged match file -> ' + file));
+                            purge_count++;
+                        }
+                    })
+                }
+            })
+        }
+    })
+    
+
+    //
+    //#endregion ----------------------------------------------------------------------
 
 
     if (purge_count > 0) {

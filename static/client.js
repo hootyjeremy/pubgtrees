@@ -232,6 +232,7 @@ async function GetTelemetry(_matchID) {
 				var attackerTeamId  = new String(record.attacker.teamId);
 					attackerTeamId 	= attackerTeamId.padStart(3, '0') + '.';
 				var victimTeamId 	= new String(record.victim.teamId);
+				
 					victimTeamId  	= victimTeamId.padStart(3, '0') + '.';
 	
 				var attackerName   	= new String(record.attacker.name).padEnd(16, ' ');
