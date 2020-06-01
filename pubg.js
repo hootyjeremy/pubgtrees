@@ -14,7 +14,7 @@ const hf            = require('./hooty_modules/hf_server'); // helper functions
 
 const port = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 
-const gzip = require('node-gzip');
+const zlib = require('zlib');
 
 
 // ---------------------------->
@@ -111,7 +111,7 @@ app.get('/getplayermatches', async (req, res) => {
     //#region // ! [Region] fetch player_data
     //
 
-    const player_cache_file     = './cache/players/' + req.query.platform + '/'     + req.query.player_name + '.json';
+    const player_cache_file     = './cache/players/' + req.query.platform + '/' + req.query.player_name + '.json.gzip';
     //const player_cache_file_404 = './cache/players/' + req.query.platform + '/404/' + req.query.player_name + '.txt';
 
 
@@ -225,7 +225,7 @@ app.get('/getplayermatches', async (req, res) => {
         // $ need to recalculate match_celing when skipping unwanted gameMode types
         //console.log(i + '. ' + getDate() + ' -> match_url: ' + match_url + player_data.relationships.matches.data[i].id);
 
-        var match_cache_file = './cache/matches/' + player_data.relationships.matches.data[i].id + '.json';
+        var match_cache_file = './cache/matches/' + player_data.relationships.matches.data[i].id + '.json.gzip';
         var pubgapi_match_response;
         var match_data;
         var _cached;
@@ -484,7 +484,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     var   playerName        = req.query.player_name;
     const match_url         = 'https://api.pubg.com/shards/' + req.query.platform + '/matches/' + req.query.matchID;
-    const match_cache_file  = './cache/matches/' + req.query.matchID + '.json';
+    const match_cache_file  = './cache/matches/' + req.query.matchID + '.json.gzip';
     var   telemetry_cache_file = null;
 
 
@@ -560,7 +560,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     for (let i = 0; i < match_data.included.length; i++) {
         if (match_data.included[i].type == 'asset') {
             telemetry_url           = match_data.included[i].attributes.URL;
-            telemetry_cache_file    = './cache/telemetry/' + path.parse(telemetry_url).base;
+            telemetry_cache_file    = './cache/telemetry/' + path.parse(telemetry_url).base + '.gzip';
             break;
         }                
     }
@@ -1302,32 +1302,31 @@ function writeCacheFileJSON(filename, data) {
 
     try {
 
-        gzip.gzip(JSON.stringify(data))
-        .then(buffer=>{
-          fs.writeFileSync(filename + '.gzip',buffer,'utf8',function(err){
-            if(err) return console.log(err)
-          })
-        })
+        // https://www.geeksforgeeks.org/node-js-zlib-gzip-method/
+        zlib.gzip(JSON.stringify(data), (err, buffer) => {
+            if (err) {
+                console.log('writeCacheFileJSON() zlib.gip error compressing' + err.message);
+            }
 
-
-
+            fs.writeFileSync(filename, buffer, function (err) {
+                if (err) {
+                    console.log('writeCacheFileJSON() fs.writeFileSync error compressing' + err.message);
+                }
+   
+            })
+        });
 
         
         // ---------------------------------------------------------------------->
-        fs.writeFileSync(filename, JSON.stringify(data, null, 0), function (err) {
-            //console.log('writing match cache...');
-    
-            // $ need to write a compressed version of this file from 'data'
-            
-            if (err) {
-                console.log('error writing match cache file: ' + filename);
-                throw 'writeCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
-            }
-            else {
-                //console.log('created match cache file: ' + match_cache_file);
-            }
-        })
-            
+        // fs.writeFileSync(filename, JSON.stringify(data, null, 0), function (err) {
+        //     if (err) {
+        //         console.log('error writing match cache file: ' + filename);
+        //         throw 'writeCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
+        //     }
+        //     else {
+        //         //console.log('created match cache file: ' + match_cache_file);
+        //     }
+        // })
     } 
     catch (error) {
         console.log('error writing match cache file: ' + filename);
@@ -1341,17 +1340,35 @@ function readCacheFileJSON(filename) {
 
     try {
 
-        var unzipped;
+        // https://www.geeksforgeeks.org/node-js-zlib-creategunzip-method/
 
-        gzip.ungzip(filename + '.gzip')
-        .then(buffer => {
-        })
+        var zipData = fs.readFileSync(filename);
 
 
-        var data = fs.readFileSync(filename, {encoding: 'utf8'});
-        return JSON.parse(data);
+        var unzipped = zlib.gunzipSync(zipData, function(err, data) {
+            if (err) {
+                console.log('readCacheFileJSON() error at zlib.gunzipSync()');
+            }
+
+            var stuff = JSON.parse(data);
+
+            console.dir(stuff);
+
+            return stuff;
+        });
+
+        //console.log(unzipped.toString('utf8'));
+
+        return JSON.parse(unzipped.toString('utf8'));
+
+
+
+        // ----------------------------------------------------->
+        //var data = fs.readFileSync(filename, {encoding: 'utf8'});
+        //return JSON.parse(data);
             
-    } catch (error) {
+    } 
+    catch (error) {
         
         // throw this back to the caller and let it's try/catch block handle it...
         throw 'readPlayerCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
