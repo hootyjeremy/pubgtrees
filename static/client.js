@@ -4,7 +4,7 @@
 
 let strLine = "--------------------------------------------";
 
-let hooty_server_url 	= 'http://localhost:80';
+let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->

@@ -2,15 +2,17 @@ const express       = require('express');
 const bodyParser    = require('body-parser');
 const axios         = require('axios');
 const moment        = require('moment-timezone');   //require('moment');
+
 const app           = express();
 const fs            = require('fs');
 const path          = require('path');
 const glob          = require('glob');
 const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
 const compression   = require('compression');       // http://expressjs.com/en/resources/middleware/compression.html
+
 const hf            = require('./hooty_modules/hf_server'); // helper functions
-//const port          = 8080;
-const port = process.env.PORT || 80;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
+
+const port = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 
 
 // ---------------------------->
@@ -24,19 +26,11 @@ var   apiKey    = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02
       apiKey   += 'xNTg3Njk1MTM1LCJwdWIiOiJibHVlaG9sZSIsInRpdGxlIjoicHViZyIsImFwcCI6Im1pbmlzdGVya2F0YW9rIn0.HiuLi97rFSW-ho5zE1XBYmpV9E6M0Nj90qXIY1TWsco';
 const strLine   = "--------------------------------------------";
 
-// ? what is this app receiving from the user?
-// ? what is this app requesting from the pubg api?
-// ? what is this app receiving  from the pubg api?
-// ? what is this app responding to the user with?
-
 
 // ---------------------------->
 // ! Cache Purging...
-const blCacheTelemetry = true;      // true, when debugging
 setInterval(clearCache, 300000);    // check for cache clear every 5 minutes (300,000 milliseconds)
 
-
-//app.use(bodyParser.json()); // $ probably don't need this anymore since you're not using POST/body parameters
 
 // alias, literal
 app.use(compression());
@@ -49,7 +43,6 @@ app.listen(port, () => {
     console.log(chalk.blue('test version: ' + blTestingVersion));
     console.log(chalk.blue(getDate() + ' -> hooty-pubg server listening on port ' + port));
 });
-
 
 
 // ------------------------------------------------------------->
@@ -85,12 +78,10 @@ app.get('/getplayermatches', async (req, res) => {
     // player url: https://api.pubg.com/shards/steam/players?filter[playerNames]=hooty__
     // match  url: https://api.pubg.com/shards/steam/matches/066befe1-6320-44c6-8a66-2a9578ad87ba
 
-    var base_url    = "https://api.pubg.com/shards/";
-    var player_url  = '';
-    var match_url   = '';
-
-    var player_data;            // player_data is the data portion of the full pubgapi_player_response (whether from api or cache)
-    var blPlayerCacheExists;
+    var base_url    = "https://api.pubg.com/shards/",
+        player_url  = '',
+        match_url   = '',
+        player_data = null;     // player_data is the data portion of the full pubgapi_player_response (whether from api or cache)
 
     base_url   += req.query.platform + '/';
     player_url  = base_url + req.query.endpoint + '?filter[playerNames]=' + req.query.player_name;
@@ -124,40 +115,32 @@ app.get('/getplayermatches', async (req, res) => {
 
     // -------------------------------------------------------------->
     // ! READ CACHE FILE -> if you can get the player cache from the file, then get it...
-    try {
 
-        //console.log('retrieving from cache file: ' + player_cache_file);
+    if (fs.existsSync(player_cache_file)) {
 
-        player_data = fs.readFileSync(player_cache_file, {encoding: 'utf8'});
+        try {
 
-        //console.log(pubgapi_player_response);
+            //console.log('retrieving from cache file: ' + player_cache_file);
+    
+            player_data = readCacheFileJSON(player_cache_file);
 
-        player_data = JSON.parse(player_data);
-        player_data = player_data.data[0];   // only get "data" portion from cache file
-
-        blPlayerCacheExists = true;
-
-        console.log('blPlayerCacheExists: ' + blPlayerCacheExists);
-
-        pubgApiResponseInfo = { 'hootyserver': 'cached', 'status': null, 'statusText': 'no need to fetch from pubg api' };
-    }
-    catch (err) {
-        blPlayerCacheExists = false;
-
-        console.log('no player cache file: ' + player_cache_file);
-
-        if (err.code != "ENOENT") {
-            console.log('player cache file read error: ' + err.code);
+            console.log('player cache exists... ');
+    
+            pubgApiResponseInfo = { 'hootyserver': 'cached', 'status': null, 'statusText': 'no need to fetch from pubg api' };
+        }
+        catch (err) {
+    
+            console.log('no player cache file: ' + player_cache_file);
+    
+            if (err.code != "ENOENT") {
+                console.log('player cache file read error: ' + err.code);
+            }
         }
     }
-
-
-
-    // ---------------------------------------------------------------------------------------->
-    // ! FETCH PUBG API -> if the cache file doesn't exist, then fetch from the pubg api and create the cache file
-    if (!blPlayerCacheExists) { 
-
+    else {
         //console.log('no cache file. fetching from pubg api -> ' + player_url);
+
+        console.log('player cache does not exist... ');
 
         var pubgapi_player_response;
 
@@ -198,7 +181,7 @@ app.get('/getplayermatches', async (req, res) => {
 
         // ----------------------------->
         // ! WRITE CACHE FILE -> write player's cache file...
-        writeCacheFileJSON(player_cache_file, pubgapi_player_response.data);
+        writeCacheFileJSON(player_cache_file, pubgapi_player_response.data.data[0]);
         // fs.writeFile(player_cache_file, JSON.stringify(pubgapi_player_response.data, null, 2), function (err) {
         //     if (err) {
         //         console.log('error writing cache file: ' + player_cache_file);
@@ -210,8 +193,12 @@ app.get('/getplayermatches', async (req, res) => {
 
 
         player_data = pubgapi_player_response.data.data[0];
+
     }
+
+    //
     //#endregion ---------------------------------------------------------------------------------------------->
+
 
     if (blTestingVersion) {
         console.log('player_data -> ', player_data);
@@ -242,7 +229,7 @@ app.get('/getplayermatches', async (req, res) => {
         var _cached;
 
 
-        // -------------------------------------------------->
+        // ------------------------------------------------------->
         // #region // ! [Region] fetch match_data from cache or api
         //
 
@@ -251,8 +238,7 @@ app.get('/getplayermatches', async (req, res) => {
 
             try 
             {
-                match_data = fs.readFileSync(match_cache_file, {encoding: 'utf8'});
-                match_data = JSON.parse(match_data);
+                match_data = readCacheFileJSON(match_cache_file);
     
                 //console.log(i +  '. ' + getDate() + ' (cached) ' , match_data);
                 _cached = ('cached');
@@ -273,12 +259,20 @@ app.get('/getplayermatches', async (req, res) => {
                         Accept: 'application/vnd.api+json'
                     }
                 });
+
+                writeCacheFileJSON(match_cache_file, pubgapi_match_response.data);
+
+                match_data = pubgapi_match_response.data;
+    
+                //console.log(i +  '. ' + getDate() + ' (fetched) ' , match_data);
+                _cached = '(fetched)';
             }
             catch (error) 
             {
                 // handle fetch errors...
                 if (error.response.status != 200) {
-                    console.log('could not fetch match from pubg api: ' + match_url + player_data.relationships.matches.data[i].id)
+                    console.log('-could not fetch match from pubg api: ' + match_url + player_data.relationships.matches.data[i].id)
+                    console.log('-error: ' + error.response.status + ', ' + error.response.statusText);
                 }
 
                 continue; // ? get next match if this one fails? does any data need to be sent back to the client? probably not.
@@ -288,7 +282,6 @@ app.get('/getplayermatches', async (req, res) => {
             //fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 2), function (err) {
             // fs.writeFileSync(match_cache_file, JSON.stringify(pubgapi_match_response.data, null, 0), function (err) {
             //     //console.log('writing match cache...');
-
             //     if (err) {
             //         console.log('error writing match cache file: ' + match_cache_file);
             //     }
@@ -297,12 +290,6 @@ app.get('/getplayermatches', async (req, res) => {
             //     }
             // })
 
-            writeCacheFileJSON(match_cache_file, pubgapi_match_response.data);
-
-            match_data = pubgapi_match_response.data;
-
-            //console.log(i +  '. ' + getDate() + ' (fetched) ' , match_data);
-            _cached = '(fetched)';
         }
         //
         //#endregion fetch
@@ -512,8 +499,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     if (fs.existsSync(match_cache_file)) {
         try 
         {
-            match_data = fs.readFileSync(match_cache_file, {encoding: 'utf8'});
-            match_data = JSON.parse(match_data);
+            match_data = readCacheFileJSON(match_cache_file);
 
             //console.log('match_data (cached): ');
             //console.log(match_data);
@@ -592,8 +578,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
         try 
         {
-            telemetry_response = fs.readFileSync(telemetry_cache_file, {encoding: 'utf8'});
-            telemetry_response = JSON.parse(telemetry_response);
+            telemetry_response = readCacheFileJSON(telemetry_cache_file);
 
             pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry (cached)', 'status': null, 'statusText': 'no need to fetch from pubg api' };
         }
@@ -1313,29 +1298,42 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 function writeCacheFileJSON(filename, data) {
 
-    fs.writeFileSync(filename, JSON.stringify(data, null, 0), function (err) {
-        //console.log('writing match cache...');
+    try {
 
-        // $ need to throw an error back to caller and let them handle it
+        fs.writeFileSync(filename, JSON.stringify(data, null, 0), function (err) {
+            //console.log('writing match cache...');
+    
+            // $ need to throw an error back to caller and let them handle it
+    
+            if (err) {
+                console.log('error writing match cache file: ' + filename);
+                throw 'writeCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
+            }
+            else {
+                //console.log('created match cache file: ' + match_cache_file);
+            }
+        })
+            
+    } 
+    catch (error) {
+        console.log('error writing match cache file: ' + filename);
+        throw 'writeCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
+    }
 
-        if (err) {
-            console.log('error writing match cache file: ' + match_cache_file);
-        }
-        else {
-            //console.log('created match cache file: ' + match_cache_file);
-        }
-    })
 }
 
 function readCacheFileJSON(filename) {
 
     try {
-        
+        var data = fs.readFileSync(filename, {encoding: 'utf8'});
+
+        return JSON.parse(data);
+            
     } catch (error) {
         
+        // throw this back to the caller and let it's try/catch block handle it...
+        throw 'readPlayerCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
     }
-
-    // return json data
 }
 
 
