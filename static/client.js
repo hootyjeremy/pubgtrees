@@ -106,6 +106,21 @@ async function GetPlayerMatches() {
 	console.log('match_floor:     ' + match_floor + ' of ' + total_matches);
 
 
+	// don't show 0's on the board. show '-' instead so it's more clear...
+	for (i = 0; i < axios_response.data.matches.length; i++) {
+		if (axios_response.data.matches[i].DBNOs == 0) {
+			axios_response.data.matches[i].DBNOs = '-';
+		}
+
+		if (axios_response.data.matches[i].kills == 0) {
+			axios_response.data.matches[i].kills = '-';
+		}
+
+		if (axios_response.data.matches[i].damageDealt == 0) {
+			axios_response.data.matches[i].damageDealt = '-';
+		}
+	}
+
 	vm.getMatchData(axios_response.data.matches);
 
 
