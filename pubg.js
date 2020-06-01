@@ -1,5 +1,5 @@
 const express       = require('express');
-const bodyParser    = require('body-parser');
+//const bodyParser    = require('body-parser');
 const axios         = require('axios');
 const moment        = require('moment-timezone');   //require('moment');
 
@@ -13,6 +13,8 @@ const compression   = require('compression');       // http://expressjs.com/en/r
 const hf            = require('./hooty_modules/hf_server'); // helper functions
 
 const port = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
+
+const gzip = require('node-gzip');
 
 
 // ---------------------------->
@@ -1300,11 +1302,23 @@ function writeCacheFileJSON(filename, data) {
 
     try {
 
+        gzip.gzip(JSON.stringify(data))
+        .then(buffer=>{
+          fs.writeFileSync(filename + '.gzip',buffer,'utf8',function(err){
+            if(err) return console.log(err)
+          })
+        })
+
+
+
+
+        
+        // ---------------------------------------------------------------------->
         fs.writeFileSync(filename, JSON.stringify(data, null, 0), function (err) {
             //console.log('writing match cache...');
     
-            // $ need to throw an error back to caller and let them handle it
-    
+            // $ need to write a compressed version of this file from 'data'
+            
             if (err) {
                 console.log('error writing match cache file: ' + filename);
                 throw 'writeCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
@@ -1317,24 +1331,34 @@ function writeCacheFileJSON(filename, data) {
     } 
     catch (error) {
         console.log('error writing match cache file: ' + filename);
-        throw 'writeCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
+        throw 'writeCacheFileJSON() error for file ' + filename + ' -> ' + error.code + ', ' + error.message;
+        // $ verify this throw actually works back at the caller
     }
-
 }
+
 
 function readCacheFileJSON(filename) {
 
     try {
-        var data = fs.readFileSync(filename, {encoding: 'utf8'});
 
+        var unzipped;
+
+        gzip.ungzip(filename + '.gzip')
+        .then(buffer => {
+        })
+
+
+        var data = fs.readFileSync(filename, {encoding: 'utf8'});
         return JSON.parse(data);
             
     } catch (error) {
         
         // throw this back to the caller and let it's try/catch block handle it...
         throw 'readPlayerCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
+        // $ verify this throw actually works back at the caller
     }
 }
+
 
 
 // Purge cache files...
