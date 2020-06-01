@@ -492,7 +492,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
     // ---------------------------------------------------->
-    //#region // ! [Region] Fetch Telemetry
+    //#region // ! [Region] Fetch telemetry from match data
     //
 
     // get telemetry url from asset property of match_data. try match cache first. if not there, fetch the match from the pubg api and then cache the match.
@@ -583,6 +583,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
             telemetry_response = readCacheFileJSON(telemetry_cache_file);
 
             pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry (cached)', 'status': null, 'statusText': 'no need to fetch from pubg api' };
+
+            if (blTestingVersion) {
+                //console.dir(telemetry_response);
+                console.dir(telemetry_response);
+            }
         }
         catch (err)
         {
@@ -599,7 +604,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // if no cache file, fetch it and then cache it
 
         try {
-            telemetry_response = await axios.get(telemetry_url, {
+            var telemetry_response_full = await axios.get(telemetry_url, {
                 headers: {
                     'Accept': 'application/vnd.api+json',
                     'Accept-Encoding': 'gzip'
@@ -607,12 +612,12 @@ app.get('/getmatchtelemetry', async (req, res) => {
             });
         
             // create cache file for this telemetry response...    
-            writeCacheFileJSON(telemetry_cache_file, telemetry_response.data);
-    
-            telemetry_response = telemetry_response.data;
+            writeCacheFileJSON(telemetry_cache_file, telemetry_response_full.data);
 
-            pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry (fetched)', 'status': telemetry_response.status, 'statusText': telemetry_response.statusText };
+            pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry (fetched)', 'status': telemetry_response_full.status, 'statusText': telemetry_response_full.statusText };
     
+            telemetry_response = telemetry_response_full.data;
+
             if (blTestingVersion) {
                 //console.dir(telemetry_response);
                 console.dir(telemetry_response.data);
@@ -1302,6 +1307,7 @@ function writeCacheFileJSON(filename, data) {
 
     try {
 
+        // compress data before writing it...
         // https://www.geeksforgeeks.org/node-js-zlib-gzip-method/
         zlib.gzip(JSON.stringify(data), (err, buffer) => {
             if (err) {
@@ -1331,6 +1337,7 @@ function writeCacheFileJSON(filename, data) {
     catch (error) {
         console.log('error writing match cache file: ' + filename);
         throw 'writeCacheFileJSON() error for file ' + filename + ' -> ' + error.code + ', ' + error.message;
+
         // $ verify this throw actually works back at the caller
     }
 }
@@ -1340,38 +1347,23 @@ function readCacheFileJSON(filename) {
 
     try {
 
-        // https://www.geeksforgeeks.org/node-js-zlib-creategunzip-method/
+        // i don't know how i got this working but it seems to work...
 
-        var zipData = fs.readFileSync(filename);
-
-
-        var unzipped = zlib.gunzipSync(zipData, function(err, data) {
-            if (err) {
-                console.log('readCacheFileJSON() error at zlib.gunzipSync()');
-            }
-
-            var stuff = JSON.parse(data);
-
-            console.dir(stuff);
-
-            return stuff;
-        });
-
-        //console.log(unzipped.toString('utf8'));
+        // decompress data before sending it back...
+        var zipData     = fs.readFileSync(filename);
+        var unzipped    = zlib.gunzipSync(zipData);
 
         return JSON.parse(unzipped.toString('utf8'));
 
-
-
         // ----------------------------------------------------->
         //var data = fs.readFileSync(filename, {encoding: 'utf8'});
-        //return JSON.parse(data);
-            
+        //return JSON.parse(data);            
     } 
     catch (error) {
         
         // throw this back to the caller and let it's try/catch block handle it...
         throw 'readPlayerCacheFileJSON() error for file ' + filename + ' -> ' + error.response.status + ', ' + error.response.statusText;
+
         // $ verify this throw actually works back at the caller
     }
 }
