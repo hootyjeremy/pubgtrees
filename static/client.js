@@ -99,8 +99,8 @@ async function GetPlayerMatches() {
 		return;
 	}
 
-	console.log('axios_response...');
-	console.dir(axios_response.data);
+	//console.log('axios_response...');
+	//console.dir(axios_response.data);
 
 	total_matches 	= axios_response.data.totalMatches;
 	console.log('match_floor:     ' + match_floor + ' of ' + total_matches);
@@ -108,17 +108,9 @@ async function GetPlayerMatches() {
 
 	// don't show 0's on the board. show '-' instead so it's more clear...
 	for (i = 0; i < axios_response.data.matches.length; i++) {
-		if (axios_response.data.matches[i].DBNOs == 0) {
-			axios_response.data.matches[i].DBNOs = '-';
-		}
-
-		if (axios_response.data.matches[i].kills == 0) {
-			axios_response.data.matches[i].kills = '-';
-		}
-
-		if (axios_response.data.matches[i].damageDealt == 0) {
-			axios_response.data.matches[i].damageDealt = '-';
-		}
+		if (axios_response.data.matches[i].DBNOs 		== 0) { axios_response.data.matches[i].DBNOs 		= '-'; }
+		if (axios_response.data.matches[i].kills 		== 0) { axios_response.data.matches[i].kills 		= '-'; }
+		if (axios_response.data.matches[i].damageDealt 	== 0) { axios_response.data.matches[i].damageDealt 	= '-'; }
 	}
 
 	vm.getMatchData(axios_response.data.matches);
@@ -255,8 +247,8 @@ async function GetTelemetry(_matchID) {
 				var line = null;
 				var attackerTeamId  = new String(record.attacker.teamId);
 					attackerTeamId 	= attackerTeamId.padStart(3, '0') + '.';
-				var victimTeamId 	= new String(record.victim.teamId);				
-					victimTeamId  	= victimTeamId.padStart(3, '0') + '.';	
+				var victimTeamId 	= new String(record.victim.teamId);			
+					victimTeamId  	= victimTeamId.padStart(3, '0') + '.';
 				var attackerName   	= new String(record.attacker.name).padEnd(16, ' ');
 				var victimName		= new String(record.victim.name).padEnd(16, ' ');
 

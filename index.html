@@ -116,10 +116,6 @@ select {
 	});	
 
 
-	// window.addEventListener('load', (event) => {
-  	// 	console.log('page is fully loaded');
-	// });
-
 	window.addEventListener('load', (event) => {
 		//console.log('page is fully loaded');
 		document.getElementById('inputPlayerName').value = defaultPlayer;
@@ -140,9 +136,9 @@ select {
 				<th>Humans</th>
 				<th>Mode</th>
 				<th>Place</th>
-				<th style="padding: 10px;">Dmg</th>
-				<th style="padding: 10px;">Kills</th>
-				<th style="padding: 10px;">Knocks</th>
+				<th style="padding: 4px;">Dmg</th>
+				<th style="padding: 4px;">Kills</th>
+				<th style="padding: 4px;">Knocks</th>
 				<th>Mode</th>
 				<th>Teammates</th>
 				<th>Inspect</th>
@@ -152,20 +148,19 @@ select {
 			<tr style="border:1px; border-color:#303030; outline: thin solid"
 			  	v-for='match in match_data' :match_prop='match' :key='match.matchID'
 			> 					
-				<td style="padding: 10px; text-align:left;">{{match.timeSinceMatch}}</td> 
-				<td style="padding: 10px; text-align:left;">{{match.mapName}}</td>
-				<td style="padding: 10px; text-align:left;">{{match.participantCount}}</td>
-				<td style="padding: 10px; text-align:center;">{{resolveMatchType(match.matchType)}}</td>
+				<td style="padding: 4px; text-align:left;">{{match.timeSinceMatch}}</td> 
+				<td style="padding: 4px; text-align:left;">{{match.mapName}}</td>
+				<td style="padding: 4px; text-align:center;">{{match.participantCount}}</td>
+				<td style="padding: 4px; text-align:center;">{{resolveMatchType(match.matchType)}}</td>
 
-				<td style="padding: 10px; text-align:center;">#{{match.winPlace}}</td> 
-				<td style="padding: 10px; text-align:center;">{{match.damageDealt}}</td> 
-				<td style="padding: 10px; text-align:center;">{{match.kills}}</td> 
-				<td style="padding: 10px; text-align:center;">{{resolveKnocks(match.gameMode, match.DBNOs)}}</td> 
+				<td style="padding: 4px; text-align:center;">#{{match.winPlace}}</td> 
+				<td style="padding: 4px; text-align:center;">{{match.damageDealt}}</td> 
+				<td style="padding: 4px; text-align:center;">{{match.kills}}</td> 
+				<td style="padding: 4px; text-align:center;">{{resolveKnocks(match.gameMode, match.DBNOs)}}</td> 
 
-
-				<td style="padding: 10px; text-align:left;">{{match.gameMode}}</td> 
-				<td style="padding: 10px; text-align:left;">{{printRoster(match.teamRoster, match.strPlayerName)}}</td>
-				<td style="padding: 10px; text-align:left;"> <button v-on:click="analyzeMatch(match.matchID)">View</button> </td>
+				<td style="padding: 4px; text-align:left;">{{match.gameMode}}</td> 
+				<td style="padding: 4px; text-align:left;">{{printRoster(match.teamRoster, match.strPlayerName)}}</td>
+				<td style="padding: 4px; text-align:left;"> <button v-on:click="analyzeMatch(match.matchID)">View</button> </td>
 			</tr>
 		</tbody>
 	</table>

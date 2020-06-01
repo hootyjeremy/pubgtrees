@@ -1526,7 +1526,7 @@ function getTimeSinceMatch(strDate) {
 
 
     if (diffMinutes < 60) {
-        return diffMinutes + ' minutes ago';
+        return diffMinutes + ' min. ago';
     }
     else if (diffHours < 24) {
         return diffHours + ' hours ago';
@@ -1534,7 +1534,6 @@ function getTimeSinceMatch(strDate) {
     else {
         return diffDays + ' days ago';
     }
-
 }
 
 
