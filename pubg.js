@@ -657,18 +657,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
     
     var arrTeams        = [];   // [teamId, [players]]
     var arrPlayerTeam   = [];   // [name, teamId]   // for reverse lookups
-    var arrKnocks       = [];   // [{ knocked_player, whodunit}]
-    var arrDeaths       = [];   // [ { killer, [{victims}] } ]
+    var arrKnocks       = [];   // [{ knocked_player, whodunit}] -> this is here to keep up with who is currently knocked in-game so you know if a player was thirsted
 
     // data for client response...
-    var clientPlayerCards   = [];               // [name, { activity }]  the damage to and from a player, and kills/death.
+    var clientPlayerCards   = [];   // [name, { activity }]  the damage to and from a player, and kills/death.
     var arrPlayersDamageLog = [];   // [player_name, {playerDamageLog}]  -- this will be every player's damage/tagged log
     var playerTeamId    = null;
-    var killerTeamId    = null;
-    var killerName      = null;
 
-    var matchDetails    = []; // $ identify the map, humans/bots, player win place
-    var null_attacker = []; // for testing bluezone/redzone/blackzone
+    var arrKills    = [];           // [ { killer, [{victims}] } ]
+    var arrKillTree = new Object();
+
+    var matchDetails    = [];   // $ identify the map, humans/bots, player win place, region
+    //var null_attacker   = [];   // for testing bluezone/redzone/blackzone
 
 
     // ! loop through each telemetry event...
@@ -679,6 +679,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
         var _recordLog = '';
 
         var playerDamageLog = new Object();
+
+        arrKillTree.killer  = {};
+        arrKillTree.victims = [];
+
+        var killer          = new Object();
+            killer.victims  = [];
+        var blKillerExists  = false;
+
 
         var i_string = new String(i);
         // _T types...
@@ -1065,6 +1073,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 if (record.killer == null) {
                     var killer_player_type = '*env*';
 
+                    // $ need to know if environment "thirsted" the player?
+
                     // console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + 
                     //             ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type);
 
@@ -1075,7 +1085,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     arrDamageLog.push(_recordLog);
 
 
-                    // client stuff (environment kill) ----------------------------->
+                    // client stuff, damage log, (environment kill) ----------------------------->
                     var _attacker   = new Object();
                     var _victim     = new Object();
                     playerDamageLog._T          = 'LogPlayerKill';
@@ -1096,6 +1106,33 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     playerDamageLog.damageReason        = record.damageReason;
 
                     arrPlayersDamageLog.push(playerDamageLog);
+
+
+                    // kill tree stuff (environment kill) -------------------------------------->
+                    killer.name     = '*' + hf.translateDamageTypeCategory(record.damageTypeCategory) + '*';
+                    killer.isPlayer = false;    // attacker is environment
+                    killer.isBot    = false;
+                    killer.teamId   = null;
+                    killer.isAlive  = null;
+
+                    for (j = 0; j < arrKills.length; j++) {
+                        if (arrKills[j].name == killer.name) {
+                            blKillerExists = true;
+
+                            arrKills[j].victims.push(_victim);   // add victim to this killer's victims array
+
+                            break;
+                        }
+                    }
+
+                    // if there is no record for this killer, create it...
+                    if (!blKillerExists) {
+                        killer.victims.push(_victim);
+                        arrKills.push(killer);
+                    }
+
+                    //debugger;
+
                 }
                 else {
                     // if they did die to a player killer
@@ -1214,8 +1251,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
-                    // client stuff --------------------------------->
-                    // player kill / non-environment kill
+                    // client stuff, damage log (player kill, not environment) --------------------------------->
                     var _attacker   = new Object();
                     var _victim     = new Object();
                     playerDamageLog._T          = 'LogPlayerKill';
@@ -1241,6 +1277,39 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     playerDamageLog.damageReason        = record.damageReason;
 
                     arrPlayersDamageLog.push(playerDamageLog);
+
+
+
+                    // kill tree stuff (player kills) -------------------------------------->
+                    killer.name     = record.killer.name;
+                    killer.isBot    = hf.isBot(record.killer.accountId);
+                    killer.teamId   = record.killer.teamId;
+
+                    _victim.killerHealth   = record.killer.health;
+
+                    // $$ meh, this loop isn't that expensive
+                    // $ what about a callback function or something that returns the index or -1 of the array if found and then does it's work inside instead of all this rigamaroo?
+                    // $ maybe just collect all kills/victims instead of looping here and sending back flatly to client and let the client run the extra loops
+                    // $ same with damage, send a flat file of damage back to the client and let them run their own loops to figure it out
+                    for (j = 0; j < arrKills.length; j++) {
+                        if (arrKills[j].name == killer.name) {
+                            blKillerExists = true;
+
+                            arrKills[j].victims.push(_victim);   // add victim to this killer's victims array
+
+                            // $ if victim has kills, conver that killer's isAlive to false? or can you get that from the matches data beforehand?
+                            break;
+                        }
+                    }
+
+                    // if there is no record for this killer, create it...
+                    if (!blKillerExists) {
+                        killer.victims.push(_victim);
+                        arrKills.push(killer);
+                    }
+
+
+                    //debugger;
                 }
             }
             catch (err) {
@@ -1263,11 +1332,13 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
-
+ 
     // ! print damage log
     if (blTestingVersion){
         console.log('arrTeams:', arrTeams);
         console.log('arrPlayerTeam', arrPlayerTeam);
+
+        console.log('arrKills', arrKills);
     
         //console.log(null_attacker);
     
@@ -1278,9 +1349,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // }
 
         console.log('arrDamageLog...');
-        for (let j = 0; j < arrDamageLog.length; j++){
-            console.log(arrDamageLog[j]);
-        }
+        // for (let j = 0; j < arrDamageLog.length; j++){
+        //     console.log(arrDamageLog[j]);
+        // }
 
         //console.dir(arr_T);
         console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);
