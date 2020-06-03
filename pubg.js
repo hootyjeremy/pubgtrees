@@ -556,13 +556,21 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
+    console.log('match_data...');
+    console.dir(match_data);
+
     // get the telemetry url from the asset property of match_data
     for (let i = 0; i < match_data.included.length; i++) {
         if (match_data.included[i].type == 'asset') {
             telemetry_url           = match_data.included[i].attributes.URL;
             telemetry_cache_file    = './cache/telemetry/' + path.parse(telemetry_url).base + '.gzip';
             break;
-        }                
+        }
+        // else if (match_data.included[i].type == 'participant') {
+        //     if (match_data.included[i].attributes.stats.deathType == "alive") {
+        //         console.log('alive: ' + match_data.included[i].attributes.stats.deathType + match_data.included[i].attributes.stats.name);
+        //     }
+        // }
     }
 
 
@@ -585,7 +593,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             pubgApiTelemetryResponseInfo = { 'hootyserver': 'telemetry (cached)', 'status': null, 'statusText': 'no need to fetch from pubg api' };
 
             if (blTestingVersion) {
-                //console.dir(telemetry_response);
+                console.dir('telemetry_response...');
                 console.dir(telemetry_response);
             }
         }
@@ -619,8 +627,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
             telemetry_response = telemetry_response_full.data;
 
             if (blTestingVersion) {
-                //console.dir(telemetry_response);
-                console.dir(telemetry_response.data);
+                console.log('telemetry_response...');
+                console.dir(telemetry_response);
             }
         }
         catch (error) {
@@ -1028,7 +1036,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 return item.knocked_player == record.victim.name;
             })
 
-            arrKnocks.splice(remove_index, 1);  // $ may need this to only splice if (remove_index > -1)
+            if (remove_index > -1){
+                arrKnocks.splice(remove_index, 1);  // $ may need this to only splice if (remove_index > -1)
+            }
 
 
             // client stuff ------------------------------->
@@ -1110,6 +1120,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                     // kill tree stuff (environment kill) -------------------------------------->
                     _victim.timeOfDeath     = strRecordTimestamp;
+                    _victim.isThirst        = null; // $ need to know if environment knocked and then thirsted? or if environment thirsted a knock by player? probably not...
+                    _victim.damageTypeCategory  = playerDamageLog.damageTypeCategory;
+                    _victim.damageCauserName    = playerDamageLog.damageCauserName;
+                    _victim.damageReason        = playerDamageLog.damageReason;
+
 
                     for (j = 0; j < arrKillerVictims.length; j++) {
                         if (arrKillerVictims[j].name == _attacker.name) {
@@ -1126,13 +1141,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         killer.isBot    = null;
                         killer.teamId   = null;
                         killer.isAlive  = null;
-                        killer.killedBy = null;
-                        killer.isThirst = null;
 
                         killer.victims.push(_victim);
                         arrKillerVictims.push(killer);
                     }
-
 
                     arrKillLog.push({ 'killer': record.killer.name, 'victim': record.victim.name });  // killer:victim
 
@@ -1288,6 +1300,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.killerHealth    = record.killer.health;
                     _victim.timeOfDeath     = strRecordTimestamp;
                     _victim.isThirst        = playerDamageLog.isThirst;
+                    _victim.damageTypeCategory  = playerDamageLog.damageTypeCategory;
+                    _victim.damageCauserName    = playerDamageLog.damageCauserName;
+                    _victim.damageReason        = playerDamageLog.damageReason;
 
                     for (j = 0; j < arrKillerVictims.length; j++) {
                         if (arrKillerVictims[j].name == record.killer.name) {
@@ -1303,16 +1318,12 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         killer.isBot    = hf.isBot(record.killer.accountId);
                         killer.isPlayer = true;
                         killer.teamId   = record.killer.teamId;
-                        killer.killedBy = null;                     // fill this in if the player/bot is killed
 
                         // $ fill in .killedBy when a killer dies
-                        // $ .damageCauser, reason, type
-                        // $ timestamp/time alive
 
                         killer.victims.push(_victim);
                         arrKillerVictims.push(killer);
-                    }
-                    
+                    }                    
 
                     arrKillLog.push({ 'killer': record.killer.name, 'victim': record.victim.name });  // killer:victim
 
@@ -1328,12 +1339,15 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             // remove victim from the survivors array...
             var x = arrSurvivors.findIndex(function(item, j) {
-                return item.name == record.victim.name;
+                return item.name == record.victim.name;                
             })
 
             if (x > -1) {
                 arrSurvivors.splice(x, 1);
             }
+
+            // $ maybe don't need a "survived" tag in KillerVictims because what if the survivor didn't kill anybody and just lived while a person died of env?
+            // $ just pull it from the match data and flag from that.
 
 
             //
@@ -1382,7 +1396,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     console.log('done searching telemetry.');
 
 
-    var hooty_response = { playerTeamId, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
+    var hooty_response = { playerTeamId, arrTeams, arrSurvivors, arrKillLog, arrKillerVictims, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
     res.send(hooty_response);
 
 })

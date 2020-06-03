@@ -162,13 +162,15 @@ async function GetTelemetry(_matchID) {
 		console.log('error getting telemetry from hootyserver: ' + error.response.status + ',' + error.response.statusText)
 	}	
 
-	console.log('hootyserver.response:                     ' + axios_response.status + ', ' + axios_response.statusText);
-	console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_response.data.pubgApiMatchResponseInfo.hootyserver);
-	console.log('pubgApiMatchResponseInfo.status:          ' + axios_response.data.pubgApiMatchResponseInfo.status);
-	console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_response.data.pubgApiMatchResponseInfo.statusText);
-	console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_response.data.pubgApiTelemetryResponseInfo.hootyserver);
-	console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_response.data.pubgApiTelemetryResponseInfo.status);
-	console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_response.data.pubgApiTelemetryResponseInfo.statusText);
+	//console.log('hootyserver.response:                     ' + axios_response.status + ', ' + axios_response.statusText);
+	// console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_response.data.pubgApiMatchResponseInfo.hootyserver);
+	// console.log('pubgApiMatchResponseInfo.status:          ' + axios_response.data.pubgApiMatchResponseInfo.status);
+	// console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_response.data.pubgApiMatchResponseInfo.statusText);
+	// console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_response.data.pubgApiTelemetryResponseInfo.hootyserver);
+	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_response.data.pubgApiTelemetryResponseInfo.status);
+	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_response.data.pubgApiTelemetryResponseInfo.statusText);
+	console.log('axios_response.data...');
+	console.dir(axios_response.data);
 
 
 	// $ cycle the response data and output the player's data
