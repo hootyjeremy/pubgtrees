@@ -559,17 +559,25 @@ app.get('/getmatchtelemetry', async (req, res) => {
     console.log('match_data...');
     console.dir(match_data);
 
-    // get the telemetry url from the asset property of match_data
+
     for (let i = 0; i < match_data.included.length; i++) {
         if (match_data.included[i].type == 'asset') {
+            // get the telemetry url from the asset property of match_data
             telemetry_url           = match_data.included[i].attributes.URL;
             telemetry_cache_file    = './cache/telemetry/' + path.parse(telemetry_url).base + '.gzip';
             break;
         }
         // else if (match_data.included[i].type == 'participant') {
-        //     if (match_data.included[i].attributes.stats.deathType == "alive") {
-        //         console.log('alive: ' + match_data.included[i].attributes.stats.deathType + match_data.included[i].attributes.stats.name);
-        //     }
+            // get survivor names  here
+
+            // deathType: byzone, byplayer, suicide, alive
+            
+            // if (match_data.included[i].attributes.stats.deathType == "alive") {
+            //     console.log('survivor: ' + match_data.included[i].attributes.stats.deathType + '/' + match_data.included[i].attributes.stats.name);
+            // }
+            // else if (match_data.included[i].attributes.stats.deathType == "suicide") {
+            //     console.log('suicide: ' + match_data.included[i].attributes.stats.deathType + '/' + match_data.included[i].attributes.stats.name);
+            // }
         // }
     }
 
@@ -1079,8 +1087,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 }
 
 
-                // if the player didn't die to a killer (environment)
                 if (record.killer == null) {
+
+                    // ! (environment kill) if the player didn't die to a killer
+
                     var killer_player_type = '*env*';
 
                     // $ need to know if environment "thirsted" the player?
@@ -1102,6 +1112,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     playerDamageLog.matchTime   = strRecordTimestamp;
                     playerDamageLog.byPlayer    = false;
 
+                    playerDamageLog.isSelfKill      = null;
+                    playerDamageLog.isThirst        = null;
+                    playerDamageLog.isTeammateKill  = null;
+                    playerDamageLog.isBleedOut      = null;
+
                     _attacker.name = '*' + hf.translateDamageTypeCategory(record.damageTypeCategory) + '*';
                     
                     _victim.name    = record.victim.name;
@@ -1118,6 +1133,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     arrPlayersDamageLog.push(playerDamageLog);
 
 
+
                     // kill tree stuff (environment kill) -------------------------------------->
                     _victim.timeOfDeath     = strRecordTimestamp;
                     _victim.isThirst        = null; // $ need to know if environment knocked and then thirsted? or if environment thirsted a knock by player? probably not...
@@ -1125,6 +1141,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.damageCauserName    = playerDamageLog.damageCauserName;
                     _victim.damageReason        = playerDamageLog.damageReason;
 
+                    _victim.isThirst        = playerDamageLog.isThirst;
+                    _victim.isSelfKill      = playerDamageLog.isSelfKill; 
+                    _victim.isTeammateKill  = playerDamageLog.isTeammateKill; 
+                    _victim.isBleedOut      = playerDamageLog.isBleedOut;
 
                     for (j = 0; j < arrKillerVictims.length; j++) {
                         if (arrKillerVictims[j].name == _attacker.name) {
@@ -1140,24 +1160,28 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         killer.isPlayer = false;    // attacker is environment
                         killer.isBot    = null;
                         killer.teamId   = null;
-                        killer.isAlive  = null;
 
                         killer.victims.push(_victim);
                         arrKillerVictims.push(killer);
                     }
 
-                    arrKillLog.push({ 'killer': record.killer.name, 'victim': record.victim.name });  // killer:victim
+                    arrKillLog.push({ 'killer': _attacker.name, 'victim': record.victim.name });  // killer:victim
 
                     //debugger;
                 }
                 else {
-                    // if they did die to a player killer
+                    // ! Player kill (not environment)... 
 
                     var killer_player_type = hf.strIsHumanOrBot(record.killer.accountId).padEnd(5, ' '); // (record.killer.accountId.includes('account')) ? 'human' : 'ai   ';
                     var damage_info     = '';
                     var selfKill        = '';
                     var thirst          = '';
                     var teammateKill    = '';
+
+                    playerDamageLog.isSelfKill      = null;
+                    playerDamageLog.isThirst        = null;
+                    playerDamageLog.isTeammateKill  = null;
+                    playerDamageLog.isBleedOut      = null;
 
    
                     // self-kill
@@ -1217,7 +1241,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     }
 
 
-
                     if (record.damageTypeCategory != 'Damage_Groggy') {
 
                         // if they died by self killing, then show the type category?
@@ -1268,7 +1291,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
                     // client stuff, damage log (player kill, not environment) --------------------------------->
-                    // $ need to know if anybody killed the killer
                     var _attacker   = new Object();
                     var _victim     = new Object();
                     playerDamageLog._T          = 'LogPlayerKill';
@@ -1296,13 +1318,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     arrPlayersDamageLog.push(playerDamageLog);
 
 
-                    // kill tree stuff (player kills) -------------------------------------->
+
+                    // (CLIENT) kill tree stuff (player kills) -------------------------------------->
                     _victim.killerHealth    = record.killer.health;
                     _victim.timeOfDeath     = strRecordTimestamp;
                     _victim.isThirst        = playerDamageLog.isThirst;
+                    _victim.isSelfKill      = playerDamageLog.isSelfKill; 
+                    _victim.isTeammateKill  = playerDamageLog.isTeammateKill; 
+                    _victim.isBleedOut      = playerDamageLog.isBleedOut;
                     _victim.damageTypeCategory  = playerDamageLog.damageTypeCategory;
                     _victim.damageCauserName    = playerDamageLog.damageCauserName;
                     _victim.damageReason        = playerDamageLog.damageReason;
+
 
                     for (j = 0; j < arrKillerVictims.length; j++) {
                         if (arrKillerVictims[j].name == record.killer.name) {
@@ -1319,7 +1346,13 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         killer.isPlayer = true;
                         killer.teamId   = record.killer.teamId;
 
-                        // $ fill in .killedBy when a killer dies
+                        // no need to track whether the killer is alive or not. arrSurvivors will tell the client if they are alive.
+                        // also, a surivivor in a team win might not actually have any kills anyway and therefore no record in 
+                        // arrKillerVictims so there is no reason to track .isAlive in the arrKillerVictims tree.
+
+                        // is possible that a survivor has no kills? if so, then those deaths will fall under environment/suicide and the winner will just have 0 kills.
+
+                        // $ track match_data suicides and byzone kills to see if you are accurrate
 
                         killer.victims.push(_victim);
                         arrKillerVictims.push(killer);
@@ -1378,10 +1411,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //console.log(null_attacker);
     
         // ! print killfeed log
-        // console.log('KillFeed log...');
-        // for (let j = 0; j < arrKillFeedLog.length; j++) {
-        //     console.log(arrKillFeedLog[j]);
-        // }
+        console.log('KillFeed log...');
+        for (let j = 0; j < arrKillFeedLog.length; j++) {
+            console.log(arrKillFeedLog[j]);
+        }
 
         //console.log('arrDamageLog...');
         // for (let j = 0; j < arrDamageLog.length; j++){
