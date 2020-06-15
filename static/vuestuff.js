@@ -38,8 +38,7 @@ var vm = new Vue({
             }
 
         },
-		printRoster: function (matchRoster, player_name) {
-			
+		printRoster: function (matchRoster, player_name) {			
 			var strRoster = '';
 
 			for (let i = 0; i < matchRoster.length; i++){

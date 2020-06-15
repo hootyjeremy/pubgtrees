@@ -134,12 +134,12 @@ select {
 				<th>Age</th>
 				<th>Map</th>
 				<th>Humans</th>
+				<th>Type</th>
 				<th>Mode</th>
 				<th>Place</th>
 				<th style="padding: 4px;">Dmg</th>
 				<th style="padding: 4px;">Kills</th>
 				<th style="padding: 4px;">Knocks</th>
-				<th>Mode</th>
 				<th>Teammates</th>
 				<th>Inspect</th>
 			</tr>
@@ -152,13 +152,13 @@ select {
 				<td style="padding: 4px; text-align:left;">{{match.mapName}}</td>
 				<td style="padding: 4px; text-align:center;">{{match.participantCount}}</td>
 				<td style="padding: 4px; text-align:center;">{{resolveMatchType(match.matchType)}}</td>
-
+				<td style="padding: 4px; text-align:left;">{{match.gameMode}}</td> 
 				<td style="padding: 4px; text-align:center;">#{{match.winPlace}}</td> 
+
 				<td style="padding: 4px; text-align:center;">{{match.damageDealt}}</td> 
 				<td style="padding: 4px; text-align:center;">{{match.kills}}</td> 
 				<td style="padding: 4px; text-align:center;">{{resolveKnocks(match.gameMode, match.DBNOs)}}</td> 
 
-				<td style="padding: 4px; text-align:left;">{{match.gameMode}}</td> 
 				<td style="padding: 4px; text-align:left;">{{printRoster(match.teamRoster, match.strPlayerName)}}</td>
 				<td style="padding: 4px; text-align:left;"> <button v-on:click="analyzeMatch(match.matchID)">View</button> </td>
 			</tr>
