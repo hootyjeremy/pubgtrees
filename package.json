@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "debug": "node --inspect-brk=9229 pubg.js",
-    "start": "node pubg.js"
+    "start": "nodemon pubg.js"
   },
   "author": "hooty",
   "license": "ISC",
