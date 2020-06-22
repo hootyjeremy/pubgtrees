@@ -33,6 +33,7 @@ const strLine   = "--------------------------------------------";
 // ! Cache Purging...
 setInterval(clearCache, 300000);    // check for cache clear every 5 minutes (300,000 milliseconds)
 
+CreateCacheFolders();
 
 // alias, literal
 app.use(compression());
@@ -1517,6 +1518,63 @@ function readCacheFileJSON(filename) {
 }
 
 
+function CreateCacheFolders() {
+    // create cache folder skeleton if it does not exist.
+
+    //#region // ! [Region] Create cache skeleton...
+    const cache_root = './cache/';
+    const cache_matches = './cache/matches/'
+    const cache_players = './cache/players/'
+    const cache_tel     = './cache/telemetry/'
+
+    const cache_platform_psn = './cache/players/psn/';
+    const cache_platform_stadia = './cache/players/stadia/';
+    const cache_platform_steam = './cache/players/steam/';
+    const cache_platform_tournament = './cache/players/tournament/';
+    const cache_platform_xbox = './cache/players/xbox/';
+
+    // top level
+    if (!fs.existsSync(cache_root)) {
+        fs.mkdirSync(cache_root);
+    }
+
+    if (!fs.existsSync(cache_matches)) {
+        fs.mkdirSync(cache_matches);
+    }
+
+    if (!fs.existsSync(cache_players)) {
+        fs.mkdirSync(cache_players);
+    }
+
+    if (!fs.existsSync(cache_tel)) {
+        fs.mkdirSync(cache_tel);
+    }
+
+    // ----------------------------
+    if (!fs.existsSync(cache_platform_psn)) {
+        fs.mkdirSync(cache_platform_psn);
+    }
+
+    if (!fs.existsSync(cache_platform_stadia)) {
+        fs.mkdirSync(cache_platform_stadia);
+    }
+
+    if (!fs.existsSync(cache_platform_steam)) {
+        fs.mkdirSync(cache_platform_steam);
+    }
+
+    if (!fs.existsSync(cache_platform_tournament)) {
+        fs.mkdirSync(cache_platform_tournament);
+    }
+
+    if (!fs.existsSync(cache_platform_xbox)) {
+        fs.mkdirSync(cache_platform_xbox);
+    }
+
+    //#endregion
+
+    console.log('created cache folders');
+}
 
 // Purge cache files...
 function clearCache() {
