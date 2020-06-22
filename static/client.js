@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
-	hooty_server_url 	= 'https://hooty-pubgtest01.azurewebsites.net/';
+	hooty_server_url 	= 'https://https://hooty-pubg01.herokuapp.com/';
 	defaultPlayer 		= '';
 }
 // --------------------------------------------------------->
