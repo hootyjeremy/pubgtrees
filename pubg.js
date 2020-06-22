@@ -557,8 +557,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
-    console.log('match_data...');
-    console.dir(match_data);
+    if (blTestingVersion) {
+        console.log('match_data...');
+        console.dir(match_data);
+    }
 
 
     for (let i = 0; i < match_data.included.length; i++) {
