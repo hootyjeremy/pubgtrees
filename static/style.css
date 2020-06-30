@@ -1,0 +1,50 @@
+body {
+	font-family: 'Open Sans Condensed', sans-serif;
+	font-size: 12px;
+    color: rgb(240, 234, 232);
+    background-color: #414144;
+}
+
+button {
+	font-family: 'Roboto Condensed', Calibri, sans-serif;
+	font-size: 14px;
+    color: rgb(240, 234, 232);
+    background-color: #414144;
+	border: 1px solid whitesmoke;
+}
+
+input {
+	font-family: 'Roboto Condensed', Calibri, sans-serif;
+	font-size: 14px;
+}
+
+select {
+	font-family: 'Roboto Condensed', Calibri, sans-serif;
+	font-size: 14px;
+}
+
+
+text {
+	font-family: 'Roboto Condensed', Calibri, sans-serif;
+	font-size: 14px;
+}
+
+text.bot {
+	fill: #60b6f0;
+}
+
+text.selectedPlayer {
+	fill: #60b6f0;
+}
+
+text.darkText {
+	fill: #98a0a6;
+}
+
+text.lightText {
+	fill: #dcddde;
+}
+
+svg {
+	border: 1px solid whitesmoke;
+}

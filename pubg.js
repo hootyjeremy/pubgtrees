@@ -48,6 +48,17 @@ app.listen(port, () => {
 });
 
 
+// set up a route to redirect http to https
+app.get('*', function(req, res) {  
+    if (!blTestingVersion) {
+        res.redirect('https://' + req.headers.host + req.url);
+    }
+
+    // Or, if you don't want to automatically detect the domain name from the request header, you can hard code it:
+    // res.redirect('https://example.com' + req.url);
+})
+
+
 // ------------------------------------------------------------->
 // ? this doesn't seem to do anything...
 app.get('/', (req, res) => {
@@ -720,8 +731,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // }
 
         
+        // $ BOT PROBLEM
+        // $ some bots and bot teams are created after the round starts so they aren't detected in LogPlayerCreate or in backpack pickup.
+        // $ therefore, arrTeams doesn't list all bots right now. will have to detect bots and teamId in their death/survivor events for an accurate count.
         // if (record._T == 'LogPlayerCreate') {
-        //     '(' + i_string.padStart(5, ' ') + ') ' + record._T
+        //     if (record.character.teamId >= 200 && record.character.teamId < 300) {
+        //         console.log('(' + i_string.padStart(5, ' ') + ') LogPlayerCreate: ' + record.character.teamId + ' - ' + record.character.name);
+        //         console.log(record);
+        //     }
         // }
 
     
@@ -731,9 +748,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
         // before the match starts, get teamId of each player and bot
         if (blBeforeMatchStart) {
-            if (record._T == 'LogItemPickup' && record.item.itemId == 'Item_Back_B_01_StartParachutePack_C' ) {
+            if (record._T == 'LogItemPickup' && record.item.itemId == 'Item_Back_B_01_StartParachutePack_C') {
 
                 if (hf.isBot(record.character.accountId)) { //} telemetry_response.data[i].character.accountId.includes('account.')){
+                    //console.log('bot: ' + record.character.name);
                     ai_count++;
                 }
                 else {

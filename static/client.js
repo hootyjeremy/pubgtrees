@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version = '2020.06.30 02.10am'
+let version 			= '2020.06.30 04:55 d3 tree and css 001'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -17,6 +17,10 @@ const blTestingVersion 	= !true;
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
 	defaultPlayer 		= '';
+	console.log('live version: ' + version);
+}
+else {
+	console.log('testing version: ' + version);
 }
 // --------------------------------------------------------->
 
@@ -35,11 +39,6 @@ var telemetry_response_json;
 var match_floor		= 0;
 var total_matches 	= 0;
 
-function loadFunction() {
-	console.log('loadFunction()');
-	document.getElementById('btnSearchPlayer').value = defaultPlayer;
-	console.log('v. ' + version);
-}
 
 // $ FLOOD PREVENTION
 // $ NEED TO BE ABLE TO SUPPRESS GETTING MATCHES UNTIL A RESPONSE COMES BACK
@@ -385,7 +384,7 @@ function CreateTreeFromD3(csvData, arrTeams) {
 	const link = g
 	.append("g")
 	.attr("fill", "none")
-	.attr("stroke", "#bbb")
+	.attr("stroke", "#8f91a1")	// #bbb
 	.attr("stroke-opacity", 0.4)
 	.attr("stroke-width", 1.5)
 	.selectAll("path")
@@ -415,13 +414,22 @@ function CreateTreeFromD3(csvData, arrTeams) {
 
 	node
 	.append("circle")
-	.attr("fill", d => (d.children ? "#dcddde" : "#dcddde"))    // $ the dot (nodes/leaves)
+	.attr("fill", d => (d.children ? "#8f91a1" : "#8f91a1"))    // $ the dot (nodes/leaves)
 	.attr("r", 2.5);
 
 	node
 	.append("text")           //https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
 	//.attr('fill', "#dcddde")  // $$ added this to change text color
-	.attr('fill', d => {
+	// .attr('fill', d => {
+	// })
+	.attr('class', d => {
+		if (d.data.name == strPlayerName) {
+			return 'selectedPlayer';
+		}
+		else if (d.data.name == 'match' || d.data.name == 'winner' || d.data.name == 'winners' || d.data.name == 'environment kills' || d.data.name == 'self kills') {
+			return 'darkText';
+		}
+		else {
 
 		// check if player is a bot. if so, shade the name...
 		let blBotFound = false;
@@ -432,27 +440,21 @@ function CreateTreeFromD3(csvData, arrTeams) {
 				// this is a bot team
 				element.teammates.forEach(teammate => {
 					if (d.data.name == teammate.name) {
-						//console.log(d.data.name + ' is a bot on team ' + element.teamId);
+						console.log(d.data.name + ' is a bot on team ' + element.teamId);
 						blBotFound = true;
 					}
 				})
-
 			}
 		})
 
 		if (blBotFound) {
-			return '#98a0a6';
-		}
-
-		if (d.data.name == strPlayerName) {
-			return '#60b6f0';
-		}
-		else if (d.data.name == 'match' || d.data.name == 'winner' || d.data.name == 'winners' || d.data.name == 'environment kills' || d.data.name == 'self kills') {
-			return '#98a0a6';
+			return 'darkText';
 		}
 		else {
-			return '#dcddde';
+			// it's a regular player
+			return 'lightText';
 		}
+	}
 	})
 	.attr('cursor', 'pointer')
 	//.attr('class', 'selected')
