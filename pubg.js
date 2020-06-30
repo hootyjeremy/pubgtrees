@@ -48,16 +48,6 @@ app.listen(port, () => {
 });
 
 
-// set up a route to redirect http to https
-app.get('*', function(req, res) {  
-    if (!blTestingVersion) {
-        //res.redirect('https://' + req.headers.host + req.url);
-    }
-
-    // Or, if you don't want to automatically detect the domain name from the request header, you can hard code it:
-    // res.redirect('https://example.com' + req.url);
-})
-
 
 // ------------------------------------------------------------->
 // ? this doesn't seem to do anything...
