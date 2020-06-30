@@ -15,7 +15,7 @@ let version = '2020.06.30 01:58am';
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
-	hooty_server_url 	= 'https://hooty-pubgtest01.azurewebsites.net/';
+	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
 	defaultPlayer 		= '';
 }
 // --------------------------------------------------------->
