@@ -15,11 +15,12 @@ const hf            = require('./hooty_modules/hf_server'); // helper functions
 const port = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 
 const zlib = require('zlib');
+const { translateMapName } = require('./hooty_modules/hf_server');
 
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = !true;
+const blTestingVersion = true;
 
 
 
@@ -32,7 +33,6 @@ const strLine   = "--------------------------------------------";
 // ---------------------------->
 // ! Cache Purging...
 setInterval(clearCache, 300000);    // check for cache clear every 5 minutes (300,000 milliseconds)
-
 CreateCacheFolders();
 
 // alias, literal
@@ -556,7 +556,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }
 
 
-
     if (blTestingVersion) {
         console.log('match_data...');
         console.dir(match_data);
@@ -673,7 +672,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     var arrDamageLog    = [];       // for server side console logging
     var arrKillFeedLog  = [];
-    var arrEnvironmentKills = [];   // just too identify environment killers for knowing what to look for (Redzone, Drowning, other stuff I don't know yet)
+    var arrEnvironmentKills = [];   // just to identify environment killers for knowing what to look for (Redzone, Drowning, other stuff I don't know yet)
+    let arrSelfKills        = [];   // just to identify self kill data
     
     var arrTeams        = [];   // [teamId, [players]]
     var arrPlayerTeam   = [];   // [name, teamId]   // for reverse lookups
@@ -688,7 +688,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var arrKillLog          = [];   // just need to know killer:victim to know who didn't die
     var arrSurvivors        = [];   // hold a list of living players. remove when they die.
     // $ remove each living player from a list when they die
-
 
     var matchDetails        = [];   // $ identify the map, humans/bots, player win place, region
     //var null_attacker   = [];   // for testing bluezone/redzone/blackzone
@@ -706,6 +705,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         var killer          = new Object();
             killer.victims  = [];
         var blKillerExists  = false;
+
 
 
         var i_string = new String(i);
@@ -1164,6 +1164,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     if (!blKillerExists) {
                         killer.name     = _attacker.name;
                         //killer.isPlayer = false;    // attacker is environment
+                        //killer.rootType = 'environment';    // either environment or player (human or bot)
                         killer.type     = 'environment';    // either environment or player (human or bot)
                         killer.isBot    = null;
                         killer.teamId   = null;
@@ -1215,6 +1216,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                             selfKill = ' *self-kill*';
 
                             playerDamageLog.isSelfKill = true;
+                            arrSelfKills.push(record.victim.name);
                         }
 
                         selfKill += ' ' + hf.translateDamageTypeCategory(record.damageTypeCategory);
@@ -1330,18 +1332,24 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.killerHealth    = record.killer.health;
                     _victim.timeOfDeath     = strRecordTimestamp;
                     _victim.isThirst        = playerDamageLog.isThirst;
-                    _victim.isSelfKill      = playerDamageLog.isSelfKill; 
+                    _victim.isSelfKill      = playerDamageLog.isSelfKill;
                     _victim.isTeammateKill  = playerDamageLog.isTeammateKill; 
                     _victim.isBleedOut      = playerDamageLog.isBleedOut;
                     _victim.damageTypeCategory  = playerDamageLog.damageTypeCategory;
                     _victim.damageCauserName    = playerDamageLog.damageCauserName;
                     _victim.damageReason        = playerDamageLog.damageReason;
 
-
+                    // check if killer already exists. if so, push this victim to the killer.
                     for (j = 0; j < arrKillerVictims.length; j++) {
                         if (arrKillerVictims[j].name == record.killer.name) {
                             blKillerExists = true;
                             arrKillerVictims[j].victims.push(_victim);   // add victim to this killer's victims array
+
+                            // if (_victim.isSelfKill) {
+                            //     // if this killer killed themselves, then update this killer's root type
+                            //     arrKillerVictims[j].rootType = 'selfKill';
+                            // }
+
                             break;
                         }
                     }
@@ -1350,8 +1358,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     if (!blKillerExists) {
                         killer.name     = record.killer.name;
                         killer.isBot    = hf.isBot(record.killer.accountId);
-                        //killer.isPlayer = true;
-                        killer.type     = 'player'; // (human or bot, doesn't matter)
+                        //killer.rootType = (_victim.isSelfKill) ? 'selfKill' : 'player'; // (set to self kill if their only kill was themselves)
+                        killer.type     = 'player'; // (set to self kill if their only kill was themselves)
                         killer.teamId   = record.killer.teamId;
 
                         // no need to track whether the killer is alive or not. arrSurvivors will tell the client if they are alive.
@@ -1364,7 +1372,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                         killer.victims.push(_victim);
                         arrKillerVictims.push(killer);
-                    }                    
+                    }
 
                     arrKillLog.push({ 'killer': record.killer.name, 'victim': record.victim.name });  // killer:victim
 
@@ -1374,7 +1382,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
             catch (err) {
                 console.log('(' + i_string.padStart(5, ' ') + ') error: ' + err);
             }
-
 
 
 
@@ -1390,7 +1397,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // $ maybe don't need a "survived" tag in KillerVictims because what if the survivor didn't kill anybody and just lived while a person died of env?
             // $ just pull it from the match data and flag from that.
 
-
             //
             //#endregion 'LogPlayerKill' ----------------------------------------
 
@@ -1405,11 +1411,95 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
-    // $ create tree here
-    // $ roots will be winning team ID (if there is more than one survivor), self-kills, and environment kills (forks into bluezone, blackzone, redzone, driverless vehicle hit).
-    // let it take arrKillerVictims as array and can create a mapping of it's indexes?
 
+    //#region // ! [Region] Create csv data for D3
+    //
+    // ! root (match)   -> winners
+    // !                    -> survivor 01
+    // !                    -> survivor 02 etc.
+    // !                -> environment kills
+    // !                -> self kills
+
+    let csvDataForD3    = 'name,parent\n' +
+                          'match,\n';
+
+    // ---------------------------
+    if (arrSurvivors.length > 1) {
+        csvDataForD3 += 'winners,match\n';
+
+        arrSurvivors.forEach(element => {
+            csvDataForD3 += element.name + ',winners\n'
+        })
+    }
+    else {
+        csvDataForD3 += 'winner,match\n';
+        csvDataForD3 += arrSurvivors[0].name + ',winner\n';
+    }
+
+    // ----------------------------------
+    if (arrEnvironmentKills.length > 0) {
+        csvDataForD3 += 'environment kills,match\n';
+
+        // arrEnvironmentKills.forEach(element => {
+        //     csvDataForD3 += element.damageCauserName + ',environment kills\n'
+        // })
+    }
+
+    // ---------------------------
+    if (arrSelfKills.length > 0) {
+        csvDataForD3 += 'self kills,match\n';
+
+        arrSelfKills.forEach(element => {
+            //csvDataForD3 += element + ',self kills\n'
+        })
+    }
+    else {
+        // $ this is not really correct but make a default path until this is cleared up
+        csvDataForD3 += 'self kills,match\n';
+    }
+
+
+    // ---------------------------
+    let tmpEnv = ''
+    arrKillLog.forEach(element => {
+        // cycle through the kill log and get parents
+
+
+        if (element.killer.includes('*')) {
+            // this is an environment kill
+
+            //console.log(element.killer);
+
+            // create parent connection for this environment kill type
+            if (!tmpEnv.includes(element.killer)) {
+                tmpEnv += element.killer + ',';
+                csvDataForD3 += element.killer + ',environment kills\n';
+            }
+
+            csvDataForD3 += element.victim + ',' + element.killer + '\n';
+        }
+        else {
+            // this is a regular player kill
+
+            // $ SELF KILLS CURRENTLY BREAK, SO GET READY TO FIX THAT
+            // $ AMBIGUOUS means they already exist?
+            if (element.killer == element.victim) {
+                csvDataForD3 += element.victim + ',self kills\n';
+            }
+            else {
+                csvDataForD3 += element.victim + ',' + element.killer + '\n';
+            }
+        }
+    })
+
+
+    // $ cycle through the kill log and get parents of each kill
+    // $ if the killer name contains '*' then the killer's parent is evironment kill, and it's victims is added to those kills
+
+
+    //#endregion -------------------------------------------------------
     
+
  
     // ! print damage log
     if (blTestingVersion){
@@ -1420,6 +1510,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         console.log('arrKillLog',       arrKillLog);
         console.log('arrSurvivors',     arrSurvivors);
     
+        //console.log('csvDataForD3',     csvDataForD3);
         //console.log(null_attacker);
     
         // ! print killfeed log
@@ -1441,7 +1532,24 @@ app.get('/getmatchtelemetry', async (req, res) => {
     console.log('done searching telemetry.');
 
 
-    var hooty_response = { playerTeamId, arrTeams, arrSurvivors, arrKillLog, arrEnvironmentKills, arrKillerVictims, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
+    // $ create D3 tree here
+    // $ roots will be winning team ID (if there is more than one survivor), self-kills, and environment kills (forks into bluezone, blackzone, redzone, driverless vehicle hit).
+    // let it take arrKillerVictims as array and can create a mapping of it's indexes?
+    // $ should be able to verify the amount of victims and survivors to make sure everybody is accounted for.
+
+    // CREATE D3 kill tree object to send back to the client...
+    //let arrDataD3 = CreateDataForD3(arrSurvivors, arrKillerVictims);
+
+    // $ create csv:
+    // ^ name, parent
+    //   match,
+    //   winners, match
+    //   env, match
+    //   selfKills, match
+    //   hooty, winners
+    //   bluezone, env
+
+    var hooty_response = { arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, arrEnvironmentKills, arrKillerVictims, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
     res.send(hooty_response);
 
 })
@@ -1454,7 +1562,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
 // ! Helper functions
 // ! 
 
+
 function writeCacheFileJSON(filename, data) {
+
+    //#region // ! [Region]
+    //
 
     try {
 
@@ -1491,6 +1603,9 @@ function writeCacheFileJSON(filename, data) {
 
         // $ verify this throw actually works back at the caller
     }
+
+    //#endregion
+
 }
 
 
@@ -1524,6 +1639,8 @@ function CreateCacheFolders() {
     // create cache folder skeleton if it does not exist.
 
     //#region // ! [Region] Create cache skeleton...
+    // 
+
     const cache_root = './cache/';
     const cache_matches = './cache/matches/'
     const cache_players = './cache/players/'
@@ -1575,7 +1692,6 @@ function CreateCacheFolders() {
 
     //#endregion
 
-    console.log('created cache folders');
 }
 
 // Purge cache files...

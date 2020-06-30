@@ -1,6 +1,8 @@
 // PUBG Scheme Color
 //https://www.schemecolor.com/pubg.php
 
+//const hf_server = require("../hooty_modules/hf_server");
+
 
 let strLine = "--------------------------------------------";
 
@@ -9,10 +11,10 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
-	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
+	hooty_server_url 	= 'https://hooty-pubgtest01.azurewebsites.net/';
 	defaultPlayer 		= '';
 }
 // --------------------------------------------------------->
@@ -40,6 +42,8 @@ function loadFunction() {
 // $ FLOOD PREVENTION
 // $ NEED TO BE ABLE TO SUPPRESS GETTING MATCHES UNTIL A RESPONSE COMES BACK
 async function GetPlayerMatches() {
+
+	document.getElementById('d3-svg01').innerHTML = '';
 
 	match_floor = (match_floor < 0) ? 0 : match_floor;
 
@@ -132,8 +136,6 @@ async function GetPlayerMatches() {
 	document.getElementById('btnNextMatches').style.display		= "block";
 	document.getElementById('vueapp').style.display 			= "block";
 	document.getElementById('fetching').style.display 			= "none";	// turn this back off
-
-
 }
 
 
@@ -173,6 +175,20 @@ async function GetTelemetry(_matchID) {
 	console.dir(axios_response.data);
 
 
+
+
+	// clear out the svg D3 tree if there is anything in there...
+	document.getElementById('d3-svg01').innerHTML = '';
+	
+	// create D3 tree...
+	CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams);
+
+
+
+
+
+
+	// $ ---------------------------------------------------------------->
 	// $ cycle the response data and output the player's data
 	for (i = 0; i < axios_response.data.arrPlayersDamageLog.length; i++) {
 		var record 			= axios_response.data.arrPlayersDamageLog[i];
@@ -316,6 +332,151 @@ function strBot(bot) {
 }
 
 
+
+
+// ! ------------------------------------------------------------------------------------------------------>
+// ! D3 Tree Struff
+//
+
+//#region // ! [Region] Build kill tree
+//
+
+function CreateTreeFromD3(csvData, arrTeams) {
+
+	let  table = d3.csvParse(csvData);
+	const root = d3.stratify()
+				.id(function(d) { return d.name; })
+				.parentId(function(d) { return d.parent; })
+				(table);
+	
+	
+	const width = 1200;                          // ? what is this the width of? path?
+	//const root = d3.hierarchy(data);            // https://github.com/d3/d3-hierarchy
+	const dx = 14;                              // $ node height ? (default 10)
+	const dy = width / (root.height + 1);       // root.height is how many descendants there are. this is where you can make the line lengths static, probably.
+	//const tree = d3.tree().nodeSize([dx, dy]);
+	const tree = d3.tree().nodeSize([dx, 150]); // static width for paths
+
+	tree(root);
+
+	let x0 = Infinity;
+	let x1 = -x0;
+	root.each((d) => {
+	//console.log(d.data.name);
+	if (d.x > x1) x1 = d.x;
+	if (d.x < x0) x0 = d.x;
+	});
+
+
+	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg
+	const svg = d3
+	.select(document.getElementsByTagName("svg")[0])
+	.style("width", "100%")
+	.style("height", "100%"); // $ how can you know what the height should be?
+
+	const g = svg
+	.append("g")                        // svg <g> tag is a group of elements : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g#:~:text=The%20SVG%20element%20is,with%20the%20element.
+	.attr("font-family", "sans-serif")
+	.attr("font-size", 12)
+	.attr("transform", `translate(${dy / 3},${dx - x0})`);  // ? what are "transform" and "translate?"
+
+	const link = g
+	.append("g")
+	.attr("fill", "none")
+	.attr("stroke", "#bbb")
+	.attr("stroke-opacity", 0.4)
+	.attr("stroke-width", 1.5)
+	.selectAll("path")
+	.data(root.links())
+	.enter()
+	.append("path")
+	.attr(
+		"d",
+		d3
+		.linkHorizontal()
+		.x(d => d.y)      // width of line
+		.y(d => d.x)      // height of line
+							// ? how can you have a static width of the line regardless of depth of descendants?
+	);
+	// path:  https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/path
+	// d:     https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
+	// .linkHorizontal: https://github.com/d3/d3-shape/blob/v1.3.7/README.md#linkHorizontal
+
+
+	const node = g
+	.append("g")
+	.selectAll("g")
+	.data(root.descendants())
+	.enter()
+	.append("g")
+	.attr("transform", d => `translate(${d.y},${d.x})`);  
+
+	node
+	.append("circle")
+	.attr("fill", d => (d.children ? "#dcddde" : "#dcddde"))    // $ the dot (nodes/leaves)
+	.attr("r", 2.5);
+
+	node
+	.append("text")           //https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
+	//.attr('fill', "#dcddde")  // $$ added this to change text color
+	.attr('fill', d => {
+
+		// check if player is a bot. if so, shade the name...
+		let blBotFound = false;
+
+		arrTeams.forEach(element => {
+
+			if (element.teamId >= 200 && element.teamId < 300) {
+				// this is a bot team
+				element.teammates.forEach(teammate => {
+					if (d.data.name == teammate.name) {
+						console.log(d.data.name + ' is a bot on team ' + element.teamId);
+						blBotFound = true;
+					}
+				})
+
+			}
+		})
+
+		if (blBotFound) {
+			return '#98a0a6';
+		}
+
+		if (d.data.name == strPlayerName) {
+			return '#60b6f0';
+		}
+		else if (d.data.name == 'match' || d.data.name == 'winner' || d.data.name == 'winners' || d.data.name == 'environment kills' || d.data.name == 'self kills') {
+			return '#98a0a6';
+		}
+		else {
+			return '#dcddde';
+		}
+	})
+	.attr('cursor', 'pointer')
+	//.attr('class', 'selected')
+	// events: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/pointer-events
+	.attr("dy", "0.5em") // "dy", "0.31em"
+	.attr("x", d => (d.children ? 6 : 6))                    // $ seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
+	.attr("text-anchor", d => (d.children ? "start" : "start")) // $ where the text is in relation to the node dot    // "text-anchor", d => (d.children ? "end" : "start")
+	//.attr('onclick', ??)
+	.text(d => d.data.name)
+	.select(function() {
+		return this.parentNode.insertBefore(this.cloneNode(true), this);
+	})
+	//.attr("stroke", "white")
+	//.attr("stroke-linejoin", "round")
+	//.attr("stroke-width", 2);
+
+	const text_stuff = d3.selectAll('text');
+
+	//debugger;
+
+	
+			
+			
+}
+
+//#endregion
 
 
 
