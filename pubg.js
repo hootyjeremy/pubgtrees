@@ -20,7 +20,7 @@ const { translateMapName } = require('./hooty_modules/hf_server');
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = true;
+const blTestingVersion = !true;
 
 
 

@@ -8,10 +8,11 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
+let version = '2020.06.30 01:58am';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= true;
+const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubgtest01.azurewebsites.net/';
@@ -37,6 +38,7 @@ var total_matches 	= 0;
 function loadFunction() {
 	console.log('loadFunction()');
 	document.getElementById('btnSearchPlayer').value = defaultPlayer;
+	console.log(version);
 }
 
 // $ FLOOD PREVENTION
