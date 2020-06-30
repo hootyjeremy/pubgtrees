@@ -8,11 +8,11 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version = '2020.06.30 01:58am';
+let version = '2020.06.30 02.10am'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -38,7 +38,7 @@ var total_matches 	= 0;
 function loadFunction() {
 	console.log('loadFunction()');
 	document.getElementById('btnSearchPlayer').value = defaultPlayer;
-	console.log(version);
+	console.log('v. ' + version);
 }
 
 // $ FLOOD PREVENTION
@@ -432,7 +432,7 @@ function CreateTreeFromD3(csvData, arrTeams) {
 				// this is a bot team
 				element.teammates.forEach(teammate => {
 					if (d.data.name == teammate.name) {
-						console.log(d.data.name + ' is a bot on team ' + element.teamId);
+						//console.log(d.data.name + ' is a bot on team ' + element.teamId);
 						blBotFound = true;
 					}
 				})
