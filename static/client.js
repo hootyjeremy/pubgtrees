@@ -93,8 +93,7 @@ async function GetPlayerMatches() {
 			}
 		})
 	} catch (error) {
-		console.log('ERROR getting player: ' + error.response.status + ',' + error.response.statusText);
-		
+	
 		alert('There was an error with the request. See the developer tools\' console log for fetching errors.');
 
 		document.getElementById('fetching').style.display 		= "none";
