@@ -494,7 +494,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     var match_data, telemetry_url;
 
-    //let allHumanNames = '';
+    let allHumanNames = '';
     let allBotNames   = '';   // store a long string of bot names so that they can be identified for classes
 
 
@@ -586,7 +586,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // else if (match_data.included[i].attributes.stats.deathType == "suicide") {
             //     console.log('suicide: ' + match_data.included[i].attributes.stats.deathType + '/' + match_data.included[i].attributes.stats.name);
             // }
-            //allHumanNames += '|' + match_data.included[i].attributes.stats.name;
+            allHumanNames += '|' + match_data.included[i].attributes.stats.name;
         }
     }
 
@@ -1596,7 +1596,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //   hooty, winners
     //   bluezone, env
 
-    var hooty_response = { allBotNames, arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, arrEnvironmentKills, arrKillerVictims, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
+    var hooty_response = { allHumanNames, allBotNames, arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, arrEnvironmentKills, arrKillerVictims, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
     res.send(hooty_response);
 
 })

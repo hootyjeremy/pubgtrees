@@ -24,9 +24,18 @@ select {
 }
 
 
+th, td {
+	color: #dcddde;
+}
+
+
 text {
 	font-family: 'Roboto Condensed', Calibri, sans-serif;
 	font-size: 14px;
+}
+
+text.root {
+	fill: #c0ace0;
 }
 
 text.bot {

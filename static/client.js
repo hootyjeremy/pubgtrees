@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.06.30 10:56 bot detection update 001'
+let version 			= '2020.06.30 11:56 adding ID test'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -146,6 +146,12 @@ async function GetTelemetry(_matchID) {
 
 	var axios_response = null;
 
+	const div_analyze 	= document.getElementById('div-analyzing');
+	const svg_d3tree01	= document.getElementById('d3-tree01');
+
+	div_analyze.style.display 	= 'block';
+	svg_d3tree01.style.display 	= 'none';
+
 	try {
 		// get telemetry for this match for this platform/player
 
@@ -182,12 +188,16 @@ async function GetTelemetry(_matchID) {
 	document.getElementById('d3-svg01').innerHTML = '';
 	
 	// create D3 tree...
-	CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams, axios_response.data.allBotNames);
+	CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams, axios_response.data.allBotNames, axios_response.data.allHumanNames);
+
+
+	div_analyze.style.display 	= 'none';
+	svg_d3tree01.style.display 	= 'block';
 
 
 
-
-
+	//#region // ! [Console log stuff]
+	//
 
 	// $ ---------------------------------------------------------------->
 	// $ cycle the response data and output the player's data
@@ -321,6 +331,9 @@ async function GetTelemetry(_matchID) {
 	}
 
 	console.log('show winPlace and of how many teams there were');
+
+	//#endregion
+
 }
 
 function strBot(bot) {
@@ -342,7 +355,7 @@ function strBot(bot) {
 //#region // ! [Region] Build kill tree
 //
 
-function CreateTreeFromD3(csvData, arrTeams, allBotNames) {
+function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 
 	let  table = d3.csvParse(csvData);
 	const root = d3.stratify()
@@ -427,33 +440,11 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames) {
 			return 'selectedPlayer';
 		}
 		else if (d.data.name == 'match' || d.data.name == 'winner' || d.data.name == 'winners' || d.data.name == 'environment kills' || d.data.name == 'self kills') {
-			return 'darkText';
+			return 'root';
 		}
 		else {
 
 			// check if player is a bot. if so, shade the name...
-			// let blBotFound = false;
-
-			// arrTeams.forEach(element => {
-
-			// 	if (element.teamId >= 200 && element.teamId < 300) {
-			// 		// this is a bot team
-			// 		element.teammates.forEach(teammate => {
-			// 			if (d.data.name == teammate.name) {
-			// 				console.log(d.data.name + ' is a bot on team ' + element.teamId);
-			// 				blBotFound = true;
-			// 			}
-			// 		})
-			// 	}
-			// })
-
-			// if (blBotFound) {
-			// 	return 'darkText';
-			// }
-			// else {
-			// 	// it's a regular player
-			// 	return 'lightText';
-			// }
 
 			if (allBotNames.includes(d.data.name)) {
 				// this is a bot
@@ -462,6 +453,16 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames) {
 			else {
 				return 'lightText';
 			}
+		}
+
+		// $ might be better to build a class string and add "teammate" class if this player is a teammate of the selected player
+
+	})
+	.attr('id', d=> {
+		// if this is a human, then add an id of their name
+
+		if (allHumanNames.includes(d.data.name)) {
+			return d.data.name;
 		}
 	})
 	.attr('cursor', 'pointer')
