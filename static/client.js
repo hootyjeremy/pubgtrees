@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.06.30 04:55 d3 tree and css 001'
+let version 			= '2020.06.30 10:56 bot detection update 001'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -182,7 +182,7 @@ async function GetTelemetry(_matchID) {
 	document.getElementById('d3-svg01').innerHTML = '';
 	
 	// create D3 tree...
-	CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams);
+	CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams, axios_response.data.allBotNames);
 
 
 
@@ -342,7 +342,7 @@ function strBot(bot) {
 //#region // ! [Region] Build kill tree
 //
 
-function CreateTreeFromD3(csvData, arrTeams) {
+function CreateTreeFromD3(csvData, arrTeams, allBotNames) {
 
 	let  table = d3.csvParse(csvData);
 	const root = d3.stratify()
@@ -431,30 +431,38 @@ function CreateTreeFromD3(csvData, arrTeams) {
 		}
 		else {
 
-		// check if player is a bot. if so, shade the name...
-		let blBotFound = false;
+			// check if player is a bot. if so, shade the name...
+			// let blBotFound = false;
 
-		arrTeams.forEach(element => {
+			// arrTeams.forEach(element => {
 
-			if (element.teamId >= 200 && element.teamId < 300) {
-				// this is a bot team
-				element.teammates.forEach(teammate => {
-					if (d.data.name == teammate.name) {
-						console.log(d.data.name + ' is a bot on team ' + element.teamId);
-						blBotFound = true;
-					}
-				})
+			// 	if (element.teamId >= 200 && element.teamId < 300) {
+			// 		// this is a bot team
+			// 		element.teammates.forEach(teammate => {
+			// 			if (d.data.name == teammate.name) {
+			// 				console.log(d.data.name + ' is a bot on team ' + element.teamId);
+			// 				blBotFound = true;
+			// 			}
+			// 		})
+			// 	}
+			// })
+
+			// if (blBotFound) {
+			// 	return 'darkText';
+			// }
+			// else {
+			// 	// it's a regular player
+			// 	return 'lightText';
+			// }
+
+			if (allBotNames.includes(d.data.name)) {
+				// this is a bot
+				return 'darkText';
 			}
-		})
-
-		if (blBotFound) {
-			return 'darkText';
+			else {
+				return 'lightText';
+			}
 		}
-		else {
-			// it's a regular player
-			return 'lightText';
-		}
-	}
 	})
 	.attr('cursor', 'pointer')
 	//.attr('class', 'selected')

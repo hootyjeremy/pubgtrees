@@ -16,6 +16,7 @@ const port = process.env.PORT || 3000;    // https://stackoverflow.com/questions
 
 const zlib = require('zlib');
 const { translateMapName } = require('./hooty_modules/hf_server');
+const { debug } = require('console');
 
 
 // ---------------------------->
@@ -37,27 +38,28 @@ CreateCacheFolders();
 
 // alias, literal
 app.use(compression());
-app.use('/', express.static(__dirname));    // so that root/pubg.js and root/index.html can be found
 
 
 // ------------------------------------------------------------->
 app.listen(port, () => {
-    console.log(chalk.blue(strLine));
-    console.log(chalk.blue('test version: ' + blTestingVersion));
-    console.log(chalk.blue(getDate() + ' -> hooty-pubg server listening on port ' + port));
+    console.log(strLine);
+    console.log('test version: ' + blTestingVersion);
+    console.log(getDate() + ' -> hooty-pubg server listening on port ' + port);
 });
 
 
 
 // ------------------------------------------------------------->
 // ? this doesn't seem to do anything...
-app.get('/', (req, res) => {
-    console.log('request:  ' + req);
-    console.log('response: ' + res);
+app.use('/', express.static(__dirname));    // so that root/pubg.js and root/index.html can be found
 
-    res.sendFile(__dirname + '/index.html');
-});
+// app.get('/', (req, res) => {
+//     //console.log('request:  ' + req);
+//     //console.log('response: ' + res);
 
+//     console.log(__dirname + '/index.html');
+//     res.sendFile(__dirname + '/index.html');
+// });
 
 
 // ------------------------------------------------------------->
@@ -492,6 +494,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     var match_data, telemetry_url;
 
+    //let allHumanNames = '';
+    let allBotNames   = '';   // store a long string of bot names so that they can be identified for classes
+
 
     // ---------------------------------------------------->
     //#region // ! [Region] Fetch telemetry from match data
@@ -570,10 +575,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
             telemetry_cache_file    = './cache/telemetry/' + path.parse(telemetry_url).base + '.gzip';
             break;
         }
-        // else if (match_data.included[i].type == 'participant') {
-            // get survivor names  here
+        else if (match_data.included[i].type == 'participant') {
+            //get survivor names  here
 
-            // deathType: byzone, byplayer, suicide, alive
+            //deathType: byzone, byplayer, suicide, alive
             
             // if (match_data.included[i].attributes.stats.deathType == "alive") {
             //     console.log('survivor: ' + match_data.included[i].attributes.stats.deathType + '/' + match_data.included[i].attributes.stats.name);
@@ -581,7 +586,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // else if (match_data.included[i].attributes.stats.deathType == "suicide") {
             //     console.log('suicide: ' + match_data.included[i].attributes.stats.deathType + '/' + match_data.included[i].attributes.stats.name);
             // }
-        // }
+            //allHumanNames += '|' + match_data.included[i].attributes.stats.name;
+        }
     }
 
 
@@ -664,8 +670,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     var ai_deaths       = 0;
     var human_deaths    = 0;
-    var ai_count        = 0;
-    var human_count     = 0;
+    //var ai_count        = 0;
+    //var human_count     = 0;
 
     var blBeforeMatchStart  = true;
     var matchStartTime      = null;
@@ -681,7 +687,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var arrKnocks       = [];   // [{ knocked_player, whodunit}] -> this is here to keep up with who is currently knocked in-game so you know if a player was thirsted
 
     // data for client response...
-    var clientPlayerCards   = [];   // [name, { activity }]  the damage to and from a player, and kills/death.
+    //var clientPlayerCards   = [];   // [name, { activity }]  the damage to and from a player, and kills/death.
     var arrPlayersDamageLog = [];   // [player_name, {playerDamageLog}]  -- this will be every player's damage/tagged log
     var playerTeamId        = null;
 
@@ -731,22 +737,35 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     }
         // }
 
+        // if (record._T == 'LogPlayerPosition') {
+        //     if (record.character.accountId.includes('ai.')) {
+
+        //         // add bot name to string if it isn't already there
+        //         if (!allBotNames.includes(record.character.name)) {
+        //             console.log(record.character.name);
+        //             allBotNames += '|' + record.character.name;
+        //         }
+        //     }
+        //     //debugger;
+        // }
+
+        // if (record._T == 'LogGameStatePeriodic') {
+        //     console.log(record);
+        //     debugger;
+        // }
+
     
 
-        //#region // ! [Region (pre-match)]
+        //#region // ! [Region (pre-match/post-match)]
         //
 
         // before the match starts, get teamId of each player and bot
         if (blBeforeMatchStart) {
             if (record._T == 'LogItemPickup' && record.item.itemId == 'Item_Back_B_01_StartParachutePack_C') {
 
-                if (hf.isBot(record.character.accountId)) { //} telemetry_response.data[i].character.accountId.includes('account.')){
-                    //console.log('bot: ' + record.character.name);
-                    ai_count++;
-                }
-                else {
-                    human_count++;
-                }
+                // if (!hf.isBot(record.character.accountId)) { //} telemetry_response.data[i].character.accountId.includes('account.')){
+                //     human_count++;
+                // }
 
                 arrPlayerTeam.push({ 'name': record.character.name, 'teamId': record.character.teamId});
                 
@@ -814,7 +833,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
          if (record._T == 'LogMatchStart') {
             console.log('(' + i_string.padStart(5, ' ') + ') ' + record._T + ' -> ' + hf.translateMapName(record.mapName));
 
-            console.log('humans: ' + human_count + ', bots: ' + ai_count);
+            //console.log('humans: ' + human_count + ', bots: ' + ai_count);
 
             matchStartTime = record._D;
 
@@ -890,6 +909,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.teamId              = record.victim.teamId;
                     _victim.healthBeforeDamage  = record.victim.health;
                     _victim.healthAfterDamage   = record.victim.health - record.damage;
+
+                    if (_attacker.isBot) {
+                        if (!allBotNames.includes(_attacker.name)) {
+                            allBotNames += '|' + _attacker.name;
+                        }
+                    }
+
+                    if (_victim.isBot) {
+                        if (!allBotNames.includes(_victim.name)) {
+                            allBotNames += '|' + _victim.name;
+                        }
+                    }
 
                     playerDamageLog.attacker    = _attacker;
                     playerDamageLog.victim      = _victim;
@@ -1135,6 +1166,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.isBot   = hf.isBot(record.victim.accountId);
                     _victim.teamId  = record.victim.teamId;
 
+                    if (_victim.isBot) {
+                        allBotNames += '|' + _victim.name; // for finding bots in tree
+                    }
+
                     playerDamageLog.attacker    = _attacker;
                     playerDamageLog.victim      = _victim;
 
@@ -1322,6 +1357,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.name        = record.victim.name;
                     _victim.isBot       = hf.isBot(record.victim.accountId);
                     _victim.teamId      = record.victim.teamId;
+
+                    if (_victim.isBot) {
+                        allBotNames += '|' + _victim.name; // for finding bots in tree
+                    }
 
                     playerDamageLog.attacker    = _attacker;
                     playerDamageLog.victim      = _victim;
@@ -1557,7 +1596,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //   hooty, winners
     //   bluezone, env
 
-    var hooty_response = { arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, arrEnvironmentKills, arrKillerVictims, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
+    var hooty_response = { allBotNames, arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, arrEnvironmentKills, arrKillerVictims, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
     res.send(hooty_response);
 
 })
