@@ -71,6 +71,11 @@ async function GetPlayerMatches() {
 	document.getElementById('fetching').style.display 	= "block";	// turn this on
 	document.getElementById('vueapp').style.display 	= "none";
 
+
+	// hide these if a new player is looked up
+	document.getElementById('div-analyzing').style.display = 'none';
+	document.getElementById('d3-tree01').style.display = 'none';
+
 	var axios_response = null;
 
 	try {
