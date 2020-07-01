@@ -12,7 +12,7 @@ let version 			= '2020.06.30 11:56 adding ID test'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -393,12 +393,14 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 				(table);
 	
 	
-	const width = 1200;                          // ? what is this the width of? path?
-	//const root = d3.hierarchy(data);            // https://github.com/d3/d3-hierarchy
-	const dx = 14;                              // $ node height ? (default 10)
-	const dy = width / (root.height + 1);       // root.height is how many descendants there are. this is where you can make the line lengths static, probably.
+	const width = 1200;                          	// ? what is this the width of? path?
+	//const root = d3.hierarchy(data);            	// https://github.com/d3/d3-hierarchy
+	const dx = 14;                              	// $ node height ? (default 10)
+	const dy = width / (root.height + 1);       	// root.height is how many descendants there are. this is where you can make the line lengths static, probably.
 	//const tree = d3.tree().nodeSize([dx, dy]);
 	const tree = d3.tree().nodeSize([dx, 150]); // static width for paths
+
+	const custom_width = 260 + (root.height * 150);
 
 	tree(root);
 
@@ -413,9 +415,9 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 
 	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg
 	const svg = d3
-	.select(document.getElementsByTagName("svg")[0])
-	.style("width", "100%")
-	.style("height", "100%"); // $ how can you know what the height should be?
+	.select(document.getElementById("d3-svg01"))
+	.style("width", custom_width)
+	.style("height", "1600"); // $ how can you know what the height should be?
 
 	const g = svg
 	.append("g")                        // svg <g> tag is a group of elements : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g#:~:text=The%20SVG%20element%20is,with%20the%20element.
@@ -509,9 +511,6 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 	//.attr("stroke-linejoin", "round")
 	//.attr("stroke-width", 2);
 
-	const text_stuff = d3.selectAll('text');
-
-	//debugger;
 
 	
 			

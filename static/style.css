@@ -54,6 +54,12 @@ text.lightText {
 	fill: #dcddde;
 }
 
-svg {
-	border: 1px solid whitesmoke;
+svg#d3-svg01 {
+	border: 1px solid steelblue;
+	
 }
+
+div#d3-tree01 {
+	border: 1px solid #dcddde;
+}
+
