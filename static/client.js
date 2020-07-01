@@ -192,12 +192,28 @@ async function GetTelemetry(_matchID) {
 	// clear out the svg D3 tree if there is anything in there...
 	document.getElementById('d3-svg01').innerHTML = '';
 	
-	// create D3 tree...
-	CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams, axios_response.data.allBotNames, axios_response.data.allHumanNames);
+
+	try {
+		// create D3 tree...
+		CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams, axios_response.data.allBotNames, axios_response.data.allHumanNames);
+
+		div_analyze.style.display 	= 'none';
+		svg_d3tree01.style.display 	= 'block';
+
+	} catch (error) {
+
+		if (error.message == 'cycle') {
+			alert('Cannot draw tree since two people killed each other and therefore destroys hierarchy. This is a bug I need to fix. I apologize.')
+		}
+		else {
+			alert('D3 tree error: ' + error.message);
+		}
+
+		div_analyze.style.display 	= 'none';
+		svg_d3tree01.style.display 	= 'none';
+	}
 
 
-	div_analyze.style.display 	= 'none';
-	svg_d3tree01.style.display 	= 'block';
 
 
 
