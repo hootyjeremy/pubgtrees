@@ -8,11 +8,11 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.06.30 11:56 adding ID test'
+let version 			= '2020.07.01 -- 10:40pm (tree auto size)'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= true;
+const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -43,6 +43,9 @@ var total_matches 	= 0;
 // $ FLOOD PREVENTION
 // $ NEED TO BE ABLE TO SUPPRESS GETTING MATCHES UNTIL A RESPONSE COMES BACK
 async function GetPlayerMatches() {
+
+	//#region // ! [Region] GetPlayerMatches()
+	//
 
 	document.getElementById('d3-svg01').innerHTML = '';
 
@@ -150,6 +153,9 @@ async function GetPlayerMatches() {
 	document.getElementById('btnNextMatches').style.display		= "block";
 	document.getElementById('vueapp').style.display 			= "block";
 	document.getElementById('fetching').style.display 			= "none";	// turn this back off
+
+	//#endregion
+
 }
 
 
@@ -181,7 +187,13 @@ async function GetTelemetry(_matchID) {
 	} 
 	catch (error) 
 	{
-		console.log('error getting telemetry from hootyserver: ' + error.response.status + ',' + error.response.statusText)
+		//console.log('error getting telemetry from hootyserver: ' + error.response.status + ',' + error.response.statusText)
+		alert('Error getting tree details: ' + error.message);
+
+		document.getElementById('div-analyzing').style.display 	= 'none';
+		document.getElementById('d3-tree01').style.display 		= 'none';
+
+		return;
 	}	
 
 	//console.log('hootyserver.response:                     ' + axios_response.status + ', ' + axios_response.statusText);
@@ -220,7 +232,6 @@ async function GetTelemetry(_matchID) {
 		div_analyze.style.display 	= 'none';
 		svg_d3tree01.style.display 	= 'none';
 	}
-
 
 
 
@@ -365,6 +376,8 @@ async function GetTelemetry(_matchID) {
 
 }
 
+
+
 function strBot(bot) {
 	if (bot) {
 		return 'BOT  ';
@@ -393,31 +406,53 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 				(table);
 	
 	
-	const width = 1200;                          	// ? what is this the width of? path?
+	const path_width = 1200;                        // ? what is this the width of? path?
 	//const root = d3.hierarchy(data);            	// https://github.com/d3/d3-hierarchy
-	const dx = 14;                              	// $ node height ? (default 10)
-	const dy = width / (root.height + 1);       	// root.height is how many descendants there are. this is where you can make the line lengths static, probably.
+	const dx = 14;                              	// node height? (default 10)
+	const dy = path_width / (root.height + 1);       	// root.height is how many descendants there are. this is where you can make the line lengths static, probably.
 	//const tree = d3.tree().nodeSize([dx, dy]);
-	const tree = d3.tree().nodeSize([dx, 150]); // static width for paths
+	const tree = d3.tree().nodeSize([dx, 130]); 	// static width for paths
 
-	const custom_width = 260 + (root.height * 150);
+	let custom_width  = 200 + (root.height * 130);
+	let custom_height = 0;
+	
+	let custom_neg_height = 0;
+	let custom_pos_height = 0;
 
 	tree(root);
 
 	let x0 = Infinity;
 	let x1 = -x0;
 	root.each((d) => {
-	//console.log(d.data.name);
-	if (d.x > x1) x1 = d.x;
-	if (d.x < x0) x0 = d.x;
+		//console.log(d.data.name);
+		if (d.x > x1) x1 = d.x;
+		if (d.x < x0) x0 = d.x;
+
+		if (d.x < 0) {
+			// keep up with the lowest negative value...
+			if (d.x < custom_neg_height) {
+				custom_neg_height = d.x;
+				//console.log('new neg: ' + d.id + ': ' + d.x);
+			}
+		}
+		else {
+			// keep up with the hightest positive value...
+			if (d.x > custom_pos_height) {
+				custom_pos_height = d.x;
+				//console.log('new pos: ' + d.id + ': ' + d.x);
+			}
+		}
+
 	});
+
+	custom_height = (Math.abs(custom_neg_height) + custom_pos_height) + 30;
 
 
 	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg
 	const svg = d3
 	.select(document.getElementById("d3-svg01"))
-	.style("width", custom_width)
-	.style("height", "1600"); // $ how can you know what the height should be?
+	.style("width",  custom_width)
+	.style("height", custom_height);
 
 	const g = svg
 	.append("g")                        // svg <g> tag is a group of elements : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g#:~:text=The%20SVG%20element%20is,with%20the%20element.
@@ -470,19 +505,28 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 		if (d.data.name == strPlayerName) {
 			return 'selectedPlayer';
 		}
-		else if (d.data.name == 'match' || d.data.name == 'winner' || d.data.name == 'winners' || d.data.name == 'environment kills' || d.data.name == 'self kills') {
-			return 'root';
+		else if (d.data.name == 'match' || d.data.name == 'winner' || d.data.name == 'winners' || d.data.name == 'environment kills' || d.data.name == 'self kills' || 
+				 d.data.name.includes('*')) {
+			return 'categories';
 		}
 		else {
 
 			// check if player is a bot. if so, shade the name...
 
-			if (allBotNames.includes(d.data.name)) {
-				// this is a bot
-				return 'darkText';
+			// if (allBotNames.includes(d.data.name)) {
+			// 	// this is a bot
+			// 	return 'darkText';
+			// }
+			// else {
+			// 	return 'lightText';
+			// }
+
+			if (allHumanNames.includes(d.data.name)) {
+				return 'lightText';
 			}
 			else {
-				return 'lightText';
+				// this is a bot
+				return 'darkText';
 			}
 		}
 
@@ -500,7 +544,7 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 	//.attr('class', 'selected')
 	// events: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/pointer-events
 	.attr("dy", "0.5em") // "dy", "0.31em"
-	.attr("x", d => (d.children ? 6 : 6))                    // $ seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
+	.attr("x", d => (d.children ? 6 : 6))                    	// $ seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
 	.attr("text-anchor", d => (d.children ? "start" : "start")) // $ where the text is in relation to the node dot    // "text-anchor", d => (d.children ? "end" : "start")
 	//.attr('onclick', ??)
 	.text(d => d.data.name)

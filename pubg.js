@@ -21,7 +21,7 @@ const { debug } = require('console');
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = true;
+const blTestingVersion = !true;
 
 
 
@@ -573,7 +573,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // get the telemetry url from the asset property of match_data
             telemetry_url           = match_data.included[i].attributes.URL;
             telemetry_cache_file    = './cache/telemetry/' + path.parse(telemetry_url).base + '.gzip';
-            break;
+            //break;
         }
         else if (match_data.included[i].type == 'participant') {
             //get survivor names  here
