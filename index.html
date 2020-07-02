@@ -40,17 +40,13 @@
 
 <center>
 
+<br>
 
 <div id='search-div'>
 
 	<br>
 	<br>
 
-	(alpha version : 2020.07.01 _ 001)
-
-	<br>
-	<br>
-	<br>
 
 	<!--
 	<input type="radio" name="platform" id="rdoSteam" value="steam" checked>Steam
@@ -61,7 +57,7 @@
 	<br>
 	-->
 
-	<select id="slcPlatform">
+	<select id="slcPlatform" style='width: 100;'>
 		<option value="psn">PS4</option>>
 		<option value="stadia">Stadia</option>>
 		<option value="steam" selected="selected">Steam (PC)</option>
@@ -69,10 +65,12 @@
 		<option value="xbox">Xbox</option>>
 	</select>
 	
-	<input  id="inputPlayerName" placeholder="Player name" onsubmit="btnSearchPlayer_Click()">
-	<button id="btnSearchPlayer" onclick="btnSearchPlayer_Click()">Search</button>
+	<input  id="inputPlayerName" placeholder="Player name" style='width: 300;' onsubmit="btnSearchPlayer_Click()">
+	<button id="btnSearchPlayer" style='width: 100;' onclick="btnSearchPlayer_Click()">Search</button>
 	
 	<br>
+	<br>
+	(beta version : 2020.07.02 _ 001)
 	<br>
 	<br>
 	
@@ -115,17 +113,6 @@
 	<br>
 
 	<table>
-		<tr> 
-			<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none;">Previous 10 Matches</button></td> 
-			<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none;">Next 10 Matches</button></td>  
-		</tr>
-	</table>
-
-	<br>
-	<br>
-
-
-	<table>
 		<thead>
 			<tr>
 				<th>Age</th>
@@ -163,6 +150,15 @@
 	</table>
 
 	<br>
+
+	<table>
+		<tr> 
+			<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none; width: 160; margin-right: 10;">Previous 10 Matches</button></td> 
+			<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none; width: 160; margin-left: 10;">Next 10 Matches</button></td>  
+		</tr>
+	</table>
+	<br>
+
 </div>
 
 <br>
@@ -175,16 +171,13 @@
 	<svg id='d3-svg01' style='height: 2000; width:3000; overflow: auto;'></svg>
 </div> -->
 <div id='d3-tree01' style='display: none; width: auto; overflow: auto;'>
-	<br>
+		<br>
 		Kill Tree
 		<br>
-		<br>
 		<svg id='d3-svg01' style='overflow: auto;'></svg>
-	<br>
-	<br>
 </div>
 
-
+<br>
 
 <!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
 

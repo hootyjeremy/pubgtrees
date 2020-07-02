@@ -2,7 +2,7 @@ body {
 	font-family: 'Roboto Condensed', sans-serif;
 	font-size: 14px;
     color: rgb(240, 234, 232);
-    background-color: #36363a;
+    background-color: #1b1b1b;
 }
 
 button {
@@ -75,12 +75,15 @@ text.lightText {
 
 svg#d3-svg01 {
 	border: 2px solid #60b6f0;
-	border-radius: 10px;	
+	border-radius: 10px;
+	margin-top: 10;
+	margin-bottom: 20;
 }
 
 div#search-div, div#vueapp, div#d3-tree01 {
-	border: 2px solid #efb8df;
 	border-radius: 10px;
 	background-color: #414144;
+	margin-left: 14;
+	margin-right: 14;
 }
 

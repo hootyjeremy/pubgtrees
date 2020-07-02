@@ -12,7 +12,7 @@ let version 			= '2020.07.01 -- 10:40pm (tree auto size)'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -168,8 +168,6 @@ async function GetTelemetry(_matchID) {
 	const svg_d3tree01	= document.getElementById('d3-tree01');
 
 	div_analyze.style.display 	= 'block';
-
-
 	svg_d3tree01.style.display 	= 'none';
 
 	try {
@@ -381,17 +379,6 @@ async function GetTelemetry(_matchID) {
 
 	//#endregion
 
-}
-
-
-
-function strBot(bot) {
-	if (bot) {
-		return 'BOT  ';
-	}
-	else {
-		return 'HUMAN';
-	}
 }
 
 
