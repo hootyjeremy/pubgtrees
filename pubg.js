@@ -21,7 +21,7 @@ const { debug } = require('console');
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = !true;
+const blTestingVersion = true;
 
 
 
@@ -1461,40 +1461,40 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     //#region // ! [Region] Create csv data for D3
     //
-    // ! root (match)   -> winners
-    // !                    -> survivor 01
-    // !                    -> survivor 02 etc.
-    // !                -> environment kills
-    // !                -> self kills
+    // root (match) -> winners
+    //                  -> survivor 01
+    //                  -> survivor 02 etc.
+    //              -> environment kills
+    //              -> self kills
 
     let csvDataForD3    = 'name,parent\n' +
-                          'match,\n';
+                          'Match,\n';
 
-    // ---------------------------
+    // [Winners branch] ------------------
     if (arrSurvivors.length > 1) {
-        csvDataForD3 += 'winners,match\n';
+        csvDataForD3 += 'Winners,Match\n';
 
         arrSurvivors.forEach(element => {
-            csvDataForD3 += element.name + ',winners\n'
+            csvDataForD3 += element.name + ',Winners\n'
         })
     }
     else {
-        csvDataForD3 += 'winner,match\n';
-        csvDataForD3 += arrSurvivors[0].name + ',winner\n';
+        csvDataForD3 += 'Winner,Match\n';
+        csvDataForD3 += arrSurvivors[0].name + ',Winner\n';
     }
 
-    // ----------------------------------
+    // [Environment Kills] -------------------------
     if (arrEnvironmentKills.length > 0) {
-        csvDataForD3 += 'environment kills,match\n';
+        csvDataForD3 += 'Environment kills,Match\n';
 
         // arrEnvironmentKills.forEach(element => {
         //     csvDataForD3 += element.damageCauserName + ',environment kills\n'
         // })
     }
 
-    // ---------------------------
+    // [Self Kills] -------------------------
     if (arrSelfKills.length > 0) {
-        csvDataForD3 += 'self kills,match\n';
+        csvDataForD3 += 'Self kills,Match\n';
 
         arrSelfKills.forEach(element => {
             //csvDataForD3 += element + ',self kills\n'
@@ -1502,7 +1502,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }
     else {
         // $ this is not really correct but make a default path until this is cleared up
-        csvDataForD3 += 'self kills,match\n';
+        // $ the problem seems to be that there are registered self-kills that aren't getting put into the arrSelfKills array somehow
+        csvDataForD3 += 'Self kills,Match\n';
     }
 
 
@@ -1520,7 +1521,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // create parent connection for this environment kill type
             if (!tmpEnv.includes(element.killer)) {
                 tmpEnv += element.killer + ',';
-                csvDataForD3 += element.killer + ',environment kills\n';
+                csvDataForD3 += element.killer + ',Environment kills\n';
             }
 
             csvDataForD3 += element.victim + ',' + element.killer + '\n';
@@ -1531,7 +1532,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // $ SELF KILLS CURRENTLY BREAK, SO GET READY TO FIX THAT
             // $ AMBIGUOUS means they already exist?
             if (element.killer == element.victim) {
-                csvDataForD3 += element.victim + ',self kills\n';
+                csvDataForD3 += element.victim + ',Self kills\n';
             }
             else {
                 csvDataForD3 += element.victim + ',' + element.killer + '\n';

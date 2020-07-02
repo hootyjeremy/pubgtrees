@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap" rel="stylesheet">
 
+
 <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> Dev Version -->
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script> <!-- Dev Version -->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -37,51 +38,50 @@
 
 
 
-
-
 <center>
+
+
+<div id='search-div'>
+
+	<br>
+	<br>
+
+	(alpha version : 2020.07.01 _ 001)
+
+	<br>
+	<br>
+	<br>
+
+	<!--
+	<input type="radio" name="platform" id="rdoSteam" value="steam" checked>Steam
+	<input type="radio" name="platform" id="rdoPS4" value="psn">PS4
+	<input type="radio" name="platform" id="rdoXbox" value="xbox">Xbox
+	<input type="radio" name="platform" id="rdoConsole" value="console">Console
+	<br>
+	<br>
+	-->
+
+	<select id="slcPlatform">
+		<option value="psn">PS4</option>>
+		<option value="stadia">Stadia</option>>
+		<option value="steam" selected="selected">Steam (PC)</option>
+		<option value="tournament">Tournament</option>>
+		<option value="xbox">Xbox</option>>
+	</select>
+	
+	<input  id="inputPlayerName" placeholder="Player name" onsubmit="btnSearchPlayer_Click()">
+	<button id="btnSearchPlayer" onclick="btnSearchPlayer_Click()">Search</button>
+	
+	<br>
+	<br>
+	<br>
+	
+</div>
+
+
 <br>
 <br>
 
-alpha version [2020.07.01 -- 10:40pm]
-
-<br>
-<br>
-<br>
-
-<!--
-<input type="radio" name="platform" id="rdoSteam" value="steam" checked>Steam
-<input type="radio" name="platform" id="rdoPS4" value="psn">PS4
-<input type="radio" name="platform" id="rdoXbox" value="xbox">Xbox
-<input type="radio" name="platform" id="rdoConsole" value="console">Console
-<br>
-<br>
--->
-
-
-<select id="slcPlatform">
-	<option value="psn">PS4</option>>
-	<option value="stadia">Stadia</option>>
-	<option value="steam" selected="selected">Steam (PC)</option>
-	<option value="tournament">Tournament</option>>
-	<option value="xbox">Xbox</option>>
-</select>
-
-<input  id="inputPlayerName" placeholder="Player name" onsubmit="btnSearchPlayer_Click()">
-<button id="btnSearchPlayer" onclick="btnSearchPlayer_Click()">Search</button>
-
-<br>
-<br>
-<br>
-
-<table>
-	<tr> 
-		<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none;">Previous 10 Matches</button></td> 
-		<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none;">Next 10 Matches</button></td>  
-	</tr>
-</table>
-
-<br>
 
 <div id="fetching" style="display:none;">
 	fetching...
@@ -115,6 +115,17 @@ alpha version [2020.07.01 -- 10:40pm]
 	<br>
 
 	<table>
+		<tr> 
+			<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none;">Previous 10 Matches</button></td> 
+			<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none;">Next 10 Matches</button></td>  
+		</tr>
+	</table>
+
+	<br>
+	<br>
+
+
+	<table>
 		<thead>
 			<tr>
 				<th>Age</th>
@@ -131,8 +142,8 @@ alpha version [2020.07.01 -- 10:40pm]
 			</tr>
 		</thead>
 		<tbody>
-			<tr style="border:1px; border-color:#303030; outline: thin solid"
-			  	v-for='match in match_data' :match_prop='match' :key='match.matchID'
+			<tr style="border-color:#303030; outline: thin solid"
+				v-for='match in match_data' :match_prop='match' :key='match.matchID'
 			> 					
 				<td style="padding: 4px; text-align:left;">{{match.timeSinceMatch}}</td> 
 				<td style="padding: 4px; text-align:left;">{{match.mapName}}</td>
@@ -165,7 +176,10 @@ alpha version [2020.07.01 -- 10:40pm]
 </div> -->
 <div id='d3-tree01' style='display: none; width: auto; overflow: auto;'>
 	<br>
-	<svg id='d3-svg01' style='overflow: auto;'></svg>
+		Kill Tree
+		<br>
+		<br>
+		<svg id='d3-svg01' style='overflow: auto;'></svg>
 	<br>
 	<br>
 </div>

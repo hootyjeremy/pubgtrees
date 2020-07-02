@@ -12,7 +12,7 @@ let version 			= '2020.07.01 -- 10:40pm (tree auto size)'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -28,7 +28,6 @@ else {
 
 var strPlatform, strPlayerName;
 var prevPlatform, prevPlayerName;	// these are used to reset match_floor if searching for a new player
-
 
 var url, player_url, match_url, telemetry_url = ""; // store the match ID's of the player
 //var response; // fetch() responses
@@ -74,10 +73,10 @@ async function GetPlayerMatches() {
 	document.getElementById('fetching').style.display 	= "block";	// turn this on
 	document.getElementById('vueapp').style.display 	= "none";
 
-
 	// hide these if a new player is looked up
-	document.getElementById('div-analyzing').style.display = 'none';
-	document.getElementById('d3-tree01').style.display = 'none';
+	document.getElementById('div-analyzing').style.display 	= 'none';
+	document.getElementById('d3-tree01').style.display 		= 'none';
+
 
 	var axios_response = null;
 
@@ -169,6 +168,8 @@ async function GetTelemetry(_matchID) {
 	const svg_d3tree01	= document.getElementById('d3-tree01');
 
 	div_analyze.style.display 	= 'block';
+
+
 	svg_d3tree01.style.display 	= 'none';
 
 	try {
@@ -215,7 +216,8 @@ async function GetTelemetry(_matchID) {
 
 	try {
 		// create D3 tree...
-		CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams, axios_response.data.allBotNames, axios_response.data.allHumanNames);
+		CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams, axios_response.data.allBotNames, axios_response.data.allHumanNames,
+						 axios_response.data.arrTeams);
 
 		div_analyze.style.display 	= 'none';
 		svg_d3tree01.style.display 	= 'block';
@@ -234,6 +236,11 @@ async function GetTelemetry(_matchID) {
 	}
 
 
+
+	// $ GET ALL THIS stuff to happen inside a function. this will need to fire off on the "view" button for the searched player
+	// $ and also for any clicked human player in the tree to show damage and details and also highlight teammates and killer/teammates.
+	// ? the question is how do you set this up initially (vue?) so that it can work on the first search and update for later searches.
+	// ? make the classes into vue variables and update vue objects (and the classes in turn) when necessary.
 
 
 	//#region // ! [Console log stuff]
@@ -397,7 +404,7 @@ function strBot(bot) {
 //#region // ! [Region] Build kill tree
 //
 
-function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
+function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames, arrTeams) {
 
 	let  table = d3.csvParse(csvData);
 	const root = d3.stratify()
@@ -445,7 +452,7 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 
 	});
 
-	custom_height = (Math.abs(custom_neg_height) + custom_pos_height) + 30;
+	custom_height = (Math.abs(custom_neg_height) + custom_pos_height) + 38;
 
 
 	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg
@@ -505,7 +512,7 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 		if (d.data.name == strPlayerName) {
 			return 'selectedPlayer';
 		}
-		else if (d.data.name == 'match' || d.data.name == 'winner' || d.data.name == 'winners' || d.data.name == 'environment kills' || d.data.name == 'self kills' || 
+		else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || 
 				 d.data.name.includes('*')) {
 			return 'categories';
 		}
@@ -531,6 +538,7 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames) {
 		}
 
 		// $ might be better to build a class string and add "teammate" class if this player is a teammate of the selected player
+		// ? can you set the class to a {{vue_something}} variable and then just update that variable initially and then on each new player click/select?
 
 	})
 	.attr('id', d=> {
@@ -594,7 +602,6 @@ function btnNext_Click() {
 
 
 	//vm.getMatchData([]); // clear out the table while fetching...
-
 
 	prelim();
 }

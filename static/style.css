@@ -1,38 +1,37 @@
 body {
-	font-family: 'Open Sans Condensed', sans-serif;
-	font-size: 12px;
+	font-family: 'Roboto Condensed', sans-serif;
+	font-size: 14px;
     color: rgb(240, 234, 232);
-    background-color: #414144;
+    background-color: #36363a;
 }
 
 button {
-	font-family: 'Roboto Condensed', Calibri, sans-serif;
+	font-family: 'Roboto Condensed', sans-serif;
 	font-size: 14px;
     color: rgb(240, 234, 232);
-    background-color: #414144;
+    background-color: #82759c;
 	border: 1px solid whitesmoke;
 }
 
 input {
-	font-family: 'Roboto Condensed', Calibri, sans-serif;
+	font-family: 'Roboto Condensed', sans-serif;
 	font-size: 14px;
 }
 
 select {
-	font-family: 'Roboto Condensed', Calibri, sans-serif;
+	font-family: 'Roboto Condensed', sans-serif;
 	font-size: 14px;
 }
 
+text {
+	font-family: 'Roboto Condensed', sans-serif;
+	font-size: 14px;
+}
 
 th, td {
 	color: #dcddde;
 }
 
-
-text {
-	font-family: 'Roboto Condensed', Calibri, sans-serif;
-	font-size: 14px;
-}
 
 text.categories {
 	fill: #c0ace0;
@@ -42,9 +41,29 @@ text.bot {
 	fill: #60b6f0;
 }
 
+
+
 text.selectedPlayer {
 	fill: #60b6f0;
 }
+
+text.playerTeammate {
+	fill: #7dde98;
+}
+
+text.killer {
+	fill: #f07d60;
+}
+
+text.killerTeammate {
+	fill: #ffbb71;
+}
+
+text.tradedPaint {
+	fill: #efb8df;
+}
+
+
 
 text.darkText {
 	fill: #98a0a6;
@@ -55,11 +74,13 @@ text.lightText {
 }
 
 svg#d3-svg01 {
-	border: 1px solid steelblue;
-	
+	border: 2px solid #60b6f0;
+	border-radius: 10px;	
 }
 
-div#d3-tree01 {
-	border: 1px solid #dcddde;
+div#search-div, div#vueapp, div#d3-tree01 {
+	border: 2px solid #efb8df;
+	border-radius: 10px;
+	background-color: #414144;
 }
 
