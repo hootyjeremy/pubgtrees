@@ -12,7 +12,7 @@ let version 			= '2020.07.01 -- 10:40pm (tree auto size)'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= true;
+const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -506,14 +506,6 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames, arrTeam
 		else {
 
 			// check if player is a bot. if so, shade the name...
-
-			// if (allBotNames.includes(d.data.name)) {
-			// 	// this is a bot
-			// 	return 'darkText';
-			// }
-			// else {
-			// 	return 'lightText';
-			// }
 
 			if (allHumanNames.includes(d.data.name)) {
 				return 'lightText';

@@ -77,3 +77,18 @@ var vm = new Vue({
     },
     
 })
+
+
+// var vmTreeD3 = new Vue({
+// 	el: "#d3-svg01",
+// 	data: {
+// 		// css text classes
+// 		classSearchedPlayer: 	'searchedPlayer',
+// 		classSelectedPlayer: 	'selectedPlayer',
+// 		classPlayerTeammate: 	'playerTeammate',
+// 		classKiller: 			'killer',
+// 		classKillerTeammate: 	'killerTeammate',
+// 		classTradedPaint: 		'tradedPaint',
+// 	},
+
+// });
