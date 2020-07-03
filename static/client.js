@@ -8,11 +8,11 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.03 _ 001 (redirect)'
+let version 			= '2020.07.03 _ 002'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -22,10 +22,8 @@ if (!blTestingVersion) {
 	if (location.protocol == 'http:') {
 		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
 		
-		location.replace('https://hooty-pubg01.herokuapp.com');
-		
+		location.replace('https://hooty-pubg01.herokuapp.com');		
 	}
-
 }
 else {
 	console.log('testing version: ' + version);
@@ -193,8 +191,8 @@ async function GetTelemetry(_matchID) {
 		axios_response = await axios.get(hooty_server_url + '/getmatchtelemetry', {
 			params: {
 				'platform'		:  strPlatform,
-				'player_name' 	:  strPlayerName,
 				'matchID'		: _matchID,
+				'player_name' 	:  strPlayerName,
 			},
 			headers: {
 				'Content-Encoding': 'gzip',
@@ -229,6 +227,8 @@ async function GetTelemetry(_matchID) {
 	document.getElementById('d3-svg01').innerHTML = '';
 	
 
+
+	// ! D3 Tree Stuff...
 	try {
 		// create D3 tree...
 		CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams, axios_response.data.allBotNames, axios_response.data.allHumanNames,
