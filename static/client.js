@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.02 _ 002 (ui updates)'
+let version 			= '2020.07.03 _ 001 (redirect)'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -18,9 +18,26 @@ if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
 	defaultPlayer 		= '';
 	console.log('live version: ' + version);
+
+	if (location.protocol == 'http:') {
+		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
+		
+		location.replace('https://hooty-pubg01.herokuapp.com');
+		
+	}
+
 }
 else {
 	console.log('testing version: ' + version);
+	console.log('you are at: ' + location.href);
+
+	// console.log(location.protocol);
+	// console.log(location.host);
+	// console.log(location.pathname);
+
+	// const tmpURL = location.protocol + '//' + location.host + location.pathname;
+
+	// console.log(tmpURL);
 }
 // --------------------------------------------------------->
 

@@ -21,7 +21,7 @@ const { debug } = require('console');
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = !true;
+const blTestingVersion = true;
 
 
 
@@ -1088,7 +1088,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             })
 
             if (remove_index > -1){
-                arrKnocks.splice(remove_index, 1);  // $ may need this to only splice if (remove_index > -1)
+                arrKnocks.splice(remove_index, 1);
             }
 
 
