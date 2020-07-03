@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.01 -- 10:40pm (tree auto size)'
+let version 			= '2020.07.02 -- 10:31pm (ui updates)'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -508,11 +508,11 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames, arrTeam
 			// check if player is a bot. if so, shade the name...
 
 			if (allHumanNames.includes(d.data.name)) {
-				return 'lightText';
+				return 'humanPlayer';
 			}
 			else {
 				// this is a bot
-				return 'darkText';
+				return 'botPlayer';
 			}
 		}
 

@@ -28,20 +28,26 @@ text {
 	font-size: 14px;
 }
 
+table {
+	font-size: 14px;
+}
+
+
+
+tr.matchRows {
+	background-color: #313135;
+}
+
 th, td {
 	color: #dcddde;
+	padding: 6px;
 }
+
 
 
 text.categories {
 	fill: #c0ace0;
 }
-
-text.bot {
-	fill: #60b6f0;
-}
-
-
 
 text.selectedPlayer {
 	fill: #60b6f0;
@@ -63,21 +69,22 @@ text.tradedPaint {
 	fill: #efb8df;
 }
 
+text.humanPlayer {
+	fill: #dcddde;
+}
 
-
-text.darkText {
+text.botPlayer {
 	fill: #98a0a6;
 }
 
-text.lightText {
-	fill: #dcddde;
-}
 
 svg#d3-svg01 {
 	border: 2px solid #60b6f0;
 	border-radius: 10px;
-	margin-top: 10;
+	margin-top: 20;
 	margin-bottom: 20;
+	margin-left: 20;
+	margin-right: 20;
 }
 
 div#search-div, div#vueapp, div#d3-tree01 {
@@ -86,4 +93,5 @@ div#search-div, div#vueapp, div#d3-tree01 {
 	margin-left: 14;
 	margin-right: 14;
 }
+
 

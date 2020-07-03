@@ -63,7 +63,8 @@ var vm = new Vue({
             }
 
             if (matchRoster.length == 1){
-                strRoster = '-';
+				//strRoster = '-';
+				strRoster = player_name;
             }
 
 			return strRoster;
@@ -89,6 +90,7 @@ var vm = new Vue({
 // 		classKiller: 			'killer',
 // 		classKillerTeammate: 	'killerTeammate',
 // 		classTradedPaint: 		'tradedPaint',
+// 		class:'botPlayer'
 // 	},
 
 // });

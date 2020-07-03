@@ -5,7 +5,6 @@
 	<style type="text/css"></style>
 	<link rel="stylesheet" type="text/css" href="static/style.css" />
 
-	<link href="https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap" rel="stylesheet">
 	
 	
@@ -75,7 +74,7 @@
 	
 	<br>
 	<br>
-	(beta version : 2020.07.02 _ 001)
+	(beta version : 2020.07.02 _ 002)
 	<br>
 	<br>
 	
@@ -134,22 +133,22 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr style="border-color:#303030; outline: thin solid"
+			<tr class='matchRows'
 				v-for='match in match_data' :match_prop='match' :key='match.matchID'
 			> 					
-				<td style="padding: 4px; text-align:left;">{{match.timeSinceMatch}}</td> 
-				<td style="padding: 4px; text-align:left;">{{match.mapName}}</td>
-				<td style="padding: 4px; text-align:center;">{{match.participantCount}}</td>
-				<td style="padding: 4px; text-align:center;">{{resolveMatchType(match.matchType)}}</td>
-				<td style="padding: 4px; text-align:left;">{{match.gameMode}}</td> 
-				<td style="padding: 4px; text-align:center;">#{{match.winPlace}}</td> 
+				<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{match.timeSinceMatch}}</td> 
+				<td style="text-align:left; width: 60px">{{match.mapName}}</td>
+				<td style="text-align:center; width: 50px">{{match.participantCount}}</td>
+				<td style="text-align:center; width: 80px">{{resolveMatchType(match.matchType)}}</td>
+				<td style="text-align:center; width: 80px">{{match.gameMode}}</td> 
+				<td style="text-align:center; width: 50px">#{{match.winPlace}}</td> 
 
-				<td style="padding: 4px; text-align:center;">{{match.damageDealt}}</td> 
-				<td style="padding: 4px; text-align:center;">{{match.kills}}</td> 
-				<td style="padding: 4px; text-align:center;">{{resolveKnocks(match.gameMode, match.DBNOs)}}</td> 
+				<td style="text-align:center; width: 50px">{{match.damageDealt}}</td> 
+				<td style="text-align:center; width: 50px">{{match.kills}}</td> 
+				<td style="text-align:center; width: 50px">{{resolveKnocks(match.gameMode, match.DBNOs)}}</td> 
 
-				<td style="padding: 4px; text-align:left;">{{printRoster(match.teamRoster, match.strPlayerName)}}</td>
-				<td style="padding: 4px; text-align:left;"> <button v-on:click="analyzeMatch(match.matchID)">View</button> </td>
+				<td style="text-align:left;">{{printRoster(match.teamRoster, match.strPlayerName)}}</td>
+				<td style="border-radius: 0px 6px 6px 0px; text-align:left;"> <button v-on:click="analyzeMatch(match.matchID)" style='width: 60; margin-left: 10; margin-right: 10'>View</button> </td>
 			</tr>
 		</tbody>
 	</table>
@@ -158,8 +157,8 @@
 
 	<table>
 		<tr> 
-			<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none; width: 160; margin-right: 10;">Previous 10 Matches</button></td> 
-			<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none; width: 160; margin-left: 10;">Next 10 Matches</button></td>  
+			<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none; width: 160; margin-right: 10;">Previous matches</button></td> 
+			<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none; width: 160; margin-left: 10;">Next matches</button></td>  
 		</tr>
 	</table>
 	<br>
@@ -176,9 +175,6 @@
 	<svg id='d3-svg01' style='height: 2000; width:3000; overflow: auto;'></svg>
 </div> -->
 <div id='d3-tree01' style='display: none; width: auto; overflow: auto;'>
-		<br>
-		Kill Tree
-		<br>
 		<svg id='d3-svg01' style='overflow: auto;'></svg>
 </div>
 
