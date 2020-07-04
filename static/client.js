@@ -12,7 +12,7 @@ let version 			= '2020.07.03 _ 002'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -52,6 +52,8 @@ var telemetry_response_json;
 
 var match_floor		= 0;
 var total_matches 	= 0;
+
+let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
 
 
 // $ FLOOD PREVENTION
@@ -177,7 +179,7 @@ async function GetPlayerMatches() {
 async function GetTelemetry(_matchID) {
 	console.log('GetTelemetry() -> ' + _matchID + ', ' + strPlatform + '/' + strPlayerName);
 
-	var axios_response = null;
+	axios_telemetry_response = null;
 
 	const div_analyze 	= document.getElementById('div-analyzing');
 	const svg_d3tree01	= document.getElementById('d3-tree01');
@@ -188,7 +190,7 @@ async function GetTelemetry(_matchID) {
 	try {
 		// get telemetry for this match for this platform/player
 
-		axios_response = await axios.get(hooty_server_url + '/getmatchtelemetry', {
+		axios_telemetry_response = await axios.get(hooty_server_url + '/getmatchtelemetry', {
 			params: {
 				'platform'		:  strPlatform,
 				'matchID'		: _matchID,
@@ -210,15 +212,15 @@ async function GetTelemetry(_matchID) {
 		return;
 	}	
 
-	//console.log('hootyserver.response:                     ' + axios_response.status + ', ' + axios_response.statusText);
-	// console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_response.data.pubgApiMatchResponseInfo.hootyserver);
-	// console.log('pubgApiMatchResponseInfo.status:          ' + axios_response.data.pubgApiMatchResponseInfo.status);
-	// console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_response.data.pubgApiMatchResponseInfo.statusText);
-	// console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_response.data.pubgApiTelemetryResponseInfo.hootyserver);
-	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_response.data.pubgApiTelemetryResponseInfo.status);
-	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_response.data.pubgApiTelemetryResponseInfo.statusText);
-	console.log('axios_response.data...');
-	console.dir(axios_response.data);
+	//console.log('hootyserver.response:                     ' + axios_telemetry_response.status + ', ' + axios_telemetry_response.statusText);
+	// console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.hootyserver);
+	// console.log('pubgApiMatchResponseInfo.status:          ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.status);
+	// console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.statusText);
+	// console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
+	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
+	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
+	console.log('axios_telemetry_response.data...');
+	console.dir(axios_telemetry_response.data);
 
 
 
@@ -231,8 +233,7 @@ async function GetTelemetry(_matchID) {
 	// ! D3 Tree Stuff...
 	try {
 		// create D3 tree...
-		CreateTreeFromD3(axios_response.data.csvDataForD3, axios_response.data.arrTeams, axios_response.data.allBotNames, axios_response.data.allHumanNames,
-						 axios_response.data.arrTeams);
+		CreateTreeFromD3();
 
 		div_analyze.style.display 	= 'none';
 		svg_d3tree01.style.display 	= 'block';
@@ -251,6 +252,15 @@ async function GetTelemetry(_matchID) {
 	}
 
 
+	try {
+		// once tree is generically created, update color for context and get data
+
+		UpdateTreeContext(strPlayerName);
+
+	} catch (error) {
+		
+	}
+
 
 	// $ GET ALL THIS stuff to happen inside a function. this will need to fire off on the "view" button for the searched player
 	// $ and also for any clicked human player in the tree to show damage and details and also highlight teammates and killer/teammates.
@@ -263,9 +273,9 @@ async function GetTelemetry(_matchID) {
 
 	// $ ---------------------------------------------------------------->
 	// $ cycle the response data and output the player's data
-	for (i = 0; i < axios_response.data.arrPlayersDamageLog.length; i++) {
-		var record 			= axios_response.data.arrPlayersDamageLog[i];
-		var playerTeamId 	= axios_response.data.playerTeamId;
+	for (i = 0; i < axios_telemetry_response.data.arrPlayersDamageLog.length; i++) {
+		var record 			= axios_telemetry_response.data.arrPlayersDamageLog[i];
+		var playerTeamId 	= axios_telemetry_response.data.playerTeamId;
 
 		// (record.attacker.teamId == playerTeamId || record.victim.teamId == playerTeamId)
 		if (record.attacker.name == strPlayerName || record.victim.name == strPlayerName) {
@@ -402,15 +412,17 @@ async function GetTelemetry(_matchID) {
 
 
 // ! ------------------------------------------------------------------------------------------------------>
-// ! D3 Tree Struff
-//
-
 //#region // ! [Region] Build kill tree
 //
 
-function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames, arrTeams) {
+function CreateTreeFromD3() {
 
-	let  table = d3.csvParse(csvData);
+	// original sample...
+	// https://codesandbox.io/s/xwm4k88wp?file=/src/index.js
+
+	const response = axios_telemetry_response.data;
+
+	let  table = d3.csvParse(response.csvDataForD3);
 	const root = d3.stratify()
 				.id(function(d) { return d.name; })
 				.parentId(function(d) { return d.parent; })
@@ -420,7 +432,7 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames, arrTeam
 	const path_width = 1200;                        // ? what is this the width of? path?
 	//const root = d3.hierarchy(data);            	// https://github.com/d3/d3-hierarchy
 	const dx = 14;                              	// node height? (default 10)
-	const dy = path_width / (root.height + 1);       	// root.height is how many descendants there are. this is where you can make the line lengths static, probably.
+	const dy = path_width / (root.height + 1);      // root.height is how many descendants there are. this is where you can make the line lengths static, probably.
 	//const tree = d3.tree().nodeSize([dx, dy]);
 	const tree = d3.tree().nodeSize([dx, 130]); 	// static width for paths
 
@@ -504,70 +516,132 @@ function CreateTreeFromD3(csvData, arrTeams, allBotNames, allHumanNames, arrTeam
 
 	node
 	.append("circle")
-	.attr("fill", d => (d.children ? "#8f91a1" : "#8f91a1"))    // $ the dot (nodes/leaves)
+	.attr("fill", d => (d.children ? "#8f91a1" : "#8f91a1"))    // the dot (nodes/leaves)
 	.attr("r", 2.5);
 
 	node
-	.append("text")           //https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
-	//.attr('fill', "#dcddde")  // $$ added this to change text color
-	// .attr('fill', d => {
-	// })
+	.append("text")           	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
+	.attr('fill', "#dcddde")  	// added this to change text color
 	.attr('class', d => {
-		if (d.data.name == strPlayerName) {
-			return 'selectedPlayer';
+
+		if (response.allHumanNames.includes(d.data.name) ) {
+			// don't create id's for stuff like ""
+			//return 'allPlayers';
+			return 'allPlayers humanPlayers';
+		}
+		else if (response.allBotNames.includes(d.data.name)) {
+			return 'allPlayers botPlayers';
 		}
 		else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || 
-				 d.data.name.includes('*')) {
+		 		 d.data.name.includes('*')) {
+			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
 			return 'categories';
 		}
-		else {
 
-			// check if player is a bot. if so, shade the name...
+		// if (d.data.name == strPlayerName) {
+		// 	return 'selectedPlayer';
+		// }
+		// else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || 
+		// 		 d.data.name.includes('*')) {
+		// 	return 'categories';
+		// }
+		// else {
 
-			if (allHumanNames.includes(d.data.name)) {
-				return 'humanPlayer';
-			}
-			else {
-				// this is a bot
-				return 'botPlayer';
-			}
-		}
+		// 	// check if player is a bot. if so, shade the name...
 
-		// $ might be better to build a class string and add "teammate" class if this player is a teammate of the selected player
-		// ? can you set the class to a {{vue_something}} variable and then just update that variable initially and then on each new player click/select?
-
+		// 	if (response.allHumanNames.includes(d.data.name)) {
+		// 		return 'humanPlayer';
+		// 	}
+		// 	else {
+		// 		// this is a bot
+		// 		return 'botPlayer';
+		// 	}
+		// }
 	})
 	.attr('id', d=> {
-		// if this is a human, then add an id of their name
+		// if this is a human or a bot, then add an id of their name
 
-		if (allHumanNames.includes(d.data.name)) {
+		if (response.allHumanNames.includes(d.data.name) || response.allBotNames.includes(d.data.name)) {
+			// don't create id's for stuff like ""
 			return d.data.name;
 		}
 	})
+	.attr('onclick', d => {
+		if (response.allHumanNames.includes(d.data.name) || response.allBotNames.includes(d.data.name)) {
+			// don't create id's for stuff like ""
+			return 'UpdateTreeContext(\'' + d.data.name + '\')';
+		}
+	})
 	.attr('cursor', 'pointer')
-	//.attr('class', 'selected')
-	// events: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/pointer-events
 	.attr("dy", "0.5em") // "dy", "0.31em"
 	.attr("x", d => (d.children ? 6 : 6))                    	// $ seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
 	.attr("text-anchor", d => (d.children ? "start" : "start")) // $ where the text is in relation to the node dot    // "text-anchor", d => (d.children ? "end" : "start")
-	//.attr('onclick', ??)
 	.text(d => d.data.name)
-	.select(function() {
-		return this.parentNode.insertBefore(this.cloneNode(true), this);
-	})
-	//.attr("stroke", "white")
-	//.attr("stroke-linejoin", "round")
-	//.attr("stroke-width", 2);
 
-
-	
-			
-			
 }
 
-//#endregion
+//#endregion D3 tree -----------------------
 
 
+
+function UpdateTreeContext(selectedPlayer) {
+	//console.log('clicked name: ' + name);
+
+	// ! human and bot players should always have at least one root class "humanPlayer" or "botPlayer" and then stack and relational classes on top of them. 
+	// ! probably have 2 max (root + relational)
+
+	let allPlayers 		= document.getElementsByClassName('allPlayers');
+	//let allHumanPlayers = document.getElementsByClassName('humanPlayer');
+	//let allBotPlayers 	= document.getElementsByClassName('botPlayer');
+
+
+	// ? Class lists...
+	// ? allPlayers -> humanPlayer/botPlayer/categories -> relationshipClass?
+
+
+
+	// addd/remove classes
+	// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
+
+
+	for (let i = 0; i < allPlayers.length; i++) {
+		//console.log(allPlayers[i].textContent);
+
+		let playerClassList = allPlayers[i].classList;
+
+		// this will prune all classes after the intial default two classes (allPlayers + human/bot) if they have any left over from the last selected player's context.
+		for (let j = playerClassList.length - 1; j >= 0; j--) {
+			//console.log('    ' + allPlayers[i].classList.value);
+
+			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers') {
+				playerClassList.remove(playerClassList[j]);
+			}
+		}
+
+		// at this point, add the relational classes...
+		// ? what is the context of this player to the selected player?
+		// selected player?
+		// teammate?
+		// killer?
+		// killer teammate?
+		// traded paint?
+
+		// selected player
+		if (selectedPlayer == allPlayers[i].textContent) {
+			playerClassList.add('selectedPlayer');
+		}
+
+
+
+		//debugger;
+
+	}
+
+
+	//debugger;
+
+
+}
 
 
 
