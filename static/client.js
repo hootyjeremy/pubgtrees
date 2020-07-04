@@ -12,7 +12,7 @@ let version 			= '2020.07.03 _ 003'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -258,7 +258,8 @@ async function GetTelemetry(_matchID) {
 		UpdateTreeContext(strPlayerName);
 
 	} catch (error) {
-		
+		console.log('error in UpdateTreeContext() -> ' + error);
+		alert('error in UpdateTreeContext()');
 	}
 
 
@@ -590,6 +591,8 @@ function UpdateTreeContext(selectedPlayer) {
 	// ! human and bot players should always have at least one root class "humanPlayer" or "botPlayer" and then stack and relational classes on top of them. 
 	// ! probably have 2 max (root + relational)
 
+	const response = axios_telemetry_response.data;
+
 	let allPlayers 		= document.getElementsByClassName('allPlayers');
 	//let allHumanPlayers = document.getElementsByClassName('humanPlayer');
 	//let allBotPlayers 	= document.getElementsByClassName('botPlayer');
@@ -598,18 +601,35 @@ function UpdateTreeContext(selectedPlayer) {
 	// ? Class lists...
 	// ? allPlayers -> humanPlayer/botPlayer/categories -> relationshipClass?
 
+	// get seletected player's teamId (for determinining teammates)
+	let selectedPlayerTeamId = null;
+	response.arrTeams.forEach(element => {
+		// loop through arrTeams until you find the selected player and then get their teamId
 
+		element.teammates.forEach(teammate => {
+			// loop through all of this team's teammates. if the selected player is there, then this is a teammate. 
+
+			if (teammate.name == selectedPlayer) {
+				//console.log('selectedPlayerTeamId found: ' + teammate.name);
+				selectedPlayerTeamId = element.teamId;
+			}
+		})
+	})
+
+
+	
 
 	// addd/remove classes
 	// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
 
 
+	// cycle through all players and then give them a context class based on the selected player...
 	for (let i = 0; i < allPlayers.length; i++) {
 		//console.log(allPlayers[i].textContent);
 
 		let playerClassList = allPlayers[i].classList;
 
-		// this will prune all classes after the intial default two classes (allPlayers + human/bot) if they have any left over from the last selected player's context.
+		// prune all classes after the intial default two classes (allPlayers + human/bot) if they have any left over from the last selected player's context.
 		for (let j = playerClassList.length - 1; j >= 0; j--) {
 			//console.log('    ' + allPlayers[i].classList.value);
 
@@ -629,6 +649,27 @@ function UpdateTreeContext(selectedPlayer) {
 		// selected player
 		if (selectedPlayer == allPlayers[i].textContent) {
 			playerClassList.add('selectedPlayer');
+		}
+		else {
+			// if not the selected player, what is allPlayers[i].textContent's teamId? is is not the selected player?
+
+			// loop through arrTeams until you find the teamId of the selected player
+			response.arrTeams.forEach(element => {
+		
+				// loop through all of this team's teammates. if the selected player is there, then this is a teammate. 
+				element.teammates.forEach(teammate => {
+		
+					if (teammate.name == allPlayers[i].textContent) {
+						//console.log('allPlayers[i].textContent team found: ' + teammate.name + ' -> ' + allPlayers[i].textContent);
+
+						if (element.teamId == selectedPlayerTeamId) {
+							//console.log('allPlayers[i].textContent teammate found: ' + teammate.name + ' -> ' + allPlayers[i].textContent);
+							// #7dde98 green
+							playerClassList.add('playerTeammate');
+						}
+					}
+				})
+			})
 		}
 
 
