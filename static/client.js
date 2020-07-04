@@ -8,11 +8,11 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.03 _ 002'
+let version 			= '2020.07.03 _ 003'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= true;
+const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
