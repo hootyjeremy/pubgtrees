@@ -56,7 +56,7 @@ th, td {
 
 
 text.categories {
-	fill: #c0ace0;
+	fill: #7dde98;
 }
 
 text.allPlayers {
@@ -76,7 +76,7 @@ text.selectedPlayer {
 }
 
 text.playerTeammate {
-	fill: #60b6f0;
+	fill: #c0ace0;
 }
 
 text.killer {
@@ -84,13 +84,31 @@ text.killer {
 }
 
 text.killerTeammate {
-	fill: #ffbb71;
+	/* fill: #ffbb71; */
+	fill: #f07d60;
 }
 
 text.tradedPaint {
 	fill: #efb8df;
 }
 
+
+span.selectedPlayer {
+	color: #60b6f0;
+}
+
+span.playerTeammate {
+	color: #c0ace0;
+}
+
+span.killer {
+	color: #f07d60;
+}
+
+span.killerTeammate {
+	/* fill: #ffbb71; */
+	color: #f07d60;
+}
 
 
 svg#d3-svg01 {

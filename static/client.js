@@ -8,11 +8,11 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.03 _ 003'
+let version 			= '2020.07.04 _ 001'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion 	= true;
+const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -219,8 +219,11 @@ async function GetTelemetry(_matchID) {
 	// console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
 	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
 	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
-	console.log('axios_telemetry_response.data...');
-	console.dir(axios_telemetry_response.data);
+
+	if (blTestingVersion) {
+		console.log('axios_telemetry_response.data...');
+		console.dir(axios_telemetry_response.data);
+	}
 
 
 
@@ -261,6 +264,9 @@ async function GetTelemetry(_matchID) {
 		console.log('error in UpdateTreeContext() -> ' + error);
 		alert('error in UpdateTreeContext()');
 	}
+
+
+	// ? how can you pop up a dialog (like instagram) that will show the clicked player's info?
 
 
 	// $ GET ALL THIS stuff to happen inside a function. this will need to fire off on the "view" button for the searched player
@@ -413,7 +419,7 @@ async function GetTelemetry(_matchID) {
 
 
 // ! ------------------------------------------------------------------------------------------------------>
-//#region // ! [Region] Build kill tree
+//#region // ! [Region] D3 : Build kill tree
 //
 
 function CreateTreeFromD3() {
@@ -538,26 +544,6 @@ function CreateTreeFromD3() {
 			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
 			return 'categories';
 		}
-
-		// if (d.data.name == strPlayerName) {
-		// 	return 'selectedPlayer';
-		// }
-		// else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || 
-		// 		 d.data.name.includes('*')) {
-		// 	return 'categories';
-		// }
-		// else {
-
-		// 	// check if player is a bot. if so, shade the name...
-
-		// 	if (response.allHumanNames.includes(d.data.name)) {
-		// 		return 'humanPlayer';
-		// 	}
-		// 	else {
-		// 		// this is a bot
-		// 		return 'botPlayer';
-		// 	}
-		// }
 	})
 	.attr('id', d=> {
 		// if this is a human or a bot, then add an id of their name
@@ -575,8 +561,8 @@ function CreateTreeFromD3() {
 	})
 	.attr('cursor', 'pointer')
 	.attr("dy", "0.5em") // "dy", "0.31em"
-	.attr("x", d => (d.children ? 6 : 6))                    	// $ seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
-	.attr("text-anchor", d => (d.children ? "start" : "start")) // $ where the text is in relation to the node dot    // "text-anchor", d => (d.children ? "end" : "start")
+	.attr("x", d => (d.children ? 6 : 6))                    	// seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
+	.attr("text-anchor", d => (d.children ? "start" : "start")) // where the text is in relation to the node dot    // "text-anchor", d => (d.children ? "end" : "start")
 	.text(d => d.data.name)
 
 }
@@ -598,11 +584,14 @@ function UpdateTreeContext(selectedPlayer) {
 	//let allBotPlayers 	= document.getElementsByClassName('botPlayer');
 
 
-	// ? Class lists...
-	// ? allPlayers -> humanPlayer/botPlayer/categories -> relationshipClass?
+	//#region // ! [Region] Get initial information...
+	//
 
 	// get seletected player's teamId (for determinining teammates)
 	let selectedPlayerTeamId = null;
+	let selectedPlayerKiller = null;
+	let selectedPlayerKillerTeamId = null;
+
 	response.arrTeams.forEach(element => {
 		// loop through arrTeams until you find the selected player and then get their teamId
 
@@ -617,17 +606,40 @@ function UpdateTreeContext(selectedPlayer) {
 	})
 
 
+	// cycle the arrKillLog for victim. if the selected player is a victim, get the killer's name.
+	response.arrKillLog.forEach(element => {
+		if (element.victim == selectedPlayer && element.killer != selectedPlayer) {
+			// if killer is self, then don't assign a killer.
+			selectedPlayerKiller = element.killer;
+
+			// if there is a valid killer, get the killer's teamId
+			response.arrTeams.forEach(team => {
+				team.teammates.forEach(teammate => {
+					if (teammate.name == selectedPlayerKiller) {
+						selectedPlayerKillerTeamId = team.teamId;
+					}
+				})
+			})
+		}
+	})
+
+
+
+	//
+	//#endregion --------------------------------------------------------
 	
 
-	// addd/remove classes
-	// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
+
 
 
 	// cycle through all players and then give them a context class based on the selected player...
 	for (let i = 0; i < allPlayers.length; i++) {
-		//console.log(allPlayers[i].textContent);
 
 		let playerClassList = allPlayers[i].classList;
+		let currentPlayer 	= allPlayers[i].textContent;
+
+		// addd/remove classes
+		// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
 
 		// prune all classes after the intial default two classes (allPlayers + human/bot) if they have any left over from the last selected player's context.
 		for (let j = playerClassList.length - 1; j >= 0; j--) {
@@ -647,11 +659,11 @@ function UpdateTreeContext(selectedPlayer) {
 		// traded paint?
 
 		// selected player
-		if (selectedPlayer == allPlayers[i].textContent) {
+		if (selectedPlayer == currentPlayer) {
 			playerClassList.add('selectedPlayer');
 		}
 		else {
-			// if not the selected player, what is allPlayers[i].textContent's teamId? is is not the selected player?
+			// if not the selected player, what is currentPlayer's teamId? is it not the selected player?
 
 			// loop through arrTeams until you find the teamId of the selected player
 			response.arrTeams.forEach(element => {
@@ -659,24 +671,31 @@ function UpdateTreeContext(selectedPlayer) {
 				// loop through all of this team's teammates. if the selected player is there, then this is a teammate. 
 				element.teammates.forEach(teammate => {
 		
-					if (teammate.name == allPlayers[i].textContent) {
-						//console.log('allPlayers[i].textContent team found: ' + teammate.name + ' -> ' + allPlayers[i].textContent);
+					if (teammate.name == currentPlayer) {
+						//console.log('currentPlayer team found: ' + teammate.name + ' -> ' + currentPlayer);
 
 						if (element.teamId == selectedPlayerTeamId) {
-							//console.log('allPlayers[i].textContent teammate found: ' + teammate.name + ' -> ' + allPlayers[i].textContent);
+							//console.log('currentPlayer teammate found: ' + teammate.name + ' -> ' + currentPlayer);
 							// #7dde98 green
 							playerClassList.add('playerTeammate');
+						}
+						else if (element.teamId == selectedPlayerKillerTeamId) {
+							// this player is on the killer's team. is it the killer or just a teammate?
+							if (currentPlayer == selectedPlayerKiller) {
+								// this is the killer
+								playerClassList.add('killer')
+							}
+							else {
+								// this is a killer teammate
+								playerClassList.add('killerTeammate')
+							}
 						}
 					}
 				})
 			})
 		}
-
-
-
-		//debugger;
-
 	}
+
 
 
 	//debugger;
