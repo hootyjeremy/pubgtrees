@@ -94,6 +94,10 @@ text.tradedPaint {
 }
 
 
+span.botPlayers {
+	color: #98a0a6;
+}
+
 span.selectedPlayer {
 	color: #60b6f0;
 }
