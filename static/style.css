@@ -80,12 +80,13 @@ text.playerTeammate {
 }
 
 text.killer {
-	fill: #f07d60;
+	fill: #ffbb71;
+	/* fill: #f07d60; */
 }
 
 text.killerTeammate {
-	/* fill: #ffbb71; */
-	fill: #f07d60;
+	fill: #ffbb71;
+	/* fill: #f07d60; */
 }
 
 text.tradedPaint {
@@ -102,12 +103,13 @@ span.playerTeammate {
 }
 
 span.killer {
-	color: #f07d60;
+	color: #ffbb71;
+	/* color: #f07d60; */
 }
 
 span.killerTeammate {
-	/* fill: #ffbb71; */
-	color: #f07d60;
+	color: #ffbb71;
+	/* color: #f07d60; */
 }
 
 
