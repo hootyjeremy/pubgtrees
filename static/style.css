@@ -76,7 +76,8 @@ text.selectedPlayer {
 }
 
 text.playerTeammate {
-	fill: #c0ace0;
+	fill: #60b6f0;
+	/* fill: #c0ace0; */
 }
 
 text.killer {
