@@ -65,6 +65,8 @@ app.use('/', express.static(__dirname));    // so that root/pubg.js and root/ind
 // ------------------------------------------------------------->
 app.get('/getplayermatches', async (req, res) => {
 
+    //console.log('bypassCache: ' + req.query.bypassCache);
+
     var pubgApiResponseInfo = null;   // will include this in response to the client
 
     var match_floor = new Number(req.query.match_floor);  // i don't know why this is catching a string. maybe the query converts it?
@@ -122,7 +124,8 @@ app.get('/getplayermatches', async (req, res) => {
     // -------------------------------------------------------------->
     // ! READ CACHE FILE -> if you can get the player cache from the file, then get it...
 
-    if (fs.existsSync(player_cache_file)) {
+    if (fs.existsSync(player_cache_file) && req.query.bypassCache == 'n') {
+        // if bypassCache is 'y' then don't get player from cache.
 
         try {
 
@@ -130,7 +133,9 @@ app.get('/getplayermatches', async (req, res) => {
     
             player_data = readCacheFileJSON(player_cache_file);
 
-            console.log('player cache exists... ');
+            if (blTestingVersion) {
+                console.log('player cache exists... ');
+            }
     
             pubgApiResponseInfo = { 'hootyserver': 'cached', 'status': null, 'statusText': 'no need to fetch from pubg api' };
         }
@@ -146,7 +151,9 @@ app.get('/getplayermatches', async (req, res) => {
     else {
         //console.log('no cache file. fetching from pubg api -> ' + player_url);
 
-        console.log('player cache does not exist... ');
+        if (blTestingVersion) {
+            console.log('player cache does not exist... ');
+        }
 
         var pubgapi_player_response;
 
@@ -159,10 +166,14 @@ app.get('/getplayermatches', async (req, res) => {
                 }
             })
 
-            pubgApiResponseInfo = { 'hootyserver': 'fetched', 'status': pubgapi_player_response.status, 'statusText': pubgapi_player_response.statusText };
+            pubgApiResponseInfo = { 'hootyserver': 'fetched', 'status': pubgapi_player_response.status, 'statusText': pubgapi_player_response.statusText,
+                                    'x-ratelimit-remaining' : pubgapi_player_response.headers['x-ratelimit-remaining'] + ' of ' + 
+                                    pubgapi_player_response.headers['x-ratelimit-limit'], };
 
-            console.log('fetched player_url: ' + player_url);
-            console.log('pubgapi_player_response.headers.x-ratelimit-remaining: ' + pubgapi_player_response.headers['x-ratelimit-remaining'] + ' of ' + pubgapi_player_response.headers['x-ratelimit-limit']);
+            if (blTestingVersion) {
+                console.log('fetched player_url: ' + player_url);
+                console.log('pubgapi_player_response.headers.x-ratelimit-remaining: ' + pubgapi_player_response.headers['x-ratelimit-remaining'] + ' of ' + pubgapi_player_response.headers['x-ratelimit-limit']);
+            }
         }
         catch (error)
         {
@@ -188,27 +199,20 @@ app.get('/getplayermatches', async (req, res) => {
         // ----------------------------->
         // ! WRITE CACHE FILE -> write player's cache file...
         writeCacheFileJSON(player_cache_file, pubgapi_player_response.data.data[0]);
-        // fs.writeFile(player_cache_file, JSON.stringify(pubgapi_player_response.data, null, 2), function (err) {
-        //     if (err) {
-        //         console.log('error writing cache file: ' + player_cache_file);
-        //     }
-        //     else {
-        //         //console.log('created player cache file: ' + player_cache_file);
-        //     }
-        // });
-
 
         player_data = pubgapi_player_response.data.data[0];
 
     }
 
+    if (blTestingVersion) {
+        console.log('player_data -> ', player_data);
+    }
+
+
     //
     //#endregion ---------------------------------------------------------------------------------------------->
 
 
-    if (blTestingVersion) {
-        console.log('player_data -> ', player_data);
-    }
 
     // ------------------------------------------------------->
     // ! MATCH DATA ->
@@ -712,7 +716,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
         var killer          = new Object();
             killer.victims  = [];
         var blKillerExists  = false;
-
 
 
         var i_string = new String(i);

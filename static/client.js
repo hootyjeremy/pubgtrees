@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.05 _ 002'
+let version 			= '2020.07.05 _ 003'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -43,6 +43,8 @@ else {
 
 var strPlatform, strPlayerName;
 var prevPlatform, prevPlayerName;	// these are used to reset match_floor if searching for a new player
+let prevSelectedPlayer = null;
+let bypassCache = null;
 
 var url, player_url, match_url, telemetry_url = ""; // store the match ID's of the player
 //var response; // fetch() responses
@@ -63,7 +65,9 @@ async function GetPlayerMatches() {
 	//#region // ! [Region] GetPlayerMatches()
 	//
 
+	// clear out the current d3 tree
 	document.getElementById('d3-svg01').innerHTML = '';
+
 
 	match_floor = (match_floor < 0) ? 0 : match_floor;
 
@@ -76,10 +80,8 @@ async function GetPlayerMatches() {
 	prevPlatform 	= strPlatform;
 	prevPlayerName 	= strPlayerName;
 
-
 	console.log('client requesting from ' + hooty_server_url);
 	console.log('requesting player:     ' + strPlatform + '/' + strPlayerName);
-
 
 	const btnSearch 	= document.getElementById('btnSearchPlayer');
 	const btnPrevious 	= document.getElementById('btnPreviousMatches');
@@ -106,6 +108,7 @@ async function GetPlayerMatches() {
 				'match_floor'	:  match_floor,
 				'match_id'		: '',
 				'telemetry_id'	: '',
+				'bypassCache'	: bypassCache,
 			},
 			headers: {
 				'Content-Encoding': 'gzip',
@@ -136,8 +139,11 @@ async function GetPlayerMatches() {
 		return;
 	}
 
-	//console.log('axios_response...');
-	//console.dir(axios_response.data);
+	if (blTestingVersion) {
+		console.log('bypassCache: ' + bypassCache);
+		console.log('GetPlayerMatches() axios_response...');
+		console.dir(axios_response.data);
+	}
 
 	total_matches 	= axios_response.data.totalMatches;
 	console.log('match_floor:     ' + match_floor + ' of ' + total_matches);
@@ -228,13 +234,12 @@ async function GetTelemetry(_matchID) {
 
 
 
-	// clear out the svg D3 tree if there is anything in there...
-	document.getElementById('d3-svg01').innerHTML = '';
-	
-
 
 	// ! D3 Tree Stuff...
 	try {
+		// clear out the svg D3 tree if there is anything in there...
+		document.getElementById('d3-svg01').innerHTML = '';
+
 		// create D3 tree...
 		CreateTreeFromD3();
 
@@ -255,6 +260,7 @@ async function GetTelemetry(_matchID) {
 	}
 
 
+	// ! Update text class colors
 	try {
 		// once tree is generically created, update color for context and get data
 
@@ -269,6 +275,7 @@ async function GetTelemetry(_matchID) {
 	}
 
 
+
 	// ? how can you pop up a dialog (like instagram) that will show the clicked player's info?
 
 
@@ -276,6 +283,7 @@ async function GetTelemetry(_matchID) {
 	// $ and also for any clicked human player in the tree to show damage and details and also highlight teammates and killer/teammates.
 	// ? the question is how do you set this up initially (vue?) so that it can work on the first search and update for later searches.
 	// ? make the classes into vue variables and update vue objects (and the classes in turn) when necessary.
+
 
 
 	//#region // ! [Console log stuff]
@@ -446,7 +454,7 @@ function CreateTreeFromD3() {
 	//const tree = d3.tree().nodeSize([dx, dy]);
 	const tree = d3.tree().nodeSize([dx, 130]); 	// static width for paths
 
-	let custom_width  = 200 + (root.height * 130);
+	let custom_width  = 160 + (root.height * 130);
 	let custom_height = 0;
 	
 	let custom_neg_height = 0;
@@ -461,6 +469,7 @@ function CreateTreeFromD3() {
 		if (d.x > x1) x1 = d.x;
 		if (d.x < x0) x0 = d.x;
 
+		// need to know how high above root and low below root so that you can get an accurate height of the final svg
 		if (d.x < 0) {
 			// keep up with the lowest negative value...
 			if (d.x < custom_neg_height) {
@@ -478,7 +487,7 @@ function CreateTreeFromD3() {
 
 	});
 
-	custom_height = (Math.abs(custom_neg_height) + custom_pos_height) + 38;
+	custom_height = (Math.abs(custom_neg_height) + custom_pos_height) + 40;
 
 
 	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg
@@ -491,20 +500,31 @@ function CreateTreeFromD3() {
 	.append("g")                        // svg <g> tag is a group of elements : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g#:~:text=The%20SVG%20element%20is,with%20the%20element.
 	.attr("font-family", "sans-serif")
 	.attr("font-size", 12)
-	//.attr("font-weight", 'bold')
-	.attr("transform", `translate(${dy / 3},${dx - x0})`);	// ! if you hide the first branch out, the first paramater can drag the tree to the left
-	//.attr("transform", `translate(${-40},${dx - x0})`);	
+	//.attr("transform", `translate(${dy / 3},${dx - x0})`);
+	.attr("transform", `translate(${10},${dx - x0})`); 	// ! if you hide the first branch out, the first paramater can drag the tree to the left	
 
 	const link = g
 	.append("g")
 	.attr("fill", "none")
-	.attr("stroke", "#8f91a1")	// #bbb
+	// .attr("stroke", "#8f91a1")
 	.attr("stroke-opacity", 0.4)
 	.attr("stroke-width", 1.5)
 	.selectAll("path")
 	.data(root.links())
 	.enter()
 	.append("path")
+	//.attr("stroke", "#8f91a1")
+	.attr("stroke", d => {
+		// draw the line invisible if it is coming from match to any of the categories
+
+		//console.log(d.source.id);
+		if (d.source.id == 'Match') {
+			return '#414144';	// background color (the line is invisible)
+		}
+		else {
+			return "#8f91a1";
+		}
+	})
 	.attr(
 		"d",
 		d3
@@ -527,7 +547,11 @@ function CreateTreeFromD3() {
 
 	node
 	.append("circle")
-	.attr("fill", d => (d.children ? "#8f91a1" : "#8f91a1"))    // the dot (nodes/leaves)
+	//.attr("fill", d => (d.children ? "#8f91a1" : "#8f91a1"))    // the dot (nodes/leaves)
+	.attr("fill", d => {
+		// don't show the first dot for "Match" on the top level
+		return (d.id == 'Match') ? "#414144" : "#8f91a1";	// background-color : line color
+	})
 	.attr("r", 2.5);
 
 	node
@@ -573,10 +597,19 @@ function CreateTreeFromD3() {
 		}
 	})
 	.attr("dy", "0.5em") // "dy", "0.31em"
-	.attr("x", d => (d.children ? 6 : 6))                    	// seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
-	.attr("text-anchor", d => (d.children ? "start" : "start")) // where the text is in relation to the node dot    // "text-anchor", d => (d.children ? "end" : "start")
+	//.attr("x", d => (d.children ? 6 : 6))                    	// seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
+	//.attr("text-anchor", d => (d.children ? "start" : "start")) // where the text is in relation to the node dot    // "text-anchor", d => (d.children ? "end" : "start")
 	//.text(d => d.data.name)
+	.attr("x", d => {
+		// if category, offset anchor to the left
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills') ? -6 : 6;
+	}) 
+	.attr("text-anchor", d => {
+		// if category, offset anchor to the left
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills') ? "end" : "start";
+	}) 
 	.text(d => {
+		// add '*' to the category names
 		if (d.data.name == 'Match') {
 			return '';
 		}
@@ -594,14 +627,23 @@ function CreateTreeFromD3() {
 
 
 function UpdateTreeContext(selectedPlayer) {
+	// This will happen when any player is clicked...
+
 	//console.log('clicked name: ' + name);
+
+	// update data data for the selected player
+	if (prevSelectedPlayer == selectedPlayer) {
+		ShowPlayerReport(selectedPlayer);
+	}
+
+	prevSelectedPlayer = selectedPlayer; 
 
 	// ! human and bot players should always have at least one root class "humanPlayer" or "botPlayer" and then stack and relational classes on top of them. 
 	// ! probably have 2 max (root + relational)
 
 	const response = axios_telemetry_response.data;
 
-	let allPlayers 		= document.getElementsByClassName('allPlayers');
+	let allPlayers = document.getElementsByClassName('allPlayers');
 	//let allHumanPlayers = document.getElementsByClassName('humanPlayer');
 	//let allBotPlayers 	= document.getElementsByClassName('botPlayer');
 
@@ -718,15 +760,12 @@ function UpdateTreeContext(selectedPlayer) {
 			})
 		}
 	}
-
-
-
-	//debugger;
-
-
 }
 
 
+function ShowPlayerReport(playername) {
+	console.log('ShowPlayerReport() -> ' + playername);
+}
 
 
 // ! ------------------------------------------------------------------------------------------------------>
@@ -778,6 +817,16 @@ function prelim() {
 	strPlatform 	= document.querySelector("#slcPlatform option:checked").value;
 	strPlayerName 	= document.getElementById("inputPlayerName").value;
 
+	if (strPlayerName[strPlayerName.length - 1] == '!') {
+		// ends with '!' and can bypass cache.
+		bypassCache = 'y';
+
+		strPlayerName = strPlayerName.slice(0, strPlayerName.length - 1);
+	}
+	else {
+		// doesn't end with '!'
+		bypassCache = 'n';
+	}
 
 	//console.log("btnSearchPlayer_Click() handler. name: " + document.getElementById("inputPlayerName").value);
 	console.log(strLine);

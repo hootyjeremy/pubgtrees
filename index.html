@@ -9,20 +9,22 @@
 	<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 	<!-- font-family: 'Roboto', sans-serif; -->
 
-	<!-- Dev Version -->
-	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" type="text/javascript"></script> 
-	<!-- Production Version -->
-	<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" type="text/javascript"></script> -->
+	<!-- VUE Dev Version -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" type="text/javascript"></script>  -->
+	<!-- BUE Production Version -->
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" type="text/javascript"></script>
 	
 	
 	<script src="https://unpkg.com/axios/dist/axios.min.js" type="text/javascript"></script>
 	<script src="https://momentjs.com/downloads/moment.min.js" type="text/javascript"></script>
 	<script src="static/hf.js" type="text/javascript"></script>
 	
-	<!-- Production Version -->
+	<!-- D3 Production Version -->
 	<script src="https://d3js.org/d3.v5.min.js" type="text/javascript"></script>
-	<!-- Local Version -->
+	<!-- D3 Local Version -->
 	<!-- <script src="d3/d3.js"></script> -->
+
+
 	
 </head>
 
@@ -71,12 +73,12 @@
 		<option value="xbox">Xbox</option>>
 	</select>
 	
-	<input  id="inputPlayerName" placeholder="Player name" style='width: 300;' onsubmit="btnSearchPlayer_Click()">
+	<input  id="inputPlayerName" placeholder="Player name (add '!' to end of name to bypass cache)" style='width: 320;' onsubmit="btnSearchPlayer_Click()">
 	<button id="btnSearchPlayer" style='width: 100;' onclick="btnSearchPlayer_Click()">Search</button>
 	
 	<br>
 	<br>
-	PUBG Trees (beta : 2020.07.05 _ 002)
+	PUBG Trees (beta : 2020.07.05 _ 003)
 	<br>
 	<br>
 	
@@ -185,35 +187,35 @@
 <div id='d3-tree01' style='display: none; width: auto; overflow: auto;'>
 	<center>
 
-		<svg id='d3-svg01' style='overflow: auto;'></svg>
 		<br>
 
 		<table>
-				<thead>
-					<tr>  
-						<!-- <td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">Age</td> 
-						<td>Map</td>
-						<td>Humans</td>
-						<td>Game Type</td>
-						<td style="border-radius: 0px 6px 6px 0px; text-align:left;">Mode</td> -->
+			<thead>
+				<tr>  
+					<!-- <td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">Age</td> 
+					<td>Map</td>
+					<td>Humans</td>
+					<td>Game Type</td>
+					<td style="border-radius: 0px 6px 6px 0px; text-align:left;">Mode</td> -->
+				</tr>
+			</thead>
+			<tbody>
+				<tr class='treeRows'> 
+					<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{age}}</td> 
+					<td>{{mapName}}</td> 
+					<td >{{gameMode}}</td>
+					<td>{{matchType}}</td> 
+					<td style="border-radius: 0px 6px 6px 0px; text-align:left;">{{humans}} humans</td>
+					<!-- <td>{{matchId}}</td>  -->
 					</tr>
-				</thead>
-				<tbody>
-					<tr class='treeRows'> 
-						<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{age}}</td> 
-						<td>{{mapName}}</td> 
-						<td >{{gameMode}}</td>
-						<td>{{matchType}}</td> 
-						<td style="border-radius: 0px 6px 6px 0px; text-align:left;">{{humans}} humans</td>
-						<!-- <td>{{matchId}}</td>  -->
-					 </tr>
-				</tbody>
+			</tbody>
 		</table>
 
+
+		<svg id='d3-svg01' style='overflow: auto;'></svg>
+
 		<br>
 
-
-		<br>
 		<div style='text-align: left; width: 240px; border: 2px solid #60b6f0; border-radius: 10px; padding-left: 10px; background-color: #313135;'>
 			<br>
 			<span class="searchedPlayer">Searched player</span>
@@ -231,18 +233,18 @@
 			<br>
 		</div>
 
-	
 		<br>
+	
 	</center>
 </div>
 
 <br>
 
-<!-- <script src="https://d3js.org/d3.v5.min.js"></script> -->
-
-
-
+<!-- Development version -->
 <script src="static/vuestuff.js" type="text/javascript"></script>
+
+
+
 
 
 
