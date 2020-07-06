@@ -15,7 +15,7 @@ const hf            = require('./hooty_modules/hf_server'); // helper functions
 const port = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 
 const zlib = require('zlib');
-const { translateMapName } = require('./hooty_modules/hf_server');
+const { translateMapName, } = require('./hooty_modules/hf_server');
 const { debug } = require('console');
 
 
@@ -740,14 +740,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // if (record._T == 'LogPlayerPosition') {
         //     if (record.character.accountId.includes('ai.')) {
 
-        //         // add bot name to string if it isn't already there
-        //         if (!allBotNames.includes(record.character.name)) {
-        //             console.log(record.character.name);
-        //             allBotNames += '|' + record.character.name;
-        //         }
-        //     }
-        //     //debugger;
-        // }
 
         // if (record._T == 'LogGameStatePeriodic') {
         //     console.log(record);
@@ -910,15 +902,20 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.healthBeforeDamage  = record.victim.health;
                     _victim.healthAfterDamage   = record.victim.health - record.damage;
 
+                    // ! add to bot names if this bot is a late spawner
                     if (_attacker.isBot) {
                         if (!allBotNames.includes(_attacker.name)) {
                             allBotNames += '|' + _attacker.name;
+
+                            //addBotToTeamsArray(_attacker.name, _attacker.teamId, arrTeams);
                         }
                     }
 
                     if (_victim.isBot) {
                         if (!allBotNames.includes(_victim.name)) {
                             allBotNames += '|' + _victim.name;
+
+                            //addBotToTeamsArray(_victim.name, _victim.teamId, arrTeams);
                         }
                     }
 
@@ -1166,8 +1163,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.isBot   = hf.isBot(record.victim.accountId);
                     _victim.teamId  = record.victim.teamId;
 
+                    // ! add to bot names if this bot is a late spawner
                     if (_victim.isBot) {
                         allBotNames += '|' + _victim.name; // for finding bots in tree
+
+                        //addBotToTeamsArray(_victim.name, _victim.teamId, arrTeams);
                     }
 
                     playerDamageLog.attacker    = _attacker;
@@ -1358,8 +1358,15 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.isBot       = hf.isBot(record.victim.accountId);
                     _victim.teamId      = record.victim.teamId;
 
+                    // ! add to bot names if this bot is a late spawner
+                    // if (_attacker.isBot) {
+                    //     allBotNames += '|' + _attacker.name; // for finding bots in tree
+                    //     addBotToTeamsArray(_attacker.name, _attacker.teamId);
+                    // }
+
                     if (_victim.isBot) {
                         allBotNames += '|' + _victim.name; // for finding bots in tree
+                        //addBotToTeamsArray(_victim.name, _victim.teamId, arrTeams);
                     }
 
                     playerDamageLog.attacker    = _attacker;
@@ -1934,4 +1941,67 @@ function printTeamRoster(dctRoster) {
     })
 
     return strRoster;
+}
+
+
+function addBotToTeamsArray(botName, botTeamId, arrTeams) {
+    
+    // $ this function is breaking the tree for some reason. not sure why it breaks bot detection but for now, i'm taking it back out.
+
+    return;
+
+    // because there are bots that spawn after the round stars, there is no record of their team so they have to be caught 
+    // during damage and kill events during the round. once that happens, they are added.
+    // ? can you also use this to detect late spawn winning bots who were not detected through damage and kills?
+    // ? maybe the best way to figure out if there is an invisible bot is to check arrSurvivors against the 'end of match' event's alive player accounts
+    //   and then create them if arrSurvivors is empty.
+
+    //console.log(botName + ' -> ' + botTeamId);
+    //console.log(arrTeams);
+
+    let blTeamFound     = false;
+    let blTeammateFound = false;
+
+
+    // does the team exist?
+    arrTeams.forEach(team => {
+        if (botTeamId == team.teamId) {
+            blTeamFound = true;
+
+            // if the team exists, does the teammate exist?
+            team.teammates.forEach(element => {
+                if (element.isBot && element.name == botName) {
+                    blTeammateFound = true;
+                }
+            })
+        }
+
+        if (blTeamFound && !blTeammateFound) {
+            // if team is found but teammate is not, then add the new teammate object to the team
+            // $ test this case
+            // ! test this case
+            // ? test this case
+            team.push({ 'isBot': true, 'teammate': botName });
+        }
+    })
+
+
+    // if (!blTeammateFound) {
+    //     console.log('bot teammate NOT found: ' + botName);
+    // }
+
+    if (!blTeamFound) {
+        //console.log('bot team NOT found: ' + botTeamId);
+
+        // let newTeammate = new Object();
+        // newTeammate.isBot = true;
+        // newTeammate.teammate = botName;
+
+        let newTeamId   = { 'teamId': botTeamId, 'teammates':  [{ 'isBot': true, 'name': botName }] };
+        
+        arrTeams.push(newTeamId);
+
+        //debugger;
+    }
+
 }

@@ -8,7 +8,7 @@
 // 	template:  ``
 // })
 
-var vm = new Vue({
+let vm = new Vue({
 	el: "#vueapp",
 	data: {
 		match_data: [],
@@ -18,6 +18,12 @@ var vm = new Vue({
 	},
 	methods: {
 		getMatchData: function (matches_array) {
+
+			// add 'isActive" here so that it can be toggled
+			// matches_array.forEach(element => {
+			// 	element.isActive = false;
+			// });
+
 			this.match_data = matches_array;
 
 			//console.dir(this.match_data);
@@ -26,7 +32,7 @@ var vm = new Vue({
 			if (match_type == 'competitive') {
 				return 'Ranked'
 			} else {
-				return 'Normal'
+				return 'Unranked'
 			}
         },
         resolveKnocks: function (mode, knocks) {
@@ -36,7 +42,6 @@ var vm = new Vue({
             else {
                 return knocks;
             }
-
         },
 		printRoster: function (matchRoster, player_name) {			
 			var strRoster = '';
@@ -69,8 +74,22 @@ var vm = new Vue({
 
 			return strRoster;
 		},
-		analyzeMatch: function (_matchID) {
+		analyzeMatch: function (_matchID, _matchType, _mapName, _gameMode, _age, _participantCount) {
 			//console.log('analyzeMatch() -> ' + _matchID);
+
+			// console.log(this.match_data);
+			// this.match_data.isActive = !isActive;
+
+			let tmpMatchDetails = new Object();
+			tmpMatchDetails.matchId = _matchID;
+			tmpMatchDetails.matchType = _matchType;
+			tmpMatchDetails.mapName = _mapName;
+			tmpMatchDetails.gameMode = _gameMode;
+			tmpMatchDetails.age = _age;
+			tmpMatchDetails.humans = _participantCount;
+
+
+			vmTreeD3.updateTreeTable(tmpMatchDetails);
 
 			GetTelemetry(_matchID);
 
@@ -80,17 +99,24 @@ var vm = new Vue({
 })
 
 
-// var vmTreeD3 = new Vue({
-// 	el: "#d3-svg01",
-// 	data: {
-// 		// css text classes
-// 		classSearchedPlayer: 	'searchedPlayer',
-// 		classSelectedPlayer: 	'selectedPlayer',
-// 		classPlayerTeammate: 	'playerTeammate',
-// 		classKiller: 			'killer',
-// 		classKillerTeammate: 	'killerTeammate',
-// 		classTradedPaint: 		'tradedPaint',
-// 		class:'botPlayer'
-// 	},
-
-// });
+let vmTreeD3 = new Vue({
+	el: "#d3-tree01",
+	data: {
+		mapName: null,
+		matchId: null,
+		matchType: null,
+		gameMode: null,
+		age: null,
+		humans: null,
+	},
+	methods: {
+		updateTreeTable: function (objMatchInfo) {
+			this.age = objMatchInfo.age;
+			this.matchId = objMatchInfo.matchId;
+			this.mapName = objMatchInfo.mapName;
+			this.matchType = objMatchInfo.matchType;
+			this.gameMode = objMatchInfo.gameMode;
+			this.humans = objMatchInfo.humans;
+		}
+	}
+});

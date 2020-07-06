@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.05 _ 001'
+let version 			= '2020.07.05 _ 002'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -258,6 +258,9 @@ async function GetTelemetry(_matchID) {
 	try {
 		// once tree is generically created, update color for context and get data
 
+		// need to remember who the looked up player is so that they will stay 'hightlighted'
+		document.getElementById(strPlayerName).classList.add('searchedPlayer');
+
 		UpdateTreeContext(strPlayerName);
 
 	} catch (error) {
@@ -488,7 +491,9 @@ function CreateTreeFromD3() {
 	.append("g")                        // svg <g> tag is a group of elements : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g#:~:text=The%20SVG%20element%20is,with%20the%20element.
 	.attr("font-family", "sans-serif")
 	.attr("font-size", 12)
-	.attr("transform", `translate(${dy / 3},${dx - x0})`);  // ? what are "transform" and "translate?"
+	//.attr("font-weight", 'bold')
+	.attr("transform", `translate(${dy / 3},${dx - x0})`);	// ! if you hide the first branch out, the first paramater can drag the tree to the left
+	//.attr("transform", `translate(${-40},${dx - x0})`);	
 
 	const link = g
 	.append("g")
@@ -506,7 +511,6 @@ function CreateTreeFromD3() {
 		.linkHorizontal()
 		.x(d => d.y)      // width of line
 		.y(d => d.x)      // height of line
-							// ? how can you have a static width of the line regardless of depth of descendants?
 	);
 	// path:  https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/path
 	// d:     https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
@@ -530,7 +534,6 @@ function CreateTreeFromD3() {
 	.append("text")           	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
 	.attr('fill', "#dcddde")  	// added this to change text color
 	.attr('class', d => {
-
 		if (response.allHumanNames.includes(d.data.name) ) {
 			// don't create id's for stuff like ""
 			//return 'allPlayers';
@@ -559,12 +562,31 @@ function CreateTreeFromD3() {
 			return 'UpdateTreeContext(\'' + d.data.name + '\')';
 		}
 	})
-	.attr('cursor', 'pointer')
+	.attr('cursor', d => {
+		if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || 
+			d.data.name.includes('*')) {
+			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
+			return 'normal';
+		}
+		else {
+			return 'pointer';
+		}
+	})
 	.attr("dy", "0.5em") // "dy", "0.31em"
 	.attr("x", d => (d.children ? 6 : 6))                    	// seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
 	.attr("text-anchor", d => (d.children ? "start" : "start")) // where the text is in relation to the node dot    // "text-anchor", d => (d.children ? "end" : "start")
-	.text(d => d.data.name)
-
+	//.text(d => d.data.name)
+	.text(d => {
+		if (d.data.name == 'Match') {
+			return '';
+		}
+		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills') {
+			return '*' + d.data.name + '*';
+		}
+		else {
+			return d.data.name;
+		}
+	})
 }
 
 //#endregion D3 tree -----------------------
@@ -641,22 +663,23 @@ function UpdateTreeContext(selectedPlayer) {
 		// addd/remove classes
 		// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
 
-		// prune all classes after the intial default two classes (allPlayers + human/bot) if they have any left over from the last selected player's context.
+		// prune all classes after the intial default classes that should not be removed (allPlayers, human/bot, 
+		// searched) if they have any left over from the last selected player's context.
 		for (let j = playerClassList.length - 1; j >= 0; j--) {
 			//console.log('    ' + allPlayers[i].classList.value);
 
-			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers') {
+			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' && playerClassList[j] != 'searchedPlayer') {
 				playerClassList.remove(playerClassList[j]);
 			}
 		}
 
 		// at this point, add the relational classes...
-		// ? what is the context of this player to the selected player?
-		// selected player?
-		// teammate?
-		// killer?
-		// killer teammate?
-		// traded paint?
+		// what is the context of this player to the selected player?
+		// -selected player?
+		// -teammate?
+		// -killer?
+		// -killer teammate?
+		// -traded paint?
 
 		// selected player
 		if (selectedPlayer == currentPlayer) {

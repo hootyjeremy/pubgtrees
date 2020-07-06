@@ -116,6 +116,7 @@ module.exports = {
 
         return parseInt(distance / 100);    // return meters
     },
+
 }
 
 
