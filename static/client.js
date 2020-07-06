@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.05 _ 003'
+let version 			= '2020.07.05 _ 001'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -26,6 +26,7 @@ if (!blTestingVersion) {
 	}
 }
 else {
+	alert ('verify not using min js');
 	console.log('testing version: ' + version);
 	console.log('you are at: ' + location.href);
 
@@ -183,7 +184,7 @@ async function GetPlayerMatches() {
 
 // ! Analyze Telemetry ----------------------------------------------------------->
 async function GetTelemetry(_matchID) {
-	console.log('GetTelemetry() -> ' + _matchID + ', ' + strPlatform + '/' + strPlayerName);
+	console.log('Match diag -> platform: ' + strPlatform + ', matchId: ' + _matchID + ', player: \'' + strPlayerName + '\'');
 
 	axios_telemetry_response = null;
 
@@ -484,7 +485,6 @@ function CreateTreeFromD3() {
 				//console.log('new pos: ' + d.id + ': ' + d.x);
 			}
 		}
-
 	});
 
 	custom_height = (Math.abs(custom_neg_height) + custom_pos_height) + 40;
