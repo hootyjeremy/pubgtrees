@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.07 _ 001'
+let version 			= '0.002'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...

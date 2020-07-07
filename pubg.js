@@ -1497,14 +1497,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
         csvDataForD3 += arrSurvivors[0].name + ',Winner\n';
     }
 
-    // [Environment kills branch] -------------------------
-    if (arrEnvironmentKills.length > 0) {
-        csvDataForD3 += 'Environment kills,Match\n';
-
-        // arrEnvironmentKills.forEach(element => {
-        //     csvDataForD3 += element.damageCauserName + ',environment kills\n'
-        // })
-    }
 
     // [Self kills branch] -------------------------
     if (arrSelfKills.length > 0) {
@@ -1519,6 +1511,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // $ the problem seems to be that there are registered self-kills that aren't getting put into the arrSelfKills array somehow
         csvDataForD3 += 'Self kills,Match\n';
     }
+
 
 
     // ! correct for cycle kills -------------------------------------------------------
@@ -1565,6 +1558,15 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }
 
 
+    // [Environment kills branch] -------------------------
+    if (arrEnvironmentKills.length > 0) {
+        csvDataForD3 += 'Environment kills,Match\n';
+
+        // arrEnvironmentKills.forEach(element => {
+        //     csvDataForD3 += element.damageCauserName + ',environment kills\n'
+        // })
+    }
+    
 
     // ---------------------------
     let tmpEnv = ''
