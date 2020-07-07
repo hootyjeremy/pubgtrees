@@ -1497,7 +1497,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         csvDataForD3 += arrSurvivors[0].name + ',Winner\n';
     }
 
-    // [Environment Kills] -------------------------
+    // [Environment kills branch] -------------------------
     if (arrEnvironmentKills.length > 0) {
         csvDataForD3 += 'Environment kills,Match\n';
 
@@ -1506,7 +1506,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // })
     }
 
-    // [Self Kills] -------------------------
+    // [Self kills branch] -------------------------
     if (arrSelfKills.length > 0) {
         csvDataForD3 += 'Self kills,Match\n';
 
@@ -1519,6 +1519,51 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // $ the problem seems to be that there are registered self-kills that aren't getting put into the arrSelfKills array somehow
         csvDataForD3 += 'Self kills,Match\n';
     }
+
+
+    // ! correct for cycle kills -------------------------------------------------------
+    let blCycleKillsFound   = false;    // if changed, then add the name/parent record for cycle kills to the end of the list'
+
+    for (let i = 0; i < arrKillLog.length; i++) {
+
+        // for each record (after filtering out categories) get the killer's name and then go down the rest of the list to see if that person was the victim
+        // of the current victim. if so, then change the killer's name to '(killername)' 
+        // - add a '*Cycle kills*, Match' record (only once)
+        // - add a '(killername), *Cycle kills*' record so that it links up
+        // - add a '(vicimname), *Cycle kills*' record so that it links up
+        // - change the record at the next kill so that both records are edited
+
+        // victim, killer
+
+        // does this killer subseqently die to this victim?
+
+        for (let j = i; j < arrKillLog.length; j++) {
+            //console.log('j loop -> killer: ' + arrKillLog[j].killer + ' - ' + arrKillLog[j].victim);
+
+            if (i != j && 
+                arrKillLog[i].killer == arrKillLog[j].victim && 
+                arrKillLog[j].killer == arrKillLog[i].victim) {
+
+                //console.log(i + ' -> cycle kill: ' + arrKillLog[i].killer + ' -> ' + arrKillLog[i].victim);
+                //console.log(j + ' -> cycle kill: ' + arrKillLog[j].killer + ' -> ' + arrKillLog[j].victim);
+
+                // need to update these two records
+                arrKillLog[i].killer = '(' + arrKillLog[i].killer + ')';
+                arrKillLog[j].killer = '(' + arrKillLog[j].killer + ')';
+
+                // add these two (killers) to the end of arrKillLog 
+                arrKillLog.push( { 'killer': 'Cycle kills', 'victim': arrKillLog[i].killer });
+                arrKillLog.push( { 'killer': 'Cycle kills', 'victim': arrKillLog[j].killer });
+
+                blCycleKillsFound = true;
+            }
+        }
+    }
+
+    if (blCycleKillsFound) {
+        csvDataForD3 += 'Cycle kills,Match\n';
+    }
+
 
 
     // ---------------------------

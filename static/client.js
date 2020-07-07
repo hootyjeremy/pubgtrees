@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.06 _ 002'
+let version 			= '2020.07.06 _ 003'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -258,6 +258,8 @@ async function GetTelemetry(_matchID) {
 
 		div_analyze.style.display 	= 'none';
 		svg_d3tree01.style.display 	= 'none';
+
+		return;
 	}
 
 
@@ -273,6 +275,8 @@ async function GetTelemetry(_matchID) {
 	} catch (error) {
 		console.log('error in UpdateTreeContext() -> ' + error);
 		alert('error in UpdateTreeContext()');
+
+		return;
 	}
 
 
@@ -565,12 +569,17 @@ function CreateTreeFromD3() {
 		else if (response.allBotNames.includes(d.data.name)) {
 			return 'allPlayers botPlayers';
 		}
-		else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills') {
+		else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || 
+				 d.data.name == 'Self kills' || d.data.name == 'Cycle kills') {
 			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
 			return 'categories';
 		}
 		else if (d.data.name.includes('*')) { 
-			// if it's an environment kill type "player," then just color it as player color or bot
+			// if it's an environment kill type "player" with '*' then just color it as category
+			return 'categories';
+		}
+		else if (d.data.name.includes('(')) {
+			// if it's a cycle will with a '(' or ')' then do the same.
 			return 'categories';
 		}
 	})
@@ -589,8 +598,8 @@ function CreateTreeFromD3() {
 		}
 	})
 	.attr('cursor', d => {
-		if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || 
-			d.data.name.includes('*')) {
+		if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || 
+		    d.data.name == 'Self kills' || d.data.name == 'Cycle kills' || d.data.name.includes('*') || d.data.name.includes('(')) {
 			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
 			return 'normal';
 		}
@@ -604,18 +613,18 @@ function CreateTreeFromD3() {
 	//.text(d => d.data.name)
 	.attr("x", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills') ? -6 : 6;
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycle kills') ? -6 : 6;
 	}) 
 	.attr("text-anchor", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills') ? "end" : "start";
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycle kills') ? "end" : "start";
 	}) 
 	.text(d => {
 		// add '*' to the category names
 		if (d.data.name == 'Match') {
 			return '';
 		}
-		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills') {
+		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycle kills') {
 			return '*' + d.data.name + '*';
 		}
 		else {
