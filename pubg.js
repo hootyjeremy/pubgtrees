@@ -51,7 +51,7 @@ app.listen(port, () => {
 
 
 // ------------------------------------------------------------->
-app.use('/static', express.static(__dirname + '/static'));    // so that root/pubg.js and root/index.html can be found
+app.use('/static', express.static(__dirname + '/static'));
 //app.use('/match',  express.static(__dirname + '/static/match'));    // so that root/pubg.js and root/index.html can be found
 
 
@@ -60,8 +60,8 @@ app.get('/', (req, res) => {
     //console.log('request:  ' + req);
     //console.log('response: ' + res);
 
-    //console.log(__dirname + '/index.html');
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/static/index.html');
+    //res.sendFile('/static/index.html');
 });
 
 
@@ -1050,7 +1050,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 playerDamageLog.matchTime   = strRecordTimestamp;
                 playerDamageLog.byPlayer    = false;
 
-                _attacker.name = '*' + hf.translateDamageTypeCategory(record.damageTypeCategory) + '*';
+                _attacker.name = '<' + hf.translateDamageTypeCategory(record.damageTypeCategory) + '>';
                 
                 _victim.name    = record.victim.name;
                 _victim.isBot   = hf.isBot(record.victim.accountId);
@@ -1164,7 +1164,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     playerDamageLog.isTeammateKill  = null;
                     playerDamageLog.isBleedOut      = null;
 
-                    _attacker.name = '*' + hf.translateDamageTypeCategory(record.damageTypeCategory) + '*';
+                    _attacker.name = '<' + hf.translateDamageTypeCategory(record.damageTypeCategory) + '>';
                     
                     _victim.name    = record.victim.name;
                     _victim.isBot   = hf.isBot(record.victim.accountId);
@@ -1501,14 +1501,12 @@ app.get('/getmatchtelemetry', async (req, res) => {
     // [Self kills branch] -------------------------
     if (arrSelfKills.length > 0) {
         csvDataForD3 += 'Self kills,Match\n';
-
-        arrSelfKills.forEach(element => {
-            //csvDataForD3 += element + ',self kills\n'
-        })
     }
     else {
         // $ this is not really correct but make a default path until this is cleared up
         // $ the problem seems to be that there are registered self-kills that aren't getting put into the arrSelfKills array somehow
+
+        // $ i can see that one player is a "self kill" on the client because they died to being groggy
         csvDataForD3 += 'Self kills,Match\n';
     }
 
@@ -1545,8 +1543,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 arrKillLog[j].killer = '(' + arrKillLog[j].killer + ')';
 
                 // add these two (killers) to the end of arrKillLog 
-                arrKillLog.push( { 'killer': 'Cycle kills', 'victim': arrKillLog[i].killer });
-                arrKillLog.push( { 'killer': 'Cycle kills', 'victim': arrKillLog[j].killer });
+                arrKillLog.push( { 'killer': 'Cycled kills', 'victim': arrKillLog[i].killer });
+                arrKillLog.push( { 'killer': 'Cycled kills', 'victim': arrKillLog[j].killer });
 
                 blCycleKillsFound = true;
             }
@@ -1554,7 +1552,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }
 
     if (blCycleKillsFound) {
-        csvDataForD3 += 'Cycle kills,Match\n';
+        csvDataForD3 += 'Cycled kills,Match\n';
     }
 
 
@@ -1574,7 +1572,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // cycle through the kill log and get parents
 
 
-        if (element.killer.includes('*')) {
+        if (element.killer.includes('<')) {
             // this is an environment kill
 
             //console.log(element.killer);
@@ -1594,6 +1592,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // $ AMBIGUOUS means they already exist?
             if (element.killer == element.victim) {
                 csvDataForD3 += element.victim + ',Self kills\n';
+                // ? if this person doesn't exist in arrSelfKills, then add it here?
+                // ? or should this just be fixed and already exist or not exist properly in the array?
             }
             else {
                 csvDataForD3 += element.victim + ',' + element.killer + '\n';
@@ -1603,7 +1603,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
     // $ cycle through the kill log and get parents of each kill
-    // $ if the killer name contains '*' then the killer's parent is evironment kill, and it's victims is added to those kills
+    // $ if the killer name contains '<' then the killer's parent is evironment kill, and it's victims is added to those kills
 
 
     //#endregion -------------------------------------------------------

@@ -8,10 +8,11 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '0.002'
+
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
+let   version 			= '0.003'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -28,7 +29,7 @@ if (!blTestingVersion) {
 else {
 	console.log('testing version: ' + version);
 	console.log('you are at: ' + location.href);
-	console.log('!! VERIFY THAT YOU AREN\'T USING MINIFIED JS !!');
+	//console.log('!! VERIFY THAT YOU AREN\'T USING MINIFIED JS !!');
 
 	// console.log(location.protocol);
 	// console.log(location.host);
@@ -45,7 +46,9 @@ else {
 var strPlatform, strPlayerName;
 var prevPlatform, prevPlayerName;	// these are used to reset match_floor if searching for a new player
 let prevSelectedPlayer = null;
+
 let bypassCache = null;
+let blCycledKillsFound = false;
 
 var url, player_url, match_url, telemetry_url = ""; // store the match ID's of the player
 //var response; // fetch() responses
@@ -244,6 +247,9 @@ async function GetTelemetry(_matchID) {
 		// create D3 tree...
 		CreateTreeFromD3();
 
+		document.getElementById('div-cycle-footnote').style.display = (blCycledKillsFound) ? 'block' : 'none';
+
+
 		div_analyze.style.display 	= 'none';
 		svg_d3tree01.style.display 	= 'block';
 
@@ -294,14 +300,43 @@ async function GetTelemetry(_matchID) {
 	//#region // ! [Console log stuff]
 	//
 
-	// $ ---------------------------------------------------------------->
-	// $ cycle the response data and output the player's data
+	PrintReportForSelectedPlayer(strPlayerName);
+
+	//#endregion
+
+}
+
+
+
+// ! ------------------------------------------------------------------------------------------------------>
+//#region // ! [Region] Damage console logging
+//
+
+function PrintReportForSelectedPlayer(selectedPlayer) {
+
+	// get teamId of selected player
+	let playerTeamId 	= 0;
+	axios_telemetry_response.data.arrTeams.forEach(team => {
+		//console.log(team);
+
+		team.teammates.forEach(teammate => {
+			if (teammate.name == selectedPlayer) {
+				playerTeamId = team.teamId;
+			}
+		})
+	})
+
+	console.log(strLine + strLine);
+	console.log('Damage/Kill log for player -> ' + selectedPlayer + ', teamId: ' + playerTeamId);
+
+	//debugger;
+
 	for (i = 0; i < axios_telemetry_response.data.arrPlayersDamageLog.length; i++) {
 		var record 			= axios_telemetry_response.data.arrPlayersDamageLog[i];
-		var playerTeamId 	= axios_telemetry_response.data.playerTeamId;
+		//var playerTeamId 	= axios_telemetry_response.data.playerTeamId;
 
 		// (record.attacker.teamId == playerTeamId || record.victim.teamId == playerTeamId)
-		if (record.attacker.name == strPlayerName || record.victim.name == strPlayerName) {
+		if (record.attacker.name == selectedPlayer || record.victim.name == selectedPlayer) {
 			// this is only concerning the player
 			//console.log(record);
 
@@ -420,16 +455,14 @@ async function GetTelemetry(_matchID) {
 				}
 
 				if (line != null){
-					console.log(line);
+					console.log('%c' + line, 'color: #98a0a6');
 				}
 		}
 	}
 
-
-	//#endregion
-
 }
 
+//#endregion - Console log for damage
 
 
 
@@ -441,6 +474,8 @@ function CreateTreeFromD3() {
 
 	// original sample...
 	// https://codesandbox.io/s/xwm4k88wp?file=/src/index.js
+
+	blCycledKillsFound = false;
 
 	const response = axios_telemetry_response.data;
 
@@ -586,13 +621,17 @@ function CreateTreeFromD3() {
 
 			return 'allPlayers botPlayers' + winnerClass;
 		}
-		else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || 
-				 d.data.name == 'Self kills' || d.data.name == 'Cycle kills') {
+		else if (d.data.name == 'Winner' || d.data.name == 'Winners') {
+			// want to draw the winner category in winner's color so that the branch is somewhat separated from the rest.
+			return 'categories winner'
+		}
+		else if (d.data.name == 'Match' || d.data.name == 'Environment kills' || 
+				 d.data.name == 'Self kills' || d.data.name == 'Cycled kills') {
 			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
 			return 'categories';
 		}
-		else if (d.data.name.includes('*')) { 
-			// if it's an environment kill type "player" with '*' then just color it as category
+		else if (d.data.name.includes('<')) { 
+			// if it's an environment kill type "player" with '<' then just color it as category
 			return 'categories';
 		}
 		else if (d.data.name.includes('(')) {
@@ -616,7 +655,7 @@ function CreateTreeFromD3() {
 	})
 	.attr('cursor', d => {
 		if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || 
-		    d.data.name == 'Self kills' || d.data.name == 'Cycle kills' || d.data.name.includes('*') || d.data.name.includes('(')) {
+		    d.data.name == 'Self kills' || d.data.name == 'Cycled kills' || d.data.name.includes('<') || d.data.name.includes('(')) {
 			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
 			return 'normal';
 		}
@@ -630,19 +669,25 @@ function CreateTreeFromD3() {
 	//.text(d => d.data.name)
 	.attr("x", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycle kills') ? -6 : 6;
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') ? -6 : 6;
 	}) 
 	.attr("text-anchor", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycle kills') ? "end" : "start";
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') ? "end" : "start";
 	}) 
 	.text(d => {
-		// add '*' to the category names
+		// add '<>' to the category names
 		if (d.data.name == 'Match') {
 			return '';
 		}
-		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycle kills') {
-			return '*' + d.data.name + '*';
+		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') {
+			
+			if (d.data.name == 'Cycled kills') {
+				// need to know if the footnote should be displayed.
+				blCycledKillsFound = true;
+			}
+
+			return '<' + d.data.name + '>';
 		}
 		else {
 			return d.data.name;
@@ -661,7 +706,7 @@ function UpdateTreeContext(selectedPlayer) {
 
 	// update data data for the selected player
 	if (prevSelectedPlayer == selectedPlayer) {
-		ShowPlayerReport(selectedPlayer);
+		PrintReportForSelectedPlayer(selectedPlayer);
 	}
 
 	prevSelectedPlayer = selectedPlayer; 
@@ -715,13 +760,9 @@ function UpdateTreeContext(selectedPlayer) {
 		}
 	})
 
-
-
 	//
 	//#endregion --------------------------------------------------------
 	
-
-
 
 
 	// cycle through all players and then give them a context class based on the selected player...
@@ -792,9 +833,8 @@ function UpdateTreeContext(selectedPlayer) {
 }
 
 
-function ShowPlayerReport(playername) {
-	console.log('ShowPlayerReport() -> ' + playername);
-}
+
+
 
 
 // ! ------------------------------------------------------------------------------------------------------>
