@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.05 _ 001'
+let version 			= '2020.07.06 _ 002'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -26,9 +26,9 @@ if (!blTestingVersion) {
 	}
 }
 else {
-	alert ('verify not using min js');
 	console.log('testing version: ' + version);
 	console.log('you are at: ' + location.href);
+	console.log('!! VERIFY THAT YOU AREN\'T USING MINIFIED JS !!');
 
 	// console.log(location.protocol);
 	// console.log(location.host);
@@ -421,7 +421,6 @@ async function GetTelemetry(_matchID) {
 		}
 	}
 
-	console.log('show winPlace and of how many teams there were');
 
 	//#endregion
 
@@ -566,9 +565,12 @@ function CreateTreeFromD3() {
 		else if (response.allBotNames.includes(d.data.name)) {
 			return 'allPlayers botPlayers';
 		}
-		else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || 
-		 		 d.data.name.includes('*')) {
+		else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills') {
 			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
+			return 'categories';
+		}
+		else if (d.data.name.includes('*')) { 
+			// if it's an environment kill type "player," then just color it as player color or bot
 			return 'categories';
 		}
 	})

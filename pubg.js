@@ -45,21 +45,25 @@ app.listen(port, () => {
     console.log(strLine);
     console.log('test version: ' + blTestingVersion);
     console.log(getDate() + ' -> hooty-pubg server listening on port ' + port);
+    console.log('__dirname: ' + __dirname + '\\');
 });
 
 
 
 // ------------------------------------------------------------->
-// ? this doesn't seem to do anything...
-app.use('/', express.static(__dirname));    // so that root/pubg.js and root/index.html can be found
+app.use('/static', express.static(__dirname + '/static'));    // so that root/pubg.js and root/index.html can be found
+//app.use('/match',  express.static(__dirname + '/static/match'));    // so that root/pubg.js and root/index.html can be found
 
-// app.get('/', (req, res) => {
-//     //console.log('request:  ' + req);
-//     //console.log('response: ' + res);
 
-//     console.log(__dirname + '/index.html');
-//     res.sendFile(__dirname + '/index.html');
-// });
+// this doesn't seem to do anything once you apply app.use('/')
+app.get('/', (req, res) => {
+    //console.log('request:  ' + req);
+    //console.log('response: ' + res);
+
+    //console.log(__dirname + '/index.html');
+    res.sendFile(__dirname + '/index.html');
+});
+
 
 
 // ------------------------------------------------------------->
