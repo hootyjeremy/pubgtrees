@@ -73,10 +73,15 @@ text.botPlayers {
 	fill: #98a0a6;
 }
 
+text.winner {
+	fill: #73eca0;
+}
+
 text.searchedPlayer {
 	/* fill: #7dde98; */
-	fill: #10131b;
+	fill: #050913;
 }
+
 
 text.selectedPlayer {
 	fill: #60b6f0;
@@ -105,9 +110,13 @@ text.tradedPaint {
 
 
 
+span.winner {
+	color: #73eca0;
+}
+
 span.searchedPlayer {
 	/* color: #7dde98; */
-	color: #10131b;
+	color: #050913;
 }
 
 span.botPlayers {

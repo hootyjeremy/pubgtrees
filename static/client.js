@@ -8,7 +8,7 @@ let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
-let version 			= '2020.07.06 _ 003'
+let version 			= '2020.07.07 _ 001'
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -561,13 +561,30 @@ function CreateTreeFromD3() {
 	.append("text")           	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
 	.attr('fill', "#dcddde")  	// added this to change text color
 	.attr('class', d => {
+		let winnerClass = '';
+
 		if (response.allHumanNames.includes(d.data.name) ) {
 			// don't create id's for stuff like ""
 			//return 'allPlayers';
-			return 'allPlayers humanPlayers';
+
+
+			response.arrSurvivors.forEach(element => {
+				if (element.name == d.data.name) {
+					winnerClass = ' winner';
+				}
+			})
+
+			return 'allPlayers humanPlayers' + winnerClass;
 		}
 		else if (response.allBotNames.includes(d.data.name)) {
-			return 'allPlayers botPlayers';
+
+			response.arrSurvivors.forEach(element => {
+				if (element.name == d.data.name) {
+					winnerClass = ' winner';
+				}
+			})
+
+			return 'allPlayers botPlayers' + winnerClass;
 		}
 		else if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || 
 				 d.data.name == 'Self kills' || d.data.name == 'Cycle kills') {
@@ -721,7 +738,8 @@ function UpdateTreeContext(selectedPlayer) {
 		for (let j = playerClassList.length - 1; j >= 0; j--) {
 			//console.log('    ' + allPlayers[i].classList.value);
 
-			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' && playerClassList[j] != 'searchedPlayer') {
+			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' && playerClassList[j] != 'searchedPlayer' &&
+				playerClassList[j] != 'winner') {
 				playerClassList.remove(playerClassList[j]);
 			}
 		}
