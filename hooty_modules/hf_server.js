@@ -155,7 +155,8 @@ var _damageTypeCategory = {
     "Damage_TrainHit": "Train Damage",
     "Damage_VehicleCrashHit": "Vehicle Crash",
     "Damage_VehicleHit": "Vehicle Hit",
-    "SpikeTrap": "Spike Trap"
+    "SpikeTrap": "Spike Trap",
+    "Damage_Explosion_C4": 'C4 Explosion'
 }
 
 //https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageCauserName.json
@@ -243,6 +244,7 @@ var _damageCauserName = {
     "PG117_A_01_C": "PG-117",
     "PlayerFemale_A_C": "Player",
     "PlayerMale_A_C": "Player",
+    "ProjC4_C": "C4",
     "ProjGrenade_C": "Grenade",
     "ProjMolotov_C": "Molotov Cocktail",
     "ProjMolotov_DamageField_Direct_C": "Molotov Cocktail Fire Field",
