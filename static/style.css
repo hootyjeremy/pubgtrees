@@ -83,6 +83,8 @@ text.searchedPlayer {
 }
 
 
+/* what should the order be for team kills? */
+
 text.selectedPlayer {
 	fill: #60b6f0;
 }

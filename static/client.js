@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.004'
+let   version 			= '0.005'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -277,6 +277,8 @@ async function GetTelemetry(_matchID) {
 		document.getElementById(strPlayerName).classList.add('searchedPlayer');
 
 		UpdateTreeContext(strPlayerName);
+
+		document.getElementById('d3-tree01').scrollIntoView({behavior: "smooth"});
 
 	} catch (error) {
 		console.log('error in UpdateTreeContext() -> ' + error);
