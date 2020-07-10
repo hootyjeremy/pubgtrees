@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.005'
+let   version 			= '0.006'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -273,10 +273,13 @@ async function GetTelemetry(_matchID) {
 	try {
 		// once tree is generically created, update color for context and get data
 
+		if (strPlayerName != '') {
 		// need to remember who the looked up player is so that they will stay 'hightlighted'
 		document.getElementById(strPlayerName).classList.add('searchedPlayer');
+		}
 
-		UpdateTreeContext(strPlayerName);
+		// don't update tree context on the first look
+		//UpdateTreeContext(strPlayerName);
 
 		document.getElementById('d3-tree01').scrollIntoView({behavior: "smooth"});
 
@@ -302,7 +305,7 @@ async function GetTelemetry(_matchID) {
 	//#region // ! [Console log stuff]
 	//
 
-	PrintReportForSelectedPlayer(strPlayerName);
+	//PrintReportForSelectedPlayer(strPlayerName);
 
 	//#endregion
 
@@ -379,10 +382,19 @@ function PrintReportForSelectedPlayer(selectedPlayer) {
 
 				if (record.byPlayer) {
 					// killed by player or bot
-					var _thirst 		= (record.isThirst) 		? ' *thirst*' : '';
+					var _thirst 		= (record.isThirst) 			? ' *thirst*' : '';
 					var _selfKill 		= (record.isSelfKill) 		? ' *self-kill*': '';
 					var _teammateKill 	= (record.isTeammateKill) 	? ' *teammate-kill*': '';
-					var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
+					//var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
+					let _bleedOut = '';
+
+					if (record.isTeamWipe) {
+						_bleedOut = ' *bleedout/team-wiped*';
+					}
+					else if (record.isNoRevive) {
+						_bleedOut = ' *bleedout/no-revive*';
+					}
+					
 	
 					line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' x ' + victimTeamId + ' ' + victimName + '] ' + 
 							strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + ' ' +  record.damageTypeCategory + '/' +	record.damageCauserName + '/' + 
@@ -391,7 +403,7 @@ function PrintReportForSelectedPlayer(selectedPlayer) {
 				else {
 					// environment kill
 					line = 	record.matchTime + ' [' + attackerName + '     x ' + victimTeamId + ' ' + victimName + '] *env* x ' + strBot(record.victim.isBot) + ' ' + 
-							record.damageTypeCategory + '/' +	record.damageCauserName + '/' + record.damageReason + ' bleedout?';
+							record.damageTypeCategory + '/' + record.damageCauserName + '/' + record.damageReason + ' bleedout?';
 				}
 			}
 			else if (record._T == 'LogPlayerRevive') {
@@ -438,16 +450,25 @@ function PrintReportForSelectedPlayer(selectedPlayer) {
 						var _thirst 		= (record.isThirst) 		? ' *thirst*' : '';
 						var _selfKill 		= (record.isSelfKill) 		? ' *self-kill*': '';
 						var _teammateKill 	= (record.isTeammateKill) 	? ' *teammate-kill*': '';
-						var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
+						// var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
+
+						let _bleedOut = '';
+						if (record.isTeamWipe) {
+							_bleedOut = ' *bleedout/team-wiped*';
+						}
+						else if (record.isNoRevive) {
+							_bleedOut = ' *bleedout/no-revive*';
+						}
+	
 		
 						line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' x ' + victimTeamId + ' ' + victimName + '] ' + 
-								strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + ' ' + record.damageTypeCategory + '/' +	record.damageCauserName + '/' + 
+								strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + ' ' + record.damageTypeCategory + '/' + record.damageCauserName + '/' + 
 								record.damageReason + _thirst + _selfKill + _teammateKill + _bleedOut;
 					}
 					else {
 						// environment kill
 						line = 	record.matchTime + ' [' + attackerName + '     x ' + victimTeamId + ' ' + victimName + '] *env* x ' + strBot(record.victim.isBot) + ' ' + 
-								record.damageTypeCategory + '/' +	record.damageCauserName + '/' + record.damageReason + ' bleedout?';
+								record.damageTypeCategory + '/' + record.damageCauserName + '/' + record.damageReason + ' bleedout?';
 					}
 				}
 				else if (record._T == 'LogPlayerRevive') {
