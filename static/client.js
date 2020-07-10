@@ -12,8 +12,8 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.006'
-const blTestingVersion 	= !true;
+let   version 			= '0.007'
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -25,15 +25,20 @@ if (!blTestingVersion) {
 		
 		location.replace('https://hooty-pubg01.herokuapp.com');		
 	}
+
+	console.log('you are at: ' + location.href);
 }
 else {
 	console.log('testing version: ' + version);
 	console.log('you are at: ' + location.href);
+	
+
 	//console.log('!! VERIFY THAT YOU AREN\'T USING MINIFIED JS !!');
 
 	// console.log(location.protocol);
 	// console.log(location.host);
-	// console.log(location.pathname);
+	//console.log('location.pathname: ' + location.pathname);
+	// console.log('location.search: ' + location.search);
 
 	// const tmpURL = location.protocol + '//' + location.host + location.pathname;
 
@@ -46,6 +51,7 @@ else {
 var strPlatform, strPlayerName;
 var prevPlatform, prevPlayerName;	// these are used to reset match_floor if searching for a new player
 let prevSelectedPlayer = null;
+let glMatchId = '';
 
 let bypassCache = null;
 let blCycledKillsFound = false;
@@ -60,6 +66,61 @@ var match_floor		= 0;
 var total_matches 	= 0;
 
 let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
+
+
+function checkURLQuery() {
+	// if there are search parameters, parse them and search the match
+	// ?steam&hooty__&51beee36-6df7-4903-8d16-f21a97141340
+	// console.log('location.search: [' + location.search + ']');
+	if (location.search != '') {
+
+		// params should be: platform, player name, matchId
+
+		let params = location.search
+					.substring(1, location.search.length)
+					.split('&');
+
+		console.dir(params);
+
+		// don't want to see match details since it won't work when analyzing from url parameters. will need to figure something out.
+		document.getElementById('tree-match-details').style.display = 'none';
+
+		document.getElementById('inputPlayerName').value = params[1];
+
+		strPlatform 	= params[0];
+		strPlayerName 	= params[1];
+		GetTelemetry(params[2]);
+	}
+	else {
+		document.getElementById('tree-match-details').style.display = 'inline';
+	}
+}
+
+function btnCopyMatchToClipboard_Click() {
+	// console.log('hooty_server_url: ' + hooty_server_url);
+	// console.log('strPlatform: ' + strPlatform);
+	// console.log('strPlayerName: ' + strPlayerName);
+	// console.log('glMatchId: ' + glMatchId);
+
+	navigator.permissions.query({name: "clipboard-write"}).then(result => {
+		//console.log('result.state: ' + result.state);
+		
+		if (result.state == "granted" || result.state == "prompt") {
+
+			let clip = hooty_server_url + '/?' + strPlatform + '&' + strPlayerName + '&' + glMatchId;
+			//console.log(clip);
+
+			navigator.clipboard.writeText(clip).then(function() {
+				/* clipboard successfully set */
+			  }, function() {
+				/* clipboard write failed */
+				alert('Could not copy to the clipboard.');
+			  });
+		}
+    });
+}
+
+
 
 
 // $ FLOOD PREVENTION
@@ -187,7 +248,10 @@ async function GetPlayerMatches() {
 
 // ! Analyze Telemetry ----------------------------------------------------------->
 async function GetTelemetry(_matchID) {
+	
 	console.log('Match diag -> platform: ' + strPlatform + ', matchId: ' + _matchID + ', player: \'' + strPlayerName + '\'');
+
+	glMatchId = _matchID;
 
 	axios_telemetry_response = null;
 
@@ -220,7 +284,7 @@ async function GetTelemetry(_matchID) {
 		document.getElementById('d3-tree01').style.display 		= 'none';
 
 		return;
-	}	
+	}
 
 	//console.log('hootyserver.response:                     ' + axios_telemetry_response.status + ', ' + axios_telemetry_response.statusText);
 	// console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.hootyserver);
@@ -388,10 +452,10 @@ function PrintReportForSelectedPlayer(selectedPlayer) {
 					//var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
 					let _bleedOut = '';
 
-					if (record.isTeamWipe) {
+					if (record.isTeamWipe && record.isTeamWipe != null) {
 						_bleedOut = ' *bleedout/team-wiped*';
 					}
-					else if (record.isNoRevive) {
+					else if (record.isNoRevive  && record.isTeamWipe != null) {
 						_bleedOut = ' *bleedout/no-revive*';
 					}
 					
@@ -453,10 +517,10 @@ function PrintReportForSelectedPlayer(selectedPlayer) {
 						// var _bleedOut 		= (record.isBleedOut) 		? ' *bleed-out*': '';
 
 						let _bleedOut = '';
-						if (record.isTeamWipe) {
+						if (record.isTeamWipe && record.isTeamWipe != null) {
 							_bleedOut = ' *bleedout/team-wiped*';
 						}
-						else if (record.isNoRevive) {
+						else if (record.isNoRevive && record.isNoRevive != null) {
 							_bleedOut = ' *bleedout/no-revive*';
 						}
 	

@@ -81,12 +81,12 @@ let vm = new Vue({
 			// this.match_data.isActive = !isActive;
 
 			let tmpMatchDetails = new Object();
-			tmpMatchDetails.matchId = _matchID;
-			tmpMatchDetails.matchType = _matchType;
-			tmpMatchDetails.mapName = _mapName;
-			tmpMatchDetails.gameMode = _gameMode;
-			tmpMatchDetails.age = _age;
-			tmpMatchDetails.humans = _participantCount;
+			tmpMatchDetails.matchId 	= _matchID;
+			tmpMatchDetails.matchType 	= _matchType;
+			tmpMatchDetails.mapName 	= _mapName;
+			tmpMatchDetails.gameMode 	= _gameMode;
+			tmpMatchDetails.age 		= _age;
+			tmpMatchDetails.humans 		= _participantCount;
 
 
 			vmTreeD3.updateTreeTable(tmpMatchDetails);

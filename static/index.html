@@ -90,7 +90,7 @@
 	
 	<br>
 	<br>
-	PUBG Trees (beta : 0.006)
+	PUBG Trees (beta : 0.007)
 	<br>
 	<br>
 	
@@ -123,6 +123,8 @@
 	window.addEventListener('load', (event) => {
 		//console.log('page is fully loaded');
 		document.getElementById('inputPlayerName').value = defaultPlayer;
+
+		checkURLQuery();
 	});
 </script>
 
@@ -201,7 +203,7 @@
 
 		<br>
 
-		<table>
+		<table id='tree-match-details'>
 			<thead>
 				<tr>  
 					<!-- <td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">Age</td> 
@@ -223,15 +225,24 @@
 			</tbody>
 		</table>
 
+		<br>
 
 		<svg id='d3-svg01' style='overflow: auto;'></svg>
 
+		<br>
+		<button id="btnCopyMatchURL" style='width: 120;' onclick="btnCopyMatchToClipboard_Click()">Copy match URL</button>
+		<br>
+
+
+
 		<div id='div-cycle-footnote'>
+			<br>
 			<span>** Cycled kills occur if two players kill each other. If they kill each other, they are removed 
 				from the normal flow of kills since they only inherit each other.</span>
 			<br>
-			<br>
 		</div>
+
+		<br>
 
 		<div style='text-align: left; width: 186px; border: 2px solid #60b6f0; border-radius: 10px; padding-left: 10px;'>
 			<br>
