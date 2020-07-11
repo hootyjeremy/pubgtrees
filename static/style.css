@@ -92,7 +92,7 @@ text.selectedPlayer {
 
 text.playerTeammate {
 	/* fill: #60b6f0; */
-	fill: #baace0;
+	fill: #b299f5;
 }
 
 text.killer {
@@ -131,7 +131,7 @@ span.selectedPlayer {
 }
 
 span.playerTeammate {
-	color: #baace0;
+	color: #b299f5;
 }
 
 span.killer {
