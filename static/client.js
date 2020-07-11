@@ -84,7 +84,7 @@ function checkURLQuery() {
 		console.dir(params);
 
 		// don't want to see match details since it won't work when analyzing from url parameters. will need to figure something out.
-		document.getElementById('tree-match-details').style.display = 'none';
+		//document.getElementById('tree-match-details').style.display = 'none';
 
 		document.getElementById('inputPlayerName').value = params[1];
 
@@ -93,7 +93,7 @@ function checkURLQuery() {
 		GetTelemetry(params[2]);
 	}
 	else {
-		document.getElementById('tree-match-details').style.display = 'inline';
+		//document.getElementById('tree-match-details').style.display = 'inline';
 	}
 }
 
