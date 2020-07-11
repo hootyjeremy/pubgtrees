@@ -21,7 +21,7 @@ const { debug } = require('console');
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = true;
+const blTestingVersion = !true;
 
 
 
@@ -565,7 +565,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             pubgApiMatchResponseInfo = { 'hootyserver': 'match fetch (error)', 'status': error.response.status, 'statusText': error.response.statusText };
 
-            // $ should send an error response here...
+            res.send({ pubgApiMatchResponseInfo });
+
+            return;
         }
     }
 
@@ -1617,21 +1619,24 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     // [Self kills branch] -------------------------
     if (arrSelfKills.length > 0) {
-        csvDataForD3 += 'Self kills,Match\n';
+        //csvDataForD3 += 'Self kills,Match\n';
     }
     else {
-        // $ this is not really correct but make a default path until this is cleared up
-        // $ the problem seems to be that there are registered self-kills that aren't getting put into the arrSelfKills array somehow
-
-        // $ i can see that one player is a "self kill" on the client because they died to being groggy
-        csvDataForD3 += 'Self kills,Match\n';
+        //csvDataForD3 += 'Self kills,Match\n';
     }
+
+    let blSelfKillsFound = false;
+    arrKillLog.forEach(element => {
+        if (element.killer == element.victim && !blSelfKillsFound) {
+            csvDataForD3 += 'Self kills,Match\n';
+            blSelfKillsFound = true;
+        }
+    });
 
 
 
     // ! correct for cycle kills -------------------------------------------------------
     let blCycleKillsFound   = false;    // if changed, then add the name/parent record for cycle kills to the end of the list'
-
     for (let i = 0; i < arrKillLog.length; i++) {
 
         // for each record (after filtering out categories) get the killer's name and then go down the rest of the list to see if that person was the victim
@@ -1709,8 +1714,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // $ AMBIGUOUS means they already exist?
             if (element.killer == element.victim) {
                 csvDataForD3 += element.victim + ',Self kills\n';
-                // ? if this person doesn't exist in arrSelfKills, then add it here?
-                // ? or should this just be fixed and already exist or not exist properly in the array?
             }
             else {
                 csvDataForD3 += element.victim + ',' + element.killer + '\n';

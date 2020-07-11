@@ -13,7 +13,7 @@ let defaultPlayer		= 'hooty__';
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
 let   version 			= '0.007'
-const blTestingVersion 	= true;
+const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -51,7 +51,8 @@ else {
 var strPlatform, strPlayerName;
 var prevPlatform, prevPlayerName;	// these are used to reset match_floor if searching for a new player
 let prevSelectedPlayer = null;
-let glMatchId = '';
+
+let glMatchId = '';				// used for url
 
 let bypassCache = null;
 let blCycledKillsFound = false;
@@ -246,12 +247,13 @@ async function GetPlayerMatches() {
 }
 
 
+
 // ! Analyze Telemetry ----------------------------------------------------------->
 async function GetTelemetry(_matchID) {
 	
 	console.log('Match diag -> platform: ' + strPlatform + ', matchId: ' + _matchID + ', player: \'' + strPlayerName + '\'');
 
-	glMatchId = _matchID;
+	glMatchId = _matchID;	// store for url clipboard
 
 	axios_telemetry_response = null;
 
@@ -278,7 +280,7 @@ async function GetTelemetry(_matchID) {
 	catch (error) 
 	{
 		//console.log('error getting telemetry from hootyserver: ' + error.response.status + ',' + error.response.statusText)
-		alert('Error getting tree details: ' + error.message);
+		alert('Error getting match details: ' + error.message);
 
 		document.getElementById('div-analyzing').style.display 	= 'none';
 		document.getElementById('d3-tree01').style.display 		= 'none';
@@ -294,12 +296,22 @@ async function GetTelemetry(_matchID) {
 	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
 	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
 
+	console.log(axios_telemetry_response);
+
+	if (axios_telemetry_response.data.pubgApiMatchResponseInfo.status != 200 && axios_telemetry_response.data.pubgApiMatchResponseInfo.status != null) {
+		alert('Error getting match from pubg api. ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.status + ': ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.statusText);
+
+		// turn these off if there is an error.
+		div_analyze.style.display 	= 'none';
+		svg_d3tree01.style.display 	= 'none';
+		
+		return;
+	}
+
 	if (blTestingVersion) {
 		console.log('axios_telemetry_response.data...');
 		console.dir(axios_telemetry_response.data);
 	}
-
-
 
 
 
@@ -326,6 +338,7 @@ async function GetTelemetry(_matchID) {
 			alert('D3 tree error: ' + error.message);
 		}
 
+		// turn these off if there is an error.
 		div_analyze.style.display 	= 'none';
 		svg_d3tree01.style.display 	= 'none';
 
@@ -359,12 +372,6 @@ async function GetTelemetry(_matchID) {
 	// ? how can you pop up a dialog (like instagram) that will show the clicked player's info?
 
 
-	// $ GET ALL THIS stuff to happen inside a function. this will need to fire off on the "view" button for the searched player
-	// $ and also for any clicked human player in the tree to show damage and details and also highlight teammates and killer/teammates.
-	// ? the question is how do you set this up initially (vue?) so that it can work on the first search and update for later searches.
-	// ? make the classes into vue variables and update vue objects (and the classes in turn) when necessary.
-
-
 
 	//#region // ! [Console log stuff]
 	//
@@ -384,10 +391,9 @@ async function GetTelemetry(_matchID) {
 function PrintReportForSelectedPlayer(selectedPlayer) {
 
 	// get teamId of selected player
-	let playerTeamId 	= 0;
+	let playerTeamId = 0;
 	axios_telemetry_response.data.arrTeams.forEach(team => {
 		//console.log(team);
-
 		team.teammates.forEach(teammate => {
 			if (teammate.name == selectedPlayer) {
 				playerTeamId = team.teamId;
@@ -441,8 +447,6 @@ function PrintReportForSelectedPlayer(selectedPlayer) {
 				}
 			}
 			else if (record._T == 'LogPlayerKill') {
-
-				// $ bug here where knocked by environment and then bleed out, shows killer as self. what is server side saying?
 
 				if (record.byPlayer) {
 					// killed by player or bot
