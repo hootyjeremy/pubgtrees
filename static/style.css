@@ -59,7 +59,7 @@ th, td {
 text.categories {
 	/* fill: #f9abea; */
 	/* fill: #c0ace0; */
-	fill: #acc0e0;
+	fill: #97b2de;
 }
 
 text.allPlayers {
@@ -80,7 +80,7 @@ text.winner {
 
 text.searchedPlayer {
 	/* fill: #7dde98; */
-	fill: #050913;
+	fill: #0e0d0e;
 }
 
 
@@ -92,7 +92,7 @@ text.selectedPlayer {
 
 text.playerTeammate {
 	/* fill: #60b6f0; */
-	fill: #b299f5;
+	fill: #ab97e0;
 }
 
 text.killer {
@@ -102,7 +102,7 @@ text.killer {
 }
 
 text.killerTeammate {
-	fill: #ffbb71;
+	fill: #eaa559;
 	/* fill: #f58f75; */
 	/* fill: #f07d60; */
 }
@@ -119,7 +119,7 @@ span.winner {
 
 span.searchedPlayer {
 	/* color: #7dde98; */
-	color: #050913;
+	color: #0e0d0e;
 }
 
 span.botPlayers {
@@ -131,7 +131,7 @@ span.selectedPlayer {
 }
 
 span.playerTeammate {
-	color: #b299f5;
+	color: #ab97e0;
 }
 
 span.killer {
@@ -141,7 +141,7 @@ span.killer {
 }
 
 span.killerTeammate {
-	color: #ffbb71;
+	color: #eaa559;
 	/* color: #f58f75; */
 	/* color: #f07d60; */
 }

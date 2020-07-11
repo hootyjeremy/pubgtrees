@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.007'
+let   version 			= '0.008'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -81,16 +81,15 @@ function checkURLQuery() {
 					.substring(1, location.search.length)
 					.split('&');
 
-		console.dir(params);
+
 
 		// don't want to see match details since it won't work when analyzing from url parameters. will need to figure something out.
 		//document.getElementById('tree-match-details').style.display = 'none';
 
 		document.getElementById('inputPlayerName').value = params[1];
 
-		strPlatform 	= params[0];
-		strPlayerName 	= params[1];
-		GetTelemetry(params[2]);
+		strPlayerName = params[1];
+		GetTelemetry(params[0]);
 	}
 	else {
 		//document.getElementById('tree-match-details').style.display = 'inline';
@@ -108,7 +107,7 @@ function btnCopyMatchToClipboard_Click() {
 		
 		if (result.state == "granted" || result.state == "prompt") {
 
-			let clip = hooty_server_url + '/?' + strPlatform + '&' + strPlayerName + '&' + glMatchId;
+			let clip = hooty_server_url + '/?' + glMatchId + '&' + strPlayerName;
 			//console.log(clip);
 
 			navigator.clipboard.writeText(clip).then(function() {
@@ -313,7 +312,6 @@ async function GetTelemetry(_matchID) {
 	}
 
 
-
 	// ! D3 Tree Stuff...
 	try {
 		// clear out the svg D3 tree if there is anything in there...
@@ -458,10 +456,9 @@ function PrintReportForSelectedPlayer(selectedPlayer) {
 					if (record.isTeamWipe && record.isTeamWipe != null) {
 						_bleedOut = ' *bleedout/team-wiped*';
 					}
-					else if (record.isNoRevive  && record.isTeamWipe != null) {
+					else if (record.isNoRevive && record.isTeamWipe != null) {
 						_bleedOut = ' *bleedout/no-revive*';
 					}
-					
 	
 					line = 	record.matchTime + ' [' + attackerTeamId + ' ' + attackerName + ' x ' + victimTeamId + ' ' + victimName + '] ' + 
 							strBot(record.attacker.isBot) + ' x ' + strBot(record.victim.isBot) + ' ' +  record.damageTypeCategory + '/' +	record.damageCauserName + '/' + 
@@ -576,14 +573,15 @@ function CreateTreeFromD3() {
 				(table);
 	
 	
-	const path_width = 1200;                        // ? what is this the width of? path?
+	const path_width = 1200;                        // what is this the width of? path?
 	//const root = d3.hierarchy(data);            	// https://github.com/d3/d3-hierarchy
-	const dx = 14;                              	// node height? (default 10)
-	const dy = path_width / (root.height + 1);      // root.height is how many descendants there are. this is where you can make the line lengths static, probably.
+	const dx = 14;                              	// node height (default 10)
+	const dy = 140;									// path/link/line width
+//	const dy = path_width / (root.height + 1);      // root.height is how many descendants there are. this is where you can make the line lengths static, probably.
 	//const tree = d3.tree().nodeSize([dx, dy]);
-	const tree = d3.tree().nodeSize([dx, 130]); 	// static width for paths
+	const tree = d3.tree().nodeSize([dx, dy]); 	// static width for paths
 
-	let custom_width  = 160 + (root.height * 130);
+	let custom_width  = 160 + (root.height * dy);
 	let custom_height = 0;
 	
 	let custom_neg_height = 0;
@@ -622,7 +620,8 @@ function CreateTreeFromD3() {
 	const svg = d3
 	.select(document.getElementById("d3-svg01"))
 	.style("width",  custom_width)
-	.style("height", custom_height);
+	.style("height", custom_height)
+	.style('background-color', '#383839');
 
 	const g = svg
 	.append("g")                        // svg <g> tag is a group of elements : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g#:~:text=The%20SVG%20element%20is,with%20the%20element.
@@ -643,11 +642,11 @@ function CreateTreeFromD3() {
 	.append("path")
 	//.attr("stroke", "#8f91a1")
 	.attr("stroke", d => {
-		// draw the line invisible if it is coming from match to any of the categories
-
 		//console.log(d.source.id);
+
+		// draw the line invisible if it is coming from 'match' top node to any of the categories
 		if (d.source.id == 'Match') {
-			return '#414144';	// background color (the line is invisible)
+			return '#383839';	// background color (the line is invisible)
 		}
 		else {
 			return "#8f91a1";
@@ -678,7 +677,7 @@ function CreateTreeFromD3() {
 	//.attr("fill", d => (d.children ? "#8f91a1" : "#8f91a1"))    // the dot (nodes/leaves)
 	.attr("fill", d => {
 		// don't show the first dot for "Match" on the top level
-		return (d.id == 'Match') ? "#414144" : "#8f91a1";	// background-color : line color
+		return (d.id == 'Match') ? "#383839" : "#8f91a1";	// background-color : line color
 	})
 	.attr("r", 2.5);
 
@@ -713,6 +712,7 @@ function CreateTreeFromD3() {
 		}
 		else if (d.data.name == 'Winner' || d.data.name == 'Winners') {
 			// want to draw the winner category in winner's color so that the branch is somewhat separated from the rest.
+			return 'categories'
 			return 'categories winner'
 		}
 		else if (d.data.name == 'Match' || d.data.name == 'Environment kills' || 

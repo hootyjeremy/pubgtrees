@@ -90,7 +90,7 @@
 	
 	<br>
 	<br>
-	PUBG Trees (beta : 0.007)
+	PUBG Trees (beta : 0.008)
 	<br>
 	<br>
 	
@@ -229,13 +229,8 @@
 		<svg id='d3-svg01' style='overflow: auto;'></svg>
 
 		<br>
-		<button id="btnCopyMatchURL" style='width: 120;' onclick="btnCopyMatchToClipboard_Click()">Copy match URL</button>
-		<br>
-
-
 
 		<div id='div-cycle-footnote'>
-			<br>
 			<span>** Cycled kills occur if two players kill each other. If they kill each other, they are removed 
 				from the normal flow of kills since they only inherit each other.</span>
 			<br>
@@ -243,26 +238,20 @@
 
 		<br>
 
-		<div style='text-align: left; width: 186px; border: 2px solid #60b6f0; border-radius: 10px; padding-left: 10px; display: none;'>
-			<br>
-			<span class="winner">Surviving winners</span>
-			<br>
-			<span class="searchedPlayer">Searched player</span>
-			<br>
-			<span class="selectedPlayer">Selected player and teammates</span>
-			<!-- <br>
-			<span class="selectedPlayer">Player's teammates</span> -->
-			<br>
-			<span class="killer">Selected player's killer</span>
-			<br>
-			<span class="killerTeammate">Killer's teammates</span>
-			<br>
-			<span class="humanPlayers">Human players</span>
-			<br>
-			<span class="botPlayers">Bot players</span>
-			<br>
-			<br>
+		<div style='text-align: left; width: 260px; background-color: #383839; border: 2px solid #60b6f0; border-radius: 10px; padding-left: 10px;'>
+			<table style='padding-left: 10px; padding-right: 10px; padding-top: 8px; padding-bottom: 8px;'>
+				<tr> <td><span class="selectedPlayer">Selected player</span></td> 		<td><span class="killer">Player's killer</span></td>  </tr>
+				<tr> <td><span class="playerTeammate">Player's teammates</span></td> 	<td><span class="killerTeammate">Killer's teammates</span></td>  </tr>
+				<tr> <td><span class="humanPlayers">Human players</span></td> 			<td><span class="botPlayers">Bot players</span></td>  </tr>
+				<tr> <td><span class="searchedPlayer">Searched player</span></td> 		<td><span class="winner">Surviving winners</span>  </tr>
+			</table>
 		</div>
+
+		<br>
+		<br>
+		<button id="btnCopyMatchURL" style='width: 120;' onclick="btnCopyMatchToClipboard_Click()">Copy match URL</button>
+		<br>
+		<br>
 
 
 	</center>
