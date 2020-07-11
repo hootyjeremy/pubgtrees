@@ -296,7 +296,6 @@ async function GetTelemetry(_matchID) {
 	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
 	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
 
-	console.log(axios_telemetry_response);
 
 	if (axios_telemetry_response.data.pubgApiMatchResponseInfo.status != 200 && axios_telemetry_response.data.pubgApiMatchResponseInfo.status != null) {
 		alert('Error getting match from pubg api. ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.status + ': ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.statusText);
