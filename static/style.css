@@ -58,7 +58,8 @@ th, td {
 
 text.categories {
 	/* fill: #f9abea; */
-	fill: #c0ace0;
+	/* fill: #c0ace0; */
+	fill: #acc0e0;
 }
 
 text.allPlayers {
@@ -90,8 +91,8 @@ text.selectedPlayer {
 }
 
 text.playerTeammate {
-	fill: #60b6f0;
-	/* fill: #c0ace0; */
+	/* fill: #60b6f0; */
+	fill: #baace0;
 }
 
 text.killer {
@@ -130,7 +131,7 @@ span.selectedPlayer {
 }
 
 span.playerTeammate {
-	color: #c0ace0;
+	color: #baace0;
 }
 
 span.killer {
