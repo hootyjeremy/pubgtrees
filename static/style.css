@@ -45,10 +45,12 @@ table {
 
 tr.matchRow {
 	background-color: #313135;
+	cursor: pointer;
 }
 
 tr.activeMatchRow {
 	background-color: #558cb1;
+	cursor: pointer;
 }
 
 th, td {
