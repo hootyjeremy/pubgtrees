@@ -19,6 +19,7 @@ const { translateMapName, } = require('./hooty_modules/hf_server');
 const { debug } = require('console');
 
 
+
 // ---------------------------->
 // ! Deploy/Testing Version...
 const blTestingVersion = !true;
@@ -29,6 +30,7 @@ const blTestingVersion = !true;
 var   apiKey    = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02ODAwLTAxMzgtZTQ4Ny0wNjc0ZmE5YWVjOGYiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0Ijo'
       apiKey   += 'xNTg3Njk1MTM1LCJwdWIiOiJibHVlaG9sZSIsInRpdGxlIjoicHViZyIsImFwcCI6Im1pbmlzdGVya2F0YW9rIn0.HiuLi97rFSW-ho5zE1XBYmpV9E6M0Nj90qXIY1TWsco';
 const strLine   = "--------------------------------------------";
+
 
 
 // ---------------------------->
@@ -456,9 +458,10 @@ app.get('/getplayermatches', async (req, res) => {
             'DBNOs':            DBNOs,
             'winPlace':         winPlace,
             'timeSurvived':     timeSurvived,
-            'matchID':          match_data.data.id,
+            'matchId':          match_data.data.id,
+            'matchIdVue':       'row-' + match_data.data.id,
             'participantCount': participantIndex,
-         };
+        };
 
 
         if (blTestingVersion) {

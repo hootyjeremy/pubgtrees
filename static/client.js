@@ -3,16 +3,14 @@
 
 //const hf_server = require("../hooty_modules/hf_server");
 
-
 let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
 let defaultPlayer		= 'hooty__';
 
-
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.008'
+let   version 			= '0.009'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -58,7 +56,6 @@ let bypassCache = null;
 let blCycledKillsFound = false;
 
 var url, player_url, match_url, telemetry_url = ""; // store the match ID's of the player
-//var response; // fetch() responses
 var player_response_json; // parsed json responses
 var match_response_json;
 var telemetry_response_json;
@@ -67,6 +64,52 @@ var match_floor		= 0;
 var total_matches 	= 0;
 
 let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
+
+
+
+// ! Window load
+window.addEventListener('load', (event) => {
+	//console.log('page is fully loaded');
+
+	document.getElementById('inputPlayerName').value = defaultPlayer;
+
+	// check if this is going to launch a tree from url parameters...
+	checkURLQuery();
+
+
+
+	// ! Event listeners...
+	document.getElementById('btnSearchPlayer').addEventListener('click', (event) => {
+		btnSearchPlayer_Click();
+	});
+
+	// Trigger search button click on hitting ENTER in the input text box...
+	// https://stackoverflow.com/questions/155188/trigger-a-button-click-with-javascript-on-the-enter-key-in-a-text-box?rq=1
+	document.getElementById("inputPlayerName").addEventListener("keyup", function (event) {
+		event.preventDefault();
+		if (event.keyCode === 13) {
+			document.getElementById("btnSearchPlayer").click();
+		}
+	});	
+
+	// document.getElementById('inputPlayerName').addEventListener('submit', (event) => {
+	// 	btnSearchPlayer_Click();
+	// })
+
+	document.getElementById('btnPreviousMatches').addEventListener('click', (event) => {
+		btnPrevious_Click();
+	});
+
+	document.getElementById('btnNextMatches').addEventListener('click', (event) => {
+		btnNext_Click();
+	});
+
+	document.getElementById('btnCopyMatchURL').addEventListener('click', (event) => {
+		btnCopyMatchToClipboard_Click();
+	});
+
+});
+
 
 
 function checkURLQuery() {
@@ -119,6 +162,7 @@ function btnCopyMatchToClipboard_Click() {
 		}
     });
 }
+
 
 
 
@@ -938,8 +982,6 @@ function btnSearchPlayer_Click() {
 
 	match_floor = 0;
 
-	//vm.getMatchData([]); // clear out the table while fetching...
-
 	prelim();
 }
 
@@ -951,9 +993,6 @@ function btnNext_Click() {
 
 	match_floor += 10;
 
-
-	//vm.getMatchData([]); // clear out the table while fetching...
-
 	prelim();
 }
 
@@ -964,8 +1003,6 @@ function btnPrevious_Click() {
 	}
 
 	match_floor -= 10;
-
-	//vm.getMatchData([]); // clear out the table while fetching...
 
 	prelim();
 }

@@ -74,24 +74,39 @@ let vm = new Vue({
 
 			return strRoster;
 		},
-		analyzeMatch: function (_matchID, _matchType, _mapName, _gameMode, _age, _participantCount) {
+		analyzeMatch: function (_matchId, index) {
 			//console.log('analyzeMatch() -> ' + _matchID);
 
 			// console.log(this.match_data);
 			// this.match_data.isActive = !isActive;
 
-			let tmpMatchDetails = new Object();
-			tmpMatchDetails.matchId 	= _matchID;
-			tmpMatchDetails.matchType 	= _matchType;
-			tmpMatchDetails.mapName 	= _mapName;
-			tmpMatchDetails.gameMode 	= _gameMode;
-			tmpMatchDetails.age 		= _age;
-			tmpMatchDetails.humans 		= _participantCount;
+			// let tmpMatchDetails = new Object();
+			// tmpMatchDetails.matchId 	= _matchID;
+			// tmpMatchDetails.matchType 	= _matchType;
+			// tmpMatchDetails.mapName 	= _mapName;
+			// tmpMatchDetails.gameMode 	= _gameMode;
+			// tmpMatchDetails.age 		= _age;
+			// tmpMatchDetails.humans 		= _participantCount;
 
 
-			vmTreeD3.updateTreeTable(tmpMatchDetails);
+			//vmTreeD3.updateTreeTable(tmpMatchDetails);
 
-			GetTelemetry(_matchID);
+
+			for (let i = 0; i < this.match_data.length; i++) {
+				//console.log('index: ' + index);
+
+				// get classlist of each row from id
+
+				if (i == index) {
+					document.getElementById('matchRow' + i).classList.add('activeMatchRow');
+				}
+				else{
+					document.getElementById('matchRow' + i).classList.remove('activeMatchRow');
+				}
+
+			}
+
+			GetTelemetry(_matchId);
 
 		}
     },
@@ -102,21 +117,22 @@ let vm = new Vue({
 let vmTreeD3 = new Vue({
 	el: "#d3-tree01",
 	data: {
-		mapName: null,
-		matchId: null,
-		matchType: null,
-		gameMode: null,
-		age: null,
-		humans: null,
+		// matchId: null,
+		// mapName: null,
+		// matchType: null,
+		// gameMode: null,
+		// age: null,
+		// humans: null,
 	},
 	methods: {
-		updateTreeTable: function (objMatchInfo) {
-			this.age = objMatchInfo.age;
-			this.matchId = objMatchInfo.matchId;
-			this.mapName = objMatchInfo.mapName;
-			this.matchType = objMatchInfo.matchType;
-			this.gameMode = objMatchInfo.gameMode;
-			this.humans = objMatchInfo.humans;
-		}
+		// updateTreeTable: function (objMatchInfo) {
+		// 	this.age = objMatchInfo.age;
+		// 	this.matchId = objMatchInfo.matchId;
+		// 	this.mapName = objMatchInfo.mapName;
+		// 	this.matchType = objMatchInfo.matchType;
+		// 	this.gameMode = objMatchInfo.gameMode;
+		// 	this.humans = objMatchInfo.humans;
+		// }
 	}
+
 });

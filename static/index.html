@@ -85,12 +85,12 @@
 		<option value="xbox">Xbox</option>>
 	</select>
 	
-	<input  id="inputPlayerName" placeholder="Player name (add '!' to end of name to bypass cache)" style='width: 320;' onsubmit="btnSearchPlayer_Click()">
-	<button id="btnSearchPlayer" style='width: 100;' onclick="btnSearchPlayer_Click()">Search</button>
+	<input  id="inputPlayerName" placeholder="Player name (add '!' to end of name to bypass cache)" style='width: 320;'>
+	<button id="btnSearchPlayer" style='width: 100;'>Search</button>
 	
 	<br>
 	<br>
-	PUBG Trees (beta : 0.008)
+	PUBG Trees (beta : 0.009)
 	<br>
 	<br>
 	
@@ -105,28 +105,6 @@
 	fetching...
 </div>
 
-
-
-<script>
-	// Trigger search button click on hitting ENTER in the input text box...
-
-	// https://stackoverflow.com/questions/155188/trigger-a-button-click-with-javascript-on-the-enter-key-in-a-text-box?rq=1
-
-	document.getElementById("inputPlayerName").addEventListener("keyup", function (event) {
-		event.preventDefault();
-		if (event.keyCode === 13) {
-			document.getElementById("btnSearchPlayer").click();
-		}
-	});	
-
-
-	window.addEventListener('load', (event) => {
-		//console.log('page is fully loaded');
-		document.getElementById('inputPlayerName').value = defaultPlayer;
-
-		checkURLQuery();
-	});
-</script>
 
 
 
@@ -148,12 +126,13 @@
 				<th style="padding: 4px;">Kills</th>
 				<th style="padding: 4px;">Knocks</th>
 				<th>Teammates</th>
-				<th>Inspect</th>
+				<!-- <th>Inspect</th> -->
 			</tr>
 		</thead>
 		<tbody>
-			<tr class='matchRows'
-				v-for='(match) in match_data' :match_prop='match' :key='match.matchID'
+			<tr class='matchRow'
+				v-for='(match, index) in match_data' :match_prop='match' :key='match.matchId' :id="'matchRow' + index"
+				v-on:click="analyzeMatch(match.matchId, index)"
 			> 					
 				<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{match.timeSinceMatch}}</td> 
 				<td style="text-align:left; width: 60px">{{match.mapName}}</td>
@@ -166,11 +145,11 @@
 				<td style="text-align:center; width: 50px">{{match.kills}}</td> 
 				<td style="text-align:center; width: 50px">{{resolveKnocks(match.gameMode, match.DBNOs)}}</td> 
 
-				<td style="text-align:left;">{{printRoster(match.teamRoster, match.strPlayerName)}}</td>
-				<td style="border-radius: 0px 6px 6px 0px; text-align:left;"> 
-					<button v-on:click="analyzeMatch(match.matchID, resolveMatchType(match.matchType), match.mapName, match.gameMode, match.timeSinceMatch, match.participantCount)" 
+				<td style="text-align:left; border-radius: 0px 6px 6px 0px; text-align:left; padding-right: 14px;">{{printRoster(match.teamRoster, match.strPlayerName)}}</td>
+				<!-- <td style="border-radius: 0px 6px 6px 0px; text-align:left;"> 
+					<button v-on:click="analyzeMatch(match.matchId, index)"
 							style='width: 60; margin-left: 10; margin-right: 10'>View</button> 
-				</td>
+				</td> -->
 			</tr>
 		</tbody>
 	</table>
@@ -179,8 +158,8 @@
 
 	<table>
 		<tr> 
-			<td><button id="btnPreviousMatches" onclick="btnPrevious_Click()" style="display:none; width: 160; margin-right: 10;">Previous matches</button></td> 
-			<td><button id="btnNextMatches"     onclick="btnNext_Click()"     style="display:none; width: 160; margin-left: 10;">Next matches</button></td>  
+			<td><button id="btnPreviousMatches" style="display:none; width: 160; margin-right: 10;">Previous matches</button></td> 
+			<td><button id="btnNextMatches"     style="display:none; width: 160; margin-left:  10;">Next matches</button></td>  
 		</tr>
 	</table>
 	<br>
@@ -202,32 +181,7 @@
 	<center>
 
 		<br>
-
-		<table id='tree-match-details' style='display: none;'>
-			<thead>
-				<tr>  
-					<!-- <td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">Age</td> 
-					<td>Map</td>
-					<td>Humans</td>
-					<td>Game Type</td>
-					<td style="border-radius: 0px 6px 6px 0px; text-align:left;">Mode</td> -->
-				</tr>
-			</thead>
-			<tbody>
-				<tr class='treeRows'> 
-					<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{age}}</td> 
-					<td>{{mapName}}</td> 
-					<td >{{gameMode}}</td>
-					<td>{{matchType}}</td> 
-					<td style="border-radius: 0px 6px 6px 0px; text-align:left;">{{humans}} humans</td>
-					<!-- <td>{{matchId}}</td>  -->
-					</tr>
-			</tbody>
-		</table>
-
-
 		<svg id='d3-svg01' style='overflow: auto;'></svg>
-
 		<br>
 
 		<div id='div-cycle-footnote'>
@@ -258,7 +212,7 @@
 
 		<br>
 		<br>
-		<button id="btnCopyMatchURL" style='width: 120;' onclick="btnCopyMatchToClipboard_Click()">Copy match URL</button>
+		<button id="btnCopyMatchURL" style='width: 120;'>Copy match URL</button>
 		<br>
 		<br>
 

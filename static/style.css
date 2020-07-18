@@ -43,9 +43,12 @@ table {
 	font-size: 14px;
 }
 
-
-tr.matchRows, tr.treeRows {
+tr.matchRow {
 	background-color: #313135;
+}
+
+tr.activeMatchRow {
+	background-color: #558cb1;
 }
 
 th, td {
