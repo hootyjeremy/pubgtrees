@@ -49,7 +49,7 @@ tr.matchRow {
 }
 
 tr.activeMatchRow {
-	background-color: #558cb1;
+	background-color: #448fc0;
 	cursor: pointer;
 }
 
@@ -155,11 +155,15 @@ span.killerTeammate {
 svg#d3-svg01 {
 	border: 2px solid #60b6f0;
 	border-radius: 10px;
-	margin-top: 20;
-	margin-bottom: 20;
-	margin-left: 20;
-	margin-right: 20;
+	margin: 10px;
 }
+
+
+div#div-d3-tree {
+	margin: 20px;	
+}
+
+
 
 div#search-div, div#vueapp, div#d3-tree01 {
 	border-radius: 10px;

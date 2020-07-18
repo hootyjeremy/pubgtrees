@@ -665,7 +665,7 @@ function CreateTreeFromD3() {
 	.select(document.getElementById("d3-svg01"))
 	.style("width",  custom_width)
 	.style("height", custom_height)
-	.style('background-color', '#383839');
+	.style('background-color', '#414144');
 
 	const g = svg
 	.append("g")                        // svg <g> tag is a group of elements : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g#:~:text=The%20SVG%20element%20is,with%20the%20element.
@@ -690,7 +690,7 @@ function CreateTreeFromD3() {
 
 		// draw the line invisible if it is coming from 'match' top node to any of the categories
 		if (d.source.id == 'Match') {
-			return '#383839';	// background color (the line is invisible)
+			return '#414144';	// background color (the line is invisible)
 		}
 		else {
 			return "#8f91a1";
@@ -721,7 +721,7 @@ function CreateTreeFromD3() {
 	//.attr("fill", d => (d.children ? "#8f91a1" : "#8f91a1"))    // the dot (nodes/leaves)
 	.attr("fill", d => {
 		// don't show the first dot for "Match" on the top level
-		return (d.id == 'Match') ? "#383839" : "#8f91a1";	// background-color : line color
+		return (d.id == 'Match') ? "#414144" : "#8f91a1";	// background-color : line color
 	})
 	.attr("r", 2.5);
 
