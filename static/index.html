@@ -38,12 +38,22 @@
 	<link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
 	<link rel="icon" href="static/favicon.ico" type="image/x-icon">
 
+
+	<title>PUBG Trees</title>
+
 </head>
 
 
+<header class='page-header'>
+	<br>
+	
+	<a href='https://hooty-pubg01.herokuapp.com'>PUBG Trees : ver.0.010</a>
+	
+	<br>
+	<br>
+</header>
 
 <body>
-<title>PUBG Trees</title>
 
 
 
@@ -60,7 +70,6 @@
 
 
 
-<br>
 
 <div id='search-div'>
 
@@ -90,18 +99,15 @@
 	
 	<br>
 	<br>
-	PUBG Trees (beta : 0.009)
-	<br>
 	<br>
 	
 </div>
 
 
-<br>
-<br>
 
 
 <div id="fetching" style="display:none;">
+	<br>
 	fetching...
 </div>
 
@@ -135,10 +141,10 @@
 				v-on:click="analyzeMatch(match.matchId, index)"
 			> 					
 				<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{match.timeSinceMatch}}</td> 
-				<td style="text-align:left; width: 60px">{{match.mapName}}</td>
+				<td style="text-align:left; width: 60px">{{match.mapName.toUpperCase()}}</td>
 				<td style="text-align:center; width: 50px">{{match.participantCount}}</td>
 				<td style="text-align:center; width: 80px">{{resolveMatchType(match.matchType)}}</td>
-				<td style="text-align:center; width: 80px">{{match.gameMode}}</td> 
+				<td style="text-align:center; width: 80px">{{match.gameMode.toUpperCase()}}</td> 
 				<td style="text-align:center; width: 50px">#{{match.winPlace}}</td> 
 
 				<td style="text-align:center; width: 50px">{{match.damageDealt}}</td> 
@@ -167,10 +173,11 @@
 	</center>
 </div>
 
-<br>
 
-<div id='div-analyzing' style='display: none'>analyzing...</div>
-<br>
+<div id='div-analyzing' style='display: none'>
+	<br>
+	analyzing...
+</div>
 
 
 
@@ -231,5 +238,8 @@
 
 
 </body>
+
+
+
 
 </html>

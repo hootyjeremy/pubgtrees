@@ -1,6 +1,8 @@
 // PUBG Scheme Color
 //https://www.schemecolor.com/pubg.php
 
+//const e = require("express");
+
 //const hf_server = require("../hooty_modules/hf_server");
 
 let strLine = "--------------------------------------------";
@@ -10,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.009'
+let   version 			= '0.010'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -60,8 +62,12 @@ var player_response_json; // parsed json responses
 var match_response_json;
 var telemetry_response_json;
 
-var match_floor		= 0;
+//var match_floor		= 0;
+//var skipped_matches = 0;
 var total_matches 	= 0;
+let valid_match_floors = [0];
+let valid_match_floors_index = 0;
+let searchDirection = null;	// this will be for "next" or "previous" matches
 
 let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
 
@@ -107,6 +113,7 @@ window.addEventListener('load', (event) => {
 	document.getElementById('btnCopyMatchURL').addEventListener('click', (event) => {
 		btnCopyMatchToClipboard_Click();
 	});
+
 
 });
 
@@ -174,16 +181,19 @@ async function GetPlayerMatches() {
 	//#region // ! [Region] GetPlayerMatches()
 	//
 
+	let blCeilingHit 	= false;
+	let blFloorHit 		= false;
+
 	// clear out the current d3 tree
 	document.getElementById('d3-svg01').innerHTML = '';
 
 
-	match_floor = (match_floor < 0) ? 0 : match_floor;
-
 	if (strPlatform != prevPlatform || strPlayerName != prevPlayerName) {
 		// reset match_floor if a new player or platform is selected...
 		console.log('resetting match_floor for new player');
-		match_floor = 0;
+
+		valid_match_floors = [0];
+		valid_match_floors_index = 0;
 	}
 
 	prevPlatform 	= strPlatform;
@@ -208,13 +218,17 @@ async function GetPlayerMatches() {
 
 	var axios_response = null;
 
+	//console.log('req match_floor: ' + match_floor + ' of ' + total_matches);
+	console.log('valid_match_floor[' + valid_match_floors_index + ']: ' + valid_match_floors[valid_match_floors_index]);
+
 	try {
 		axios_response = await axios.get(hooty_server_url + '/getplayermatches', {
 			params: {
 				'endpoint'		: 'players', 
 				'platform'		:  strPlatform,
 				'player_name' 	:  strPlayerName,
-				'match_floor'	:  match_floor,
+				'match_floor'	:  valid_match_floors[valid_match_floors_index],
+				'searchDirection': searchDirection,
 				'match_id'		: '',
 				'telemetry_id'	: '',
 				'bypassCache'	: bypassCache,
@@ -241,21 +255,46 @@ async function GetPlayerMatches() {
 		console.log('ERROR: could not find player in pubg api: ' + axios_response.data.status + ', ' + axios_response.data.statusText);
 
 		alert('could not find player in pubg api');
-		// $ need to reset the form and shit
+
 		btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
 		document.getElementById('fetching').style.display 	= "none";	// turn this on
 	
 		return;
 	}
-
+		
 	if (blTestingVersion) {
 		console.log('bypassCache: ' + bypassCache);
 		console.log('GetPlayerMatches() axios_response...');
+		console.log('current match_floor: ' + valid_match_floors[valid_match_floors_index] + ' of ' + axios_response.data.totalMatches + ', new ceiling: ' + axios_response.data.match_ceiling);
+		console.log('total matches: ' + axios_response.data.totalMatches);
 		console.dir(axios_response.data);
 	}
 
-	total_matches 	= axios_response.data.totalMatches;
-	console.log('match_floor:     ' + match_floor + ' of ' + total_matches);
+
+
+	// add the match ceiling if the current index doesn't exist
+	if (valid_match_floors.length == valid_match_floors_index + 1) {
+		// this is basically only going to happen when you click next and an index doesn't exist
+		valid_match_floors.push(axios_response.data.match_ceiling);
+	}
+
+
+	// be aware that you are at the beginning or end of the match list (for button enabling)
+	if (axios_response.data.match_ceiling < axios_response.data.totalMatches) {
+		blCeilingHit = false;
+	}
+	else {
+		blCeilingHit = true;
+	}
+
+	if (valid_match_floors_index == 0) {
+		blFloorHit = true;
+	}
+	else {
+		blFloorHit = false;
+	}
+
+
 
 
 	// don't show 0's on the board. show '-' instead so it's more clear...
@@ -264,6 +303,7 @@ async function GetPlayerMatches() {
 		if (axios_response.data.matches[i].kills 		== 0) { axios_response.data.matches[i].kills 		= '-'; }
 		if (axios_response.data.matches[i].damageDealt 	== 0) { axios_response.data.matches[i].damageDealt 	= '-'; }
 	}
+
 
 	vm.getMatchData(axios_response.data.matches);
 
@@ -274,9 +314,25 @@ async function GetPlayerMatches() {
 	// enable all buttons...
 	btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
 	
-	// disable buttons if they need to be disabled...
-	btnPrevious.disabled 	= (match_floor < 10) 						? true : false ;
-	btnNext.disabled 		= (match_floor + 10 > total_matches - 1) 	? true : false ;	// $ verify this is hitting the ceiling properly
+
+	if (blFloorHit) {
+		// disable the "previous" button so that you can't go behind the 0 match floor
+		btnPrevious.disabled = true;
+		btnPrevious.classList.add('disabledButton');
+	}
+	else {
+		btnPrevious.disabled = false;
+		btnPrevious.classList.remove('disabledButton');
+	}
+
+	if (blCeilingHit) {
+		btnNext.disabled = true;
+		btnNext.classList.add('disabledButton');
+	}
+	else {
+		btnNext.disabled = false;
+		btnNext.classList.remove('disabledButton');
+	}
 
 
 	// show prev/next buttons
@@ -980,7 +1036,11 @@ function btnSearchPlayer_Click() {
 		return;
 	}
 
-	match_floor = 0;
+	searchDirection = 'up';
+
+	// just reset the whole array if they re-click "search"
+	valid_match_floors = [0];
+	valid_match_floors_index = 0;
 
 	prelim();
 }
@@ -991,7 +1051,9 @@ function btnNext_Click() {
 		return;
 	}
 
-	match_floor += 10;
+	searchDirection = 'up';
+
+	valid_match_floors_index++;
 
 	prelim();
 }
@@ -1002,7 +1064,9 @@ function btnPrevious_Click() {
 		return;
 	}
 
-	match_floor -= 10;
+	searchDirection = 'down';
+
+	valid_match_floors_index--;
 
 	prelim();
 }

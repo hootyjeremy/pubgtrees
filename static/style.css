@@ -19,6 +19,10 @@ button {
 	border-radius: 4px;
 }
 
+button.disabledButton {
+    background-color: #313135;
+}
+
 input {
 	font-family: 'Roboto Condensed', sans-serif;
 	font-size: 14px;
@@ -79,13 +83,13 @@ text.botPlayers {
 	fill: #98a0a6;
 }
 
-text.winner {
-	fill: #73eca0;
-}
-
 text.searchedPlayer {
 	/* fill: #7dde98; */
 	fill: #0e0d0e;
+}
+
+text.winner {
+	fill: #73eca0;
 }
 
 
@@ -160,16 +164,33 @@ svg#d3-svg01 {
 
 
 div#div-d3-tree {
-	margin: 20px;	
+	margin: 20px;
 }
 
 
+header.page-header {
+	border-bottom: 1px solid #414144;
+	/* text-align: left;
+	margin-left: 20px; */
+}
+
+footer.page-footer {
+	border-top: 1px solid #414144;
+	margin-top: 20;
+}
+
+a:link, a:visited {
+	color: rgb(240, 234, 232);
+	font-size: 18px;
+	font-weight: bold;
+}
 
 div#search-div, div#vueapp, div#d3-tree01 {
 	border-radius: 10px;
 	background-color: #414144;
-	margin-left: 14;
-	margin-right: 14;
+	margin-left: 14px;
+	margin-right: 14px;
+	margin-top: 30px;
 }
 
 

@@ -8,6 +8,8 @@
 // 	template:  ``
 // })
 
+
+
 let vm = new Vue({
 	el: "#vueapp",
 	data: {
@@ -42,7 +44,7 @@ let vm = new Vue({
             else {
                 return knocks;
             }
-        },
+		},
 		printRoster: function (matchRoster, player_name) {			
 			var strRoster = '';
 
@@ -134,5 +136,4 @@ let vmTreeD3 = new Vue({
 		// 	this.humans = objMatchInfo.humans;
 		// }
 	}
-
 });

@@ -75,12 +75,18 @@ app.get('/getplayermatches', async (req, res) => {
 
     var pubgApiResponseInfo = null;   // will include this in response to the client
 
-    var match_floor = new Number(req.query.match_floor);  // i don't know why this is catching a string. maybe the query converts it?
+    var match_floor     = new Number(req.query.match_floor);  // i don't know why this is catching a string. maybe the query converts it?
+    //let skipped_matches = new Number(0);
     const strPlayerName = req.query.player_name;
+    let searchDirection = req.query.searchDirection;
 
-    console.log(strLine);
-    console.log('/getplayer called -> ' + req.query.platform + '/' + req.query.player_name);
-    console.log('match_floor: ' + match_floor);
+    if (blTestingVersion) {
+        console.log(strLine);
+        console.log('/getplayer called -> ' + req.query.platform + '/' + req.query.player_name);
+        console.log('match_floor:     ' + match_floor);
+        //console.log('skipped_matches: ' + skipped_matches);
+        console.log('searchDirection: ' + searchDirection);
+    }
 
     // console.log('request ip: ' + req.ip);
     // console.log('req.query.endpoint:     ' + req.query.endpoint);
@@ -317,17 +323,21 @@ app.get('/getplayermatches', async (req, res) => {
 
         // filter out irregular games (and the training map)
 		if (
-			(match_data.data.attributes.gameMode != "solo"  &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
+			(//match_data.data.attributes.gameMode != "solo"  &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
 			 match_data.data.attributes.gameMode != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
-             match_data.data.attributes.gameMode != "squad" &&	match_data.data.attributes.gameMode != "squad-fpp"   ) ||
+             match_data.data.attributes.gameMode != "squad" &&	match_data.data.attributes.gameMode != "squad-fpp"   
+             ) ||
              match_data.data.attributes.mapName == "Range_Main"  ) {
 
-            console.log('skipping match gameMode or training map: ' + match_data.data.attributes.gameMode + ', ' + match_data.data.attributes.mapName);
+            
+            if (blTestingVersion) {
+                console.log('skipping match gameMode or training map: ' + match_data.data.attributes.gameMode + ', ' + match_data.data.attributes.mapName);
+            }
             
             // recalculate match_ceiling if you skip a match. 
-            // if (match_ceiling + 1 <= player_data.relationships.matches.data.length) {
-            //     match_ceiling++;
-            // }
+            if (matchArray.length < 10 && match_ceiling < player_data.relationships.matches.data.length) {
+                match_ceiling++;
+            }   
 
 			continue;
         }
@@ -444,7 +454,6 @@ app.get('/getplayermatches', async (req, res) => {
         //#endregion (match data) --------------------------------------------------------------------------------->
 
 
-        // ? you could probably send the telmetry url to the client here instead of having to maintain a telemetryUrlCache file
         matchArray[matchIndex] = { 
             'strPlayerName':    strPlayerName,
             'timeSinceMatch':   getTimeSinceMatch(match_data.data.attributes.createdAt),
@@ -459,7 +468,6 @@ app.get('/getplayermatches', async (req, res) => {
             'winPlace':         winPlace,
             'timeSurvived':     timeSurvived,
             'matchId':          match_data.data.id,
-            'matchIdVue':       'row-' + match_data.data.id,
             'participantCount': participantIndex,
         };
 
@@ -481,6 +489,7 @@ app.get('/getplayermatches', async (req, res) => {
 
     // $ if no matches, then the client should be made aware
     var response_data = { 
+        'match_ceiling' : match_ceiling, 
         'totalMatches'  : player_data.relationships.matches.data.length,
         'matches'       : matchArray,
         'pubgResponse'  : pubgApiResponseInfo,
