@@ -136,7 +136,7 @@ let vueMatchInfo = new Vue({
 			this.mapName 	= matchDetails.mapName.toUpperCase();
 			this.matchType 	= vm.resolveMatchType(matchDetails.matchType);
 			this.shardId 	= matchDetails.shardId;
-		}
+		},
 	}
 })
 
@@ -144,11 +144,23 @@ let vueMatchInfo = new Vue({
 let vuePlayerReport = new Vue({
 	el: "#div-modal",
 	data: {
-		// $ need a "player card" array that is created on the server that reads each player's match stats (kills, damage, knocks, etc.) for a header before the reporting lines
-		 playerName: null,
 
-		// kills
-		// win place
+		// $ need a "player card" array that is created on the server that reads each player's match stats (kills, damage, knocks, etc.) for a header before the reporting lines
+		selectedPlayer: null,	
+		
+		// $ if the player is a bot, don't make a player card summary since that info doesn't exist.
+		// ! arrPlayerCards
+		kills: null,
+		damageDealt: null,
+		DBNOs: null,
+		timeSurvived: null,		
+		winPlace: null,
+		teamKills: null,
+
+		arrPlayerActivity: null, // use this array for dumping the arrPlayersLog into with the player's context
+
+
+
 		// teammates
 
 		// attacker
@@ -157,21 +169,66 @@ let vuePlayerReport = new Vue({
 
 	},
 	methods: {
-		// updateTreeTable: function (objMatchInfo) {
-		// 	this.age = objMatchInfo.age;
-		// 	this.matchId = objMatchInfo.matchId;
-		// 	this.mapName = objMatchInfo.mapName;
-		// 	this.matchType = objMatchInfo.matchType;
-		// 	this.gameMode = objMatchInfo.gameMode;
-		// 	this.humans = objMatchInfo.humans;
-		// }
 
-		updatePlayerReport: function (name) {
+		updatePlayerReport: function (name, playerTeamId, arrPlayerCards, arrPlayersDamageLog) {
 
-			this.playerName = name;
+			this.selectedPlayer = name;
+
+			// ! get playercard info...
+
+			this.kills 			= '(invalid, bot)';
+			this.damageDealt 	= '(invalid, bot)';
+			this.DBNOs 			= '(invalid, bot)';
+			this.timeSurvived	= '(invalid, bot)';
+			this.winPlace 		= '(invalid, bot)';
+			this.teamKills 		= '(invalid, bot)';
+
+			arrPlayerCards.forEach(element => {
+				if (element.name == name) {
+					this.kills 			= element.kills;
+					this.damageDealt 	= parseInt(element.damageDealt).toLocaleString('en') ;
+					this.DBNOs 			= element.DBNOs;
+					this.timeSurvived	= element.timeSurvived;
+					this.winPlace 		= element.winPlace;
+					this.teamKills 		= element.teamKills;
+				}
+			});
 
 			//console.dir(this.match_data);
-        },
+
+
+			// ! get damage log activity
+			// ? separate for damage and kills, and even teammate knock/revive stuff
+			arrPlayersDamageLog.forEach(record => {
+
+				if (record.attacker.name == this.selectedPlayer || record.victim.name == this.selectedPlayer) {
+
+					if (record._T == 'LogPlayerTakeDamage') {
+
+					}
+					else if (record._T == 'LogPlayerMakeGroggy') {
+
+					}
+					else if (record._T == 'LogPlayerRevive') {
+						
+					}
+					else if (record._T == 'LogPlayerKill') {
+						
+					}
+
+
+					//debugger;
+				}
+			})
+		},
+		resolveZeroes: function (number) {
+			if (number == 0) {
+				return '-';
+			}
+			else {
+				return number;
+			}
+		},
 
 	}
 });

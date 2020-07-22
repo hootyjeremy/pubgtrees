@@ -626,16 +626,15 @@ app.get('/getmatchtelemetry', async (req, res) => {
             allHumanNames += '|' + match_data.included[i].attributes.stats.name;
 
             // make player cards here for the individual players' reports
-            arrPlayerCards.push([match_data.included[i].attributes.stats.name, 
-                                { 
+            arrPlayerCards.push({ 
+                                    'name': match_data.included[i].attributes.stats.name,
                                     'kills':  match_data.included[i].attributes.stats.kills,
                                     'damageDealt': match_data.included[i].attributes.stats.damageDealt,
                                     'DBNOs': match_data.included[i].attributes.stats.DBNOs,
                                     'timeSurvived': hf.ConvertSecondsToMinutes(match_data.included[i].attributes.stats.timeSurvived),
                                     'winPlace': match_data.included[i].attributes.stats.winPlace,
                                     'teamKills': match_data.included[i].attributes.stats.teamKills,
-                                }]);
-
+                                });
         }
     }
 
@@ -1785,10 +1784,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     console.log(arrKillFeedLog[j]);
         // }
 
-        console.log('arrDamageLog...');
-        for (let j = 0; j < arrDamageLog.length; j++){
-            console.log(arrDamageLog[j]);
-        }
+        //console.log('arrDamageLog...');
+        // for (let j = 0; j < arrDamageLog.length; j++){
+        //     console.log(arrDamageLog[j]);
+        // }
 
         //console.dir(arr_T);
         console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);

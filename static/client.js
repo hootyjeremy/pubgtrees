@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.011'
+let   version 			= '0.012'
 const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
@@ -537,6 +537,16 @@ function OpenModalDamageReport(selectedPlayer) {
 
 	console.log('OpenModalDamageReport(' + selectedPlayer + ')'); 
 
+	// get teamId of selected player
+	let playerTeamId = 0;
+	axios_telemetry_response.data.arrTeams.forEach(team => {
+		//console.log(team);
+		team.teammates.forEach(teammate => {
+			if (teammate.name == selectedPlayer) {
+				playerTeamId = team.teamId;
+			}
+		})
+	})
 
 	// $ need to update vue variables for the table. 
 	// pull table values from the damage report (kills, knocks, and damage)
@@ -549,7 +559,9 @@ function OpenModalDamageReport(selectedPlayer) {
 	// LogPlayerRevivie
 	// LogPlayerKill
 
-	vuePlayerReport.updatePlayerReport(selectedPlayer);
+	// $ identify the player's card and send that record over
+	// $ this will give the player's name and from there, you can get 
+	vuePlayerReport.updatePlayerReport(selectedPlayer, playerTeamId, axios_telemetry_response.data.arrPlayerCards, axios_telemetry_response.data.arrPlayersDamageLog);
 
 
 
