@@ -116,15 +116,45 @@ let vm = new Vue({
 })
 
 
-let vmTreeD3 = new Vue({
-	el: "#d3-tree01",
+let vueMatchInfo = new Vue({
+	el: '#d3-tree01',
 	data: {
-		// matchId: null,
-		// mapName: null,
-		// matchType: null,
-		// gameMode: null,
-		// age: null,
-		// humans: null,
+		createdAt: null,
+		duration: null,
+		gameMode: null,
+		id: null,
+		mapName: null,
+		matchType: null,
+		shardId: null
+	},
+	methods: {
+		updateTreeMatchDetails: function (matchDetails) {
+			this.createdAt	= matchDetails.createdAt;
+			this.duration 	= matchDetails.duration;
+			this.gameMode	= matchDetails.gameMode.toUpperCase();
+			this.id 		= matchDetails.id;
+			this.mapName 	= matchDetails.mapName.toUpperCase();
+			this.matchType 	= vm.resolveMatchType(matchDetails.matchType);
+			this.shardId 	= matchDetails.shardId;
+		}
+	}
+})
+
+
+let vuePlayerReport = new Vue({
+	el: "#div-modal",
+	data: {
+		// $ need a "player card" array that is created on the server that reads each player's match stats (kills, damage, knocks, etc.) for a header before the reporting lines
+		 playerName: null,
+
+		// kills
+		// win place
+		// teammates
+
+		// attacker
+		// victim
+		// event time
+
 	},
 	methods: {
 		// updateTreeTable: function (objMatchInfo) {
@@ -135,5 +165,13 @@ let vmTreeD3 = new Vue({
 		// 	this.gameMode = objMatchInfo.gameMode;
 		// 	this.humans = objMatchInfo.humans;
 		// }
+
+		updatePlayerReport: function (name) {
+
+			this.playerName = name;
+
+			//console.dir(this.match_data);
+        },
+
 	}
 });

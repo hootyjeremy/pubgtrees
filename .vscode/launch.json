@@ -5,6 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch (pwa-node)",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\pubg.js",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run-script", "debug"],
+            "attachSimplePort": 9229,
+        },
+        {
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
@@ -14,8 +26,7 @@
             "program": "${workspaceFolder}\\pubg.js",
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run-script", "debug"],
-            "port": 9229
-
+            "port": 9229,
         }
     ]
 }

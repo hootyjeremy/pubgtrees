@@ -164,7 +164,10 @@ svg#d3-svg01 {
 
 
 div#div-d3-tree {
-	margin: 20px;
+	margin-top: 10px;
+	margin-left: 20px;
+	margin-right: 20px;
+	margin-bottom: 20px;
 }
 
 
@@ -185,7 +188,7 @@ a:link, a:visited {
 	font-weight: bold;
 }
 
-div#search-div, div#vueapp, div#d3-tree01 {
+div#search-div, div#vueapp, div#d3-tree01, div#player-report {
 	border-radius: 10px;
 	background-color: #414144;
 	margin-left: 14px;
@@ -193,4 +196,22 @@ div#search-div, div#vueapp, div#d3-tree01 {
 	margin-top: 30px;
 }
 
+div#div-modal {
+	background-color: rgba(0,0,0,0.5);	
 
+	display: none;
+	position: fixed;
+	z-index: 1;
+	left: 0;
+	top: 0;
+	height: 100%;
+	width: 100%;
+	overflow: auto;
+}
+
+span#btnCloseModal {
+	float:right;
+	font-size: 30px;
+	margin-right: 16px;
+	cursor: pointer;
+}

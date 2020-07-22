@@ -12,8 +12,8 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.010'
-const blTestingVersion 	= !true;
+let   version 			= '0.011'
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -65,8 +65,8 @@ var telemetry_response_json;
 //var match_floor		= 0;
 //var skipped_matches = 0;
 var total_matches 	= 0;
-let valid_match_floors = [0];
-let valid_match_floors_index = 0;
+let match_floors = [0];
+let match_floors_index = 0;
 let searchDirection = null;	// this will be for "next" or "previous" matches
 
 let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
@@ -115,13 +115,50 @@ window.addEventListener('load', (event) => {
 	});
 
 
+	// modal close button
+	document.getElementById('btnCloseModal').addEventListener('click', (event) => {
+		document.getElementById('div-modal').style.display = 'none';
+	})
+
 });
+
+
+// if hitting escape, close the modal window
+window.addEventListener('keydown', (event) => {
+	if (event.key == 'Escape') {
+		if (document.getElementById('div-modal').style.display != 'none') {
+			CloseModal();
+		}
+	}
+});
+
+
+// close the modal if hitting any of the outlined area
+window.addEventListener('click', (event) => {
+	//console.log(event.target);
+
+	if (event.target.id == 'div-modal') {
+		console.log('modal clicked');
+		CloseModal();
+	}
+})
+
+function OpenModal() {
+	// display the modal report
+	document.getElementById('div-modal').style.display = 'block';
+}
+
+function CloseModal() {
+	document.getElementById('div-modal').style.display = 'none';
+}
+
 
 
 
 function checkURLQuery() {
 	// if there are search parameters, parse them and search the match
-	// ?steam&hooty__&51beee36-6df7-4903-8d16-f21a97141340
+	// ! ?steam&hooty__&51beee36-6df7-4903-8d16-f21a97141340
+
 	// console.log('location.search: [' + location.search + ']');
 	if (location.search != '') {
 
@@ -172,14 +209,12 @@ function btnCopyMatchToClipboard_Click() {
 
 
 
+// ------------------------------------------------------------------------------------------------------>
+//#region // ! [Region] GetPlayerMatches()
+//
 
-
-// $ FLOOD PREVENTION
-// $ NEED TO BE ABLE TO SUPPRESS GETTING MATCHES UNTIL A RESPONSE COMES BACK
 async function GetPlayerMatches() {
 
-	//#region // ! [Region] GetPlayerMatches()
-	//
 
 	let blCeilingHit 	= false;
 	let blFloorHit 		= false;
@@ -192,8 +227,8 @@ async function GetPlayerMatches() {
 		// reset match_floor if a new player or platform is selected...
 		console.log('resetting match_floor for new player');
 
-		valid_match_floors = [0];
-		valid_match_floors_index = 0;
+		match_floors = [0];
+		match_floors_index = 0;
 	}
 
 	prevPlatform 	= strPlatform;
@@ -218,8 +253,11 @@ async function GetPlayerMatches() {
 
 	var axios_response = null;
 
-	//console.log('req match_floor: ' + match_floor + ' of ' + total_matches);
-	console.log('valid_match_floor[' + valid_match_floors_index + ']: ' + valid_match_floors[valid_match_floors_index]);
+	if (blTestingVersion) {
+		//console.log('req match_floor: ' + match_floor + ' of ' + total_matches);
+		console.log('match_floors[' + match_floors_index + ']: ' + match_floors[match_floors_index]);
+	}
+
 
 	try {
 		axios_response = await axios.get(hooty_server_url + '/getplayermatches', {
@@ -227,7 +265,7 @@ async function GetPlayerMatches() {
 				'endpoint'		: 'players', 
 				'platform'		:  strPlatform,
 				'player_name' 	:  strPlayerName,
-				'match_floor'	:  valid_match_floors[valid_match_floors_index],
+				'match_floor'	:  match_floors[match_floors_index],
 				'searchDirection': searchDirection,
 				'match_id'		: '',
 				'telemetry_id'	: '',
@@ -250,11 +288,11 @@ async function GetPlayerMatches() {
 	}
 
 
-	// ! check for any errors from the pubg api...
+	// ! check for any errors from the pubg api response...
 	if (axios_response.data.pubgResponse.status != 200 && axios_response.data.pubgResponse.status != null) {
 		console.log('ERROR: could not find player in pubg api: ' + axios_response.data.status + ', ' + axios_response.data.statusText);
 
-		alert('could not find player in pubg api');
+		alert('Could not find player in pubg api.');
 
 		btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
 		document.getElementById('fetching').style.display 	= "none";	// turn this on
@@ -265,19 +303,21 @@ async function GetPlayerMatches() {
 	if (blTestingVersion) {
 		console.log('bypassCache: ' + bypassCache);
 		console.log('GetPlayerMatches() axios_response...');
-		console.log('current match_floor: ' + valid_match_floors[valid_match_floors_index] + ' of ' + axios_response.data.totalMatches + ', new ceiling: ' + axios_response.data.match_ceiling);
+		console.log('current match_floor: ' + match_floors[match_floors_index] + ' of ' + axios_response.data.totalMatches + ', new ceiling: ' + axios_response.data.match_ceiling);
 		console.log('total matches: ' + axios_response.data.totalMatches);
 		console.dir(axios_response.data);
 	}
 
 
 
-	// add the match ceiling if the current index doesn't exist
-	if (valid_match_floors.length == valid_match_floors_index + 1) {
-		// this is basically only going to happen when you click next and an index doesn't exist
-		valid_match_floors.push(axios_response.data.match_ceiling);
-	}
+	//#region // ! button stuff...
+	//
 
+	// add the match ceiling if the current index doesn't exist
+	if (match_floors.length == match_floors_index + 1) {
+		// this is basically only going to happen when you click next and an index doesn't exist
+		match_floors.push(axios_response.data.match_ceiling);
+	}
 
 	// be aware that you are at the beginning or end of the match list (for button enabling)
 	if (axios_response.data.match_ceiling < axios_response.data.totalMatches) {
@@ -287,7 +327,7 @@ async function GetPlayerMatches() {
 		blCeilingHit = true;
 	}
 
-	if (valid_match_floors_index == 0) {
+	if (match_floors_index == 0) {
 		blFloorHit = true;
 	}
 	else {
@@ -295,25 +335,9 @@ async function GetPlayerMatches() {
 	}
 
 
-
-
-	// don't show 0's on the board. show '-' instead so it's more clear...
-	for (i = 0; i < axios_response.data.matches.length; i++) {
-		if (axios_response.data.matches[i].DBNOs 		== 0) { axios_response.data.matches[i].DBNOs 		= '-'; }
-		if (axios_response.data.matches[i].kills 		== 0) { axios_response.data.matches[i].kills 		= '-'; }
-		if (axios_response.data.matches[i].damageDealt 	== 0) { axios_response.data.matches[i].damageDealt 	= '-'; }
-	}
-
-
-	vm.getMatchData(axios_response.data.matches);
-
-
-	//console.log('axios_response.data... ');
-	//console.log('match_floor: ' + match_floor + ', total_matches: ' + total_matches);
-
 	// enable all buttons...
 	btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
-	
+
 
 	if (blFloorHit) {
 		// disable the "previous" button so that you can't go behind the 0 match floor
@@ -334,20 +358,39 @@ async function GetPlayerMatches() {
 		btnNext.classList.remove('disabledButton');
 	}
 
+	//
+	//#endregion button stuff
+
+
+
+	// don't show 0's on the board. show '-' instead so it's more clear...
+	for (i = 0; i < axios_response.data.matches.length; i++) {
+		if (axios_response.data.matches[i].DBNOs 		== 0) { axios_response.data.matches[i].DBNOs 		= '-'; }
+		if (axios_response.data.matches[i].kills 		== 0) { axios_response.data.matches[i].kills 		= '-'; }
+		if (axios_response.data.matches[i].damageDealt 	== 0) { axios_response.data.matches[i].damageDealt 	= '-'; }
+	}
+
+
+
+	vm.getMatchData(axios_response.data.matches);
+
+
 
 	// show prev/next buttons
 	document.getElementById('btnPreviousMatches').style.display	= "block";
 	document.getElementById('btnNextMatches').style.display		= "block";
 	document.getElementById('vueapp').style.display 			= "block";
 	document.getElementById('fetching').style.display 			= "none";	// turn this back off
-
-	//#endregion
-
 }
 
+//#endregion
 
 
-// ! Analyze Telemetry ----------------------------------------------------------->
+
+// ------------------------------------------------------------------------------------------------------>
+//#region // ! [Region] GetTelemetry() ----------------------------------------------------------->
+//
+
 async function GetTelemetry(_matchID) {
 	
 	console.log('Match diag -> platform: ' + strPlatform + ', matchId: ' + _matchID + ', player: \'' + strPlayerName + '\'');
@@ -394,6 +437,8 @@ async function GetTelemetry(_matchID) {
 	// console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
 	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
 	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
+
+	vueMatchInfo.updateTreeMatchDetails(axios_telemetry_response.data.matchDetails);
 
 
 	if (axios_telemetry_response.data.pubgApiMatchResponseInfo.status != 200 && axios_telemetry_response.data.pubgApiMatchResponseInfo.status != null) {
@@ -459,7 +504,7 @@ async function GetTelemetry(_matchID) {
 
 	} catch (error) {
 		console.log('error in UpdateTreeContext() -> ' + error);
-		alert('error in UpdateTreeContext()');
+		alert('Error in UpdateTreeContext()');
 
 		return;
 	}
@@ -479,6 +524,43 @@ async function GetTelemetry(_matchID) {
 
 }
 
+//#endregion - Analyze telemetry
+
+
+
+
+// ------------------------------------------------------------------------------------------------------>
+//#region // ! [Region] Modal player report
+//
+
+function OpenModalDamageReport(selectedPlayer) {
+
+	console.log('OpenModalDamageReport(' + selectedPlayer + ')'); 
+
+
+	// $ need to update vue variables for the table. 
+	// pull table values from the damage report (kills, knocks, and damage)
+	// have a player summary at the top (how many kills, how much damage, etc) -> might need to make a player card class that gets the same information
+	// that you get on the searched player initially.
+
+	// events:
+	// LogPlayerTakeDamage
+	// LogPlayerMakeGroggy
+	// LogPlayerRevivie
+	// LogPlayerKill
+
+	vuePlayerReport.updatePlayerReport(selectedPlayer);
+
+
+
+
+	OpenModal();
+
+}
+
+
+
+//#endregion 
 
 
 // ! ------------------------------------------------------------------------------------------------------>
@@ -897,6 +979,7 @@ function UpdateTreeContext(selectedPlayer) {
 	// update data data for the selected player
 	if (prevSelectedPlayer == selectedPlayer) {
 		PrintReportForSelectedPlayer(selectedPlayer);
+		OpenModalDamageReport(selectedPlayer);
 	}
 
 	prevSelectedPlayer = selectedPlayer; 
@@ -1039,8 +1122,8 @@ function btnSearchPlayer_Click() {
 	searchDirection = 'up';
 
 	// just reset the whole array if they re-click "search"
-	valid_match_floors = [0];
-	valid_match_floors_index = 0;
+	match_floors = [0];
+	match_floors_index = 0;
 
 	prelim();
 }
@@ -1053,7 +1136,7 @@ function btnNext_Click() {
 
 	searchDirection = 'up';
 
-	valid_match_floors_index++;
+	match_floors_index++;
 
 	prelim();
 }
@@ -1066,7 +1149,7 @@ function btnPrevious_Click() {
 
 	searchDirection = 'down';
 
-	valid_match_floors_index--;
+	match_floors_index--;
 
 	prelim();
 }

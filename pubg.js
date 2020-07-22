@@ -15,14 +15,14 @@ const hf            = require('./hooty_modules/hf_server'); // helper functions
 const port = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 
 const zlib = require('zlib');
-const { translateMapName, } = require('./hooty_modules/hf_server');
-const { debug } = require('console');
+//const { translateMapName, } = require('./hooty_modules/hf_server');
+//const { debug } = require('console');
 
 
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = !true;
+const blTestingVersion = true;
 
 
 
@@ -323,10 +323,9 @@ app.get('/getplayermatches', async (req, res) => {
 
         // filter out irregular games (and the training map)
 		if (
-			(//match_data.data.attributes.gameMode != "solo"  &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
+			(match_data.data.attributes.gameMode != "solo"  &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
 			 match_data.data.attributes.gameMode != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
-             match_data.data.attributes.gameMode != "squad" &&	match_data.data.attributes.gameMode != "squad-fpp"   
-             ) ||
+             match_data.data.attributes.gameMode != "squad" &&	match_data.data.attributes.gameMode != "squad-fpp") ||
              match_data.data.attributes.mapName == "Range_Main"  ) {
 
             
@@ -514,8 +513,12 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     var match_data, telemetry_url;
 
-    let allHumanNames = '';
-    let allBotNames   = '';   // store a long string of bot names so that they can be identified for classes
+    let allHumanNames   = '';
+    let allBotNames     = '';   // store a long string of bot names so that they can be identified for classes
+    let arrPlayerCards  = [];   // [name, { activity }]  the damage to and from a player, and kills/death.
+    let matchDetails    = new Object();   // identify the map, humans/bots, player win place, region
+
+
 
 
     // ---------------------------------------------------->
@@ -586,7 +589,19 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     if (blTestingVersion) {
         console.log('match_data...');
-        console.dir(match_data);
+        //console.dir(match_data);
+    }
+
+
+    // get match data info here to send back to client for the tree div
+    matchDetails = { 
+        'mapName': hf.translateMapName(match_data.data.attributes.mapName),
+        'matchType': match_data.data.attributes.matchType,
+        'gameMode': match_data.data.attributes.gameMode,
+        'createdAt': getTimeSinceMatch(match_data.data.attributes.createdAt),
+        'duration': hf.ConvertSecondsToMinutes(match_data.data.attributes.duration),
+        'shardId': match_data.data.attributes.shardId,
+        'id': match_data.data.id,
     }
 
 
@@ -609,6 +624,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
             //     console.log('suicide: ' + match_data.included[i].attributes.stats.deathType + '/' + match_data.included[i].attributes.stats.name);
             // }
             allHumanNames += '|' + match_data.included[i].attributes.stats.name;
+
+            // make player cards here for the individual players' reports
+            arrPlayerCards.push([match_data.included[i].attributes.stats.name, 
+                                { 
+                                    'kills':  match_data.included[i].attributes.stats.kills,
+                                    'damageDealt': match_data.included[i].attributes.stats.damageDealt,
+                                    'DBNOs': match_data.included[i].attributes.stats.DBNOs,
+                                    'timeSurvived': hf.ConvertSecondsToMinutes(match_data.included[i].attributes.stats.timeSurvived),
+                                    'winPlace': match_data.included[i].attributes.stats.winPlace,
+                                    'teamKills': match_data.included[i].attributes.stats.teamKills,
+                                }]);
+
         }
     }
 
@@ -633,7 +660,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             if (blTestingVersion) {
                 console.dir('telemetry_response...');
-                console.dir(telemetry_response);
+                //console.dir(telemetry_response);
             }
         }
         catch (err)
@@ -667,7 +694,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             if (blTestingVersion) {
                 console.log('telemetry_response...');
-                console.dir(telemetry_response);
+                //console.dir(telemetry_response);
             }
         }
         catch (error) {
@@ -709,7 +736,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var arrKnocks       = [];   // [{ knocked_player, whodunit}] -> this is here to keep up with who is currently knocked in-game so you know if a player was thirsted
 
     // data for client response...
-    //var clientPlayerCards   = [];   // [name, { activity }]  the damage to and from a player, and kills/death.
     var arrPlayersDamageLog = [];   // [player_name, {playerDamageLog}]  -- this will be every player's damage/tagged log
     var playerTeamId        = null;
 
@@ -718,13 +744,12 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var arrSurvivors        = [];   // hold a list of living players. remove when they die.
     // $ remove each living player from a list when they die
 
-    var matchDetails        = [];   // $ identify the map, humans/bots, player win place, region
     //var null_attacker   = [];   // for testing bluezone/redzone/blackzone
 
 
     // ! loop through each telemetry event...
     for (let i = 0; i < telemetry_response.length; i++){
-        //console.log('_T: ' + telemetry_response.data[i]._T);
+        //console.log(i);
 
         var record = telemetry_response[i];
         var _recordLog = '';
@@ -733,7 +758,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
         var killer          = new Object();
             killer.victims  = [];
-        var blKillerExists  = false;
+        //var blKillerExists  = false;
 
 
         var i_string = new String(i);
@@ -872,7 +897,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             //#region //! [Region] LogPlayerTakeDamage...
             //
 
-            //console.dir(record);
+            //console.dir(i + ': ' + record);
             //strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
             
             try {
@@ -1602,7 +1627,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }   // i loop
 
 
-
+    // $ debugger is breaking before this point
 
     //#region // ! [Region] Create csv data for D3
     //
@@ -1755,15 +1780,15 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //console.log(null_attacker);
     
         // ! print killfeed log
-        console.log('KillFeed log...');
-        for (let j = 0; j < arrKillFeedLog.length; j++) {
-            console.log(arrKillFeedLog[j]);
-        }
-
-        //console.log('arrDamageLog...');
-        // for (let j = 0; j < arrDamageLog.length; j++){
-        //     console.log(arrDamageLog[j]);
+        // console.log('KillFeed log...');
+        // for (let j = 0; j < arrKillFeedLog.length; j++) {
+        //     console.log(arrKillFeedLog[j]);
         // }
+
+        console.log('arrDamageLog...');
+        for (let j = 0; j < arrDamageLog.length; j++){
+            console.log(arrDamageLog[j]);
+        }
 
         //console.dir(arr_T);
         console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);
@@ -1772,7 +1797,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }
 
 
-    var hooty_response = { allHumanNames, allBotNames, arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, arrEnvironmentKills, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
+
+    var hooty_response = { matchDetails, arrPlayerCards, allHumanNames, allBotNames, arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, 
+                           arrEnvironmentKills, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
     res.send(hooty_response);
 
 })
@@ -1784,7 +1811,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
 // ! ------------------------------------------------------------------------------------------------------>
 // ! Helper functions
 // ! 
-
 
 function writeCacheFileJSON(filename, data) {
 
