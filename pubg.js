@@ -14,6 +14,8 @@ const hf            = require('./hooty_modules/hf_server'); // helper functions
 
 const port = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 
+console.log('process.env.DATABASE_URL: ' + process.env.DATABASE_URL);
+
 const zlib = require('zlib');
 //const { translateMapName, } = require('./hooty_modules/hf_server');
 //const { debug } = require('console');
@@ -22,7 +24,7 @@ const zlib = require('zlib');
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = true;
+const blTestingVersion = !true;
 
 
 
