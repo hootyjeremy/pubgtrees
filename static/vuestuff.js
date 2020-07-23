@@ -157,7 +157,16 @@ let vuePlayerReport = new Vue({
 		winPlace: null,
 		teamKills: null,
 
-		arrPlayerActivity: null, // use this array for dumping the arrPlayersLog into with the player's context
+
+		rowId: null,					// id for rows
+		arrPlayerReport: [], 	// (report rows) use this array for dumping the arrPlayersLog into with the player's context 
+
+		// rowTime: null,
+		// rowAttackerName: null, 
+		// rowVictimName: null, 
+		// rowAction: null,
+		
+		
 
 
 
@@ -171,6 +180,8 @@ let vuePlayerReport = new Vue({
 	methods: {
 
 		updatePlayerReport: function (name, playerTeamId, arrPlayerCards, arrPlayersDamageLog) {
+
+			//console.log('vuePlayerReport.updatePlayerReport()');
 
 			this.selectedPlayer = name;
 
@@ -199,24 +210,97 @@ let vuePlayerReport = new Vue({
 
 			// ! get damage log activity
 			// ? separate for damage and kills, and even teammate knock/revive stuff
+
+			rowId = 0;
+			this.arrPlayerReport = [];
 			arrPlayersDamageLog.forEach(record => {
 
 				if (record.attacker.name == this.selectedPlayer || record.victim.name == this.selectedPlayer) {
 
+					let _event 	= '';
+					let _damage = '';
+					let _info 	= '';		// this should be a combo string of random stuff like "self-kill, thirst, bleedout/no-revive/team-wipe"
+					let _distance = '';		// $ BUG: bots have distance problems on kills
+
+
 					if (record._T == 'LogPlayerTakeDamage') {
 
+						// skip adding a record if not chosen to show damage.
+						if (!blShowDamage) {
+							return;
+						}
+
+
+						_damage = parseInt(record.damage);
+
+						if (record.selfDamage){
+							_info += ' (self-damage)'
+						}
+
+						if (record.killingStroke){
+							//_info += ' (kill/knock)'
+						}
 					}
 					else if (record._T == 'LogPlayerMakeGroggy') {
+						_event = 'v';
 
+						if (record.teammateKnock) {
+							_info += ' (teammate-knock)';
+						}
+						else if (record.selfKnock) {
+							_info += ' (self-knock)';
+						}
+						else {
+							_info = '*knock*'
+						}
 					}
 					else if (record._T == 'LogPlayerRevive') {
-						
+						_event = '^';
+
+						_info = '*revive*'
 					}
 					else if (record._T == 'LogPlayerKill') {
-						
+						_event = 'x';
+
+						_info = '*kill*';
+
+						if (record.isThirst) {
+							_info += ' (thirst)';
+						}
+
+						if (record.isSelfKill) {
+							_info += ' (self-kill)';
+						}
+
+						if (record.isNoRevive) {
+							_info += ' (bleedout/no-revive)';
+						}
+						else if (record.isTeamWipe) {
+							_info += ' (bleedout/team-wiped)';
+						}
 					}
 
 
+
+					if (record.distance != null) {
+						_distance = record.distance.toLocaleString('en') + ' m';
+					}
+
+
+
+					this.arrPlayerReport.push({
+						'rowId': rowId,
+						'matchTime': record.matchTime,
+						'attacker': record.attacker.name,
+						'victim': record.victim.name,
+						'event': _event,
+						'damage': _damage,
+						'distance': _distance,
+						'info': _info,
+						
+					});
+
+					rowId++;
 					//debugger;
 				}
 			})

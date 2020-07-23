@@ -244,29 +244,62 @@
 
 
 <div id='div-modal'>
-	<div id='player-report'>
+	<div id='player-report' style='margin-top: 80px; margin-bottom: 80px; margin-left: 200px; margin-right: 200px;'>
 		<span id='btnCloseModal'>&times;</span>
 		<br>
 		<h1><span class='selectedPlayer'>{{selectedPlayer}}</span></h1>
 
 		<br>
-		Placement: #{{winPlace}} | Time survived: {{timeSurvived}}
+		<span class='spanBoxy'>Time survived: {{timeSurvived}}</span>
+		<span class='spanBoxy'>Placement: #{{winPlace}}</span> 
+		<span class='spanBoxy'>Kills: {{kills}}</span>
+		<span class='spanBoxy'>Knocks: {{DBNOs}}</span>
+		<span class='spanBoxy'>Damage: {{damageDealt}}</span>
 		<br>
-		Kills: {{kills}} | Knocks: {{DBNOs}} | Damage: {{damageDealt}}
 		<br>
 		<br>
+		<button id="btnShowDamage" style="width: 120; margin-left: 10;">Show damage</button>
+		<br>
+		<br>
+		<br>
 
 
-		<table>
-			<thead>
 
-			</thead>
+		<center>
+			<table>
+				<thead>
+					<tr>
+						<th>Time</th>
+						<th>Attacker</th>
+						<th>kkr</th>
+						<th>Victim</th>
+						<th>Dmg</th>
+						<th>Dist</th>
+						<th>Info</th>
+					</tr>
+				</thead>
+	
+	
+				<tbody>
+					<tr class='matchRow'
+						v-for='(reportRow, index) in arrPlayerReport' :key='reportRow.id'
+					>
+						<td>{{reportRow.matchTime}}</td>
+						<td>{{reportRow.attacker}}</td>
+						<td style='text-align: center;'>{{reportRow.event}}</td>
+						<td>{{reportRow.victim}}</td>
+						<td style='text-align: right;'>{{reportRow.damage}}</td>
+						<td style='text-align: right;'>{{reportRow.distance}}</td>
+						<td style='text-align: left;'>{{reportRow.info}}</td>
+					</tr>
+				</tbody>
+			</table>
+			</center>
 
+		<br>
+		<br>
+		<br>
 
-			<tbody>
-
-			</tbody>
-		</table>
 	</div>
 
 </div>

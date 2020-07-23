@@ -13,7 +13,7 @@ let defaultPlayer		= 'hooty__';
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
 let   version 			= '0.012'
-const blTestingVersion 	= true;
+const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -50,6 +50,7 @@ else {
 
 var strPlatform, strPlayerName;
 var prevPlatform, prevPlayerName;	// these are used to reset match_floor if searching for a new player
+let glSelectedPlayer = null;		// needed for the "show damage" button in the player report.
 let prevSelectedPlayer = null;
 
 let glMatchId = '';				// used for url
@@ -68,6 +69,8 @@ var total_matches 	= 0;
 let match_floors = [0];
 let match_floors_index = 0;
 let searchDirection = null;	// this will be for "next" or "previous" matches
+
+let blShowDamage = false;
 
 let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
 
@@ -120,6 +123,27 @@ window.addEventListener('load', (event) => {
 		document.getElementById('div-modal').style.display = 'none';
 	})
 
+	// Show damage button
+	document.getElementById('btnShowDamage').addEventListener('click', (event) => {
+
+		//console.log(glSelectedPlayer);
+
+
+		// $ reprint the report
+
+		if (blShowDamage) {
+			document.getElementById('btnShowDamage').textContent = 'Show damage';
+		}
+		else {
+			document.getElementById('btnShowDamage').textContent = 'Hide damage';
+		}
+
+		blShowDamage = !blShowDamage;
+
+		// re-draw the report
+		OpenModalDamageReport(glSelectedPlayer);
+	})
+
 });
 
 
@@ -127,7 +151,7 @@ window.addEventListener('load', (event) => {
 window.addEventListener('keydown', (event) => {
 	if (event.key == 'Escape') {
 		if (document.getElementById('div-modal').style.display != 'none') {
-			CloseModal();
+			HideModal();
 		}
 	}
 });
@@ -138,17 +162,18 @@ window.addEventListener('click', (event) => {
 	//console.log(event.target);
 
 	if (event.target.id == 'div-modal') {
-		console.log('modal clicked');
-		CloseModal();
+		//console.log('modal clicked');
+		HideModal();
 	}
 })
 
-function OpenModal() {
+
+function ShowModal() {
 	// display the modal report
 	document.getElementById('div-modal').style.display = 'block';
 }
 
-function CloseModal() {
+function HideModal() {
 	document.getElementById('div-modal').style.display = 'none';
 }
 
@@ -528,14 +553,15 @@ async function GetTelemetry(_matchID) {
 
 
 
-
 // ------------------------------------------------------------------------------------------------------>
 //#region // ! [Region] Modal player report
 //
 
 function OpenModalDamageReport(selectedPlayer) {
 
-	console.log('OpenModalDamageReport(' + selectedPlayer + ')'); 
+	//console.log('OpenModalDamageReport(' + selectedPlayer + ')');
+
+	glSelectedPlayer = selectedPlayer;
 
 	// get teamId of selected player
 	let playerTeamId = 0;
@@ -565,8 +591,7 @@ function OpenModalDamageReport(selectedPlayer) {
 
 
 
-
-	OpenModal();
+	ShowModal();
 
 }
 
