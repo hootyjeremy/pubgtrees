@@ -183,6 +183,16 @@ let vuePlayerReport = new Vue({
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
 
+			if (allBotNames.includes(name)) {
+				document.getElementById('botReportDisclaimer').style.display = 'block';
+				document.getElementById('div-reportStats').style.display = 'none';
+			}
+			else {
+				document.getElementById('botReportDisclaimer').style.display = 'none';
+				document.getElementById('div-reportStats').style.display = 'block';
+			}
+
+
 			this.selectedPlayer = name;
 
 			// ! get playercard info...
@@ -235,6 +245,8 @@ let vuePlayerReport = new Vue({
 
 						_damage = parseInt(record.damage);
 
+						_info = this.resolveDamageReason(record.damageCauserName, record.damageReason, record.damageTypeCategory);
+
 						if (record.selfDamage){
 							_info += ' (Self-damage)'
 						}
@@ -257,6 +269,12 @@ let vuePlayerReport = new Vue({
 						}
 					}
 					else if (record._T == 'LogPlayerRevive') {
+
+						// don't bother showing the player reviving teammates. just show when the player is revived.
+						if (record.attacker.name == this.selectedPlayer) {
+							return;
+						}
+
 						_event = '\u2227'; //'\u25B2';  //'^';
 
 						//_info = '(revive)'
@@ -267,7 +285,7 @@ let vuePlayerReport = new Vue({
 						//_info = '(kill)';
 
 						if (record.isThirst) {
-							_info += ' (Thirst)';
+							_info += ' (Thirsted)';
 						}
 
 						if (record.isSelfKill) {
@@ -345,6 +363,9 @@ let vuePlayerReport = new Vue({
 			else if (damageTypeCategory == 'Melee') {
 				_damager = damageCauserName;
 			}
+			else if (damageTypeCategory == 'Molotov') {
+				_damager = 'Molotov';
+			}
 			else {
 				console.log(strLine);
 				console.log('unaccounted damager...');
@@ -352,7 +373,33 @@ let vuePlayerReport = new Vue({
 			}
 
 			return _damager;
+		},
+		resolveDamageReason: function (damageCauserName, damageReason, damageTypeCategory) {
+			let r = '';
 
+			if (damageReason != undefined && damageReason != 'NonSpecific') {
+
+				r = damageReason;
+
+				if (damageReason == 'TorsoShot') {
+					r = 'Torso';
+				}
+				else if (damageReason == 'LegShot') {
+					r = 'Leg';
+				}
+				else if (damageReason == 'ArmShot') {
+					r = 'Arm';
+				}
+				else if (damageReason == 'HeadShot') {
+					r = 'Headshot';
+				}
+				else if (damageReason == 'PelvisShot') {
+					r = 'Pelvis';
+				}
+
+			}
+
+			return r;
 		}
 
 	}

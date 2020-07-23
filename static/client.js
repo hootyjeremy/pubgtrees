@@ -12,8 +12,8 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.014'
-const blTestingVersion 	= !true;
+let   version 			= '0.015'
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -147,7 +147,7 @@ window.addEventListener('load', (event) => {
 		blShowDamage = !blShowDamage;
 
 		// re-draw the report
-		OpenModalDamageReport(glSelectedPlayer);
+		RunPlayerDamageReport(glSelectedPlayer);
 	})
 
 });
@@ -177,8 +177,7 @@ window.addEventListener('click', (event) => {
 function ShowModal() {
 	// display the modal report
 	document.getElementById('div-modal').style.display = 'block';
-	document.getElementById('div-modal').scrollIntoView({behavior: "smooth"});
-
+	document.getElementById('div-modal').scrollIntoView({behavior: "smooth"});	
 }
 
 function HideModal() {
@@ -566,9 +565,9 @@ async function GetTelemetry(_matchID) {
 //#region // ! [Region] Modal player report
 //
 
-function OpenModalDamageReport(selectedPlayer) {
+function RunPlayerDamageReport(selectedPlayer) {
 
-	//console.log('OpenModalDamageReport(' + selectedPlayer + ')');
+	//console.log('RunPlayerDamageReport(' + selectedPlayer + ')');
 
 	glSelectedPlayer = selectedPlayer;
 
@@ -1022,17 +1021,19 @@ function CreateTreeFromD3() {
 
 
 function UpdateTreeContext(selectedPlayer) {
-	// This will happen when any player is clicked...
-
-	//console.log('clicked name: ' + name);
 
 	// update data data for the selected player
-	if (prevSelectedPlayer == selectedPlayer) {
-		//PrintReportForSelectedPlayer(selectedPlayer);
-		OpenModalDamageReport(selectedPlayer);
-	}
 
-	prevSelectedPlayer = selectedPlayer; 
+	//console.log('clicked name: ' + name);
+	
+	// if (prevSelectedPlayer == selectedPlayer) {
+	// 	RunPlayerDamageReport(selectedPlayer);
+	// }
+	//prevSelectedPlayer = selectedPlayer; 
+
+
+	RunPlayerDamageReport(selectedPlayer);
+
 
 	// ! human and bot players should always have at least one root class "humanPlayer" or "botPlayer" and then stack and relational classes on top of them. 
 	// ! probably have 2 max (root + relational)

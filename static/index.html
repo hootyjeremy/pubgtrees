@@ -47,7 +47,7 @@
 <header class='page-header'>
 	<br>
 	
-	<a href='https://hooty-pubg01.herokuapp.com'>PUBG Trees : ver.0.014</a>
+	<a href='https://hooty-pubg01.herokuapp.com'>PUBG Trees : ver.0.015</a>
 	
 	<br>
 	<br>
@@ -251,22 +251,34 @@
 
 		<br>
 		<br>
-		<span class='spanBoxy' style="text-align: center; font-size: 24px">{{selectedPlayer}}</span>
-		<br>
-		<br>
+		
+		<div id='botReportDisclaimer' style="width: 580px; border: 1px solid #60b6f0; border-radius: 4px; padding: 4px;">
+			<span style="font-style: italic; font-size: 16px; color: #60b6f0;">
+				Hey read this! 
+				<br>
+				<br>
+				Collected data for bots may be inaccurrate so don't rely too much on anything shown here. 
+				<br>
+				I'd rather not show any bot information but here it is anyway as a best effort. 
+			</span>			
+		</div>
 
-		<br>
-		<span class='spanBoxy'>Time survived: {{timeSurvived}}</span>
-		<span class='spanBoxy'>Placement: #{{winPlace}}</span> 
-		<span class='spanBoxy'>Kills: {{kills}}</span>
-		<span class='spanBoxy'>Knocks: {{DBNOs}}</span>
-		<span class='spanBoxy'>Damage: {{damageDealt}}</span>
-		<br>
-		<br>
-		<br>
-		<button id="btnShowDamage" style="width: 120; margin-left: 10;">Show damage</button>
-		<br>
-		<br>
+		<div id='div-reportStats'>
+			<span class='spanBoxy' style="text-align: center; font-size: 32px; color: #60b6f0;">{{selectedPlayer}}</span>
+			<br>
+			<br>
+			<br>
+			<span class='spanBoxy'>Placement: #{{winPlace}}</span> 
+			<span class='spanBoxy'>Time survived: {{timeSurvived}}</span>
+			<br>
+			<br>
+			<span class='spanBoxy'>Kills: {{kills}}</span>
+			<span class='spanBoxy'>Knocks: {{DBNOs}}</span>
+			<span class='spanBoxy'>Damage: {{damageDealt}}</span>
+			<br>
+			<br>
+		</div>
+
 		<br>
 
 		<center>
@@ -274,9 +286,9 @@
 				<thead>
 					<tr>
 						<th style="width: 40px;">Time</th>
-						<th style="width: 120px;">Attacker</th>
-						<th>kkr</th>
-						<th style="width: 120px;">Victim</th>
+						<th style="width: 120px; text-align: right;">Attacker</th>
+						<th></th>
+						<th style="width: 120px; text-align: left;">Victim</th>
 						<th>Weapon</th>
 						<th>Dmg</th>
 						<th style="width: 40px;">Dist</th>
@@ -289,13 +301,13 @@
 						v-for='(reportRow, index) in arrPlayerReport' :key='reportRow.id'
 					>
 						<td style='border-radius: 6px 0px 0px 6px; text-align: center;'>{{reportRow.matchTime}}</td>
-						<td>{{reportRow.attacker}}</td>
+						<td style='text-align: right;'>{{reportRow.attacker}}</td>
 						<td style='text-align: center;'>{{reportRow.event}}</td>
 						<td>{{reportRow.victim}}</td>
 						<td>{{reportRow.damagerInfo}}</td>
 						<td style='text-align: right;'>{{reportRow.damage}}</td>
 						<td style='text-align: right;'>{{reportRow.distance}}</td>
-						<td style='border-radius: 0px 6px 6px 0px; text-align: left;'>{{reportRow.info}}</td>
+						<td style='border-radius: 0px 6px 6px 0px; text-align: left; padding-right: 10px;'>{{reportRow.info}}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -304,14 +316,16 @@
 		<br>
 		<br>
 
-		<span class='spanBoxy'>╳ : Kill</span>
-		<span class='spanBoxy'>▼ : Knock</span>
-		<span class='spanBoxy'>∧ : Revive</span>
+		<span class='spanBoxy'>╳ &ensp; Kill</span>
+		<span class='spanBoxy'>▼ &ensp; Knock</span>
+		<span class='spanBoxy'>∧ &ensp; Revive</span>
 		
 		
 		<br>
 		<br>
 		<br>
+		<button id="btnShowDamage" style="width: 120; margin-left: 10;">Show damage</button>
+
 		<button id="btnCloseModal2" style="width: 120; margin-left: 10;">Close</button>
 		<br>
 		<br>
