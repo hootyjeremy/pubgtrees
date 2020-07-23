@@ -179,7 +179,7 @@ let vuePlayerReport = new Vue({
 	},
 	methods: {
 
-		updatePlayerReport: function (name, playerTeamId, arrPlayerCards, arrPlayersDamageLog) {
+		updatePlayerReport: function (name, playerTeamId, arrPlayerCards, arrPlayersDamageLog, allBotNames) {
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
 
@@ -222,6 +222,8 @@ let vuePlayerReport = new Vue({
 					let _info 	= '';		// this should be a combo string of random stuff like "self-kill, thirst, bleedout/no-revive/team-wipe"
 					let _distance = '';		// $ BUG: bots have distance problems on kills
 
+					// ! unicode characters
+					// https://en.wikipedia.org/wiki/List_of_Unicode_characters
 
 					if (record._T == 'LogPlayerTakeDamage') {
 
@@ -234,7 +236,7 @@ let vuePlayerReport = new Vue({
 						_damage = parseInt(record.damage);
 
 						if (record.selfDamage){
-							_info += ' (self-damage)'
+							_info += ' (Self-damage)'
 						}
 
 						if (record.killingStroke){
@@ -242,58 +244,72 @@ let vuePlayerReport = new Vue({
 						}
 					}
 					else if (record._T == 'LogPlayerMakeGroggy') {
-						_event = 'v';
+						_event = '\u25BC'; // '\u2228'; //'\u25BD'; //'v';
 
 						if (record.teammateKnock) {
-							_info += ' (teammate-knock)';
+							_info += ' (Teammate-knock)';
 						}
 						else if (record.selfKnock) {
-							_info += ' (self-knock)';
+							_info += ' (Self-knock)';
 						}
 						else {
-							_info = '*knock*'
+							//_info = '(knock)'
 						}
 					}
 					else if (record._T == 'LogPlayerRevive') {
-						_event = '^';
+						_event = '\u2227'; //'\u25B2';  //'^';
 
-						_info = '*revive*'
+						//_info = '(revive)'
 					}
 					else if (record._T == 'LogPlayerKill') {
-						_event = 'x';
+						_event = '\u2573'; // '╳'; // 'x';
 
-						_info = '*kill*';
+						//_info = '(kill)';
 
 						if (record.isThirst) {
-							_info += ' (thirst)';
+							_info += ' (Thirst)';
 						}
 
 						if (record.isSelfKill) {
-							_info += ' (self-kill)';
+							_info += ' (Self-kill)';
 						}
 
 						if (record.isNoRevive) {
-							_info += ' (bleedout/no-revive)';
+							_info += ' (Bleedout/No-revive)';
 						}
 						else if (record.isTeamWipe) {
-							_info += ' (bleedout/team-wiped)';
+							_info += ' (Bleedout/Team-wiped)';
 						}
 					}
 
 
-
+					// correct for distance errors ----->
 					if (record.distance != null) {
-						_distance = record.distance.toLocaleString('en') + ' m';
+						if (record.distance == -1) {
+							// invalid bot stuff
+							_distance = '- - - - -';
+						}
+						else {
+							_distance = record.distance.toLocaleString('en') + ' m';
+						}
 					}
 
 
+					// get a summed up weapon/damager word
+					let _damager = this.resolveDamager(record.damageCauserName, record.damageReason, record.damageTypeCategory);
+
+
+
+					let _botAttacker = (allBotNames.includes(record.attacker.name)) ? '(BOT) ' : '';
+					let _botVictim   = (allBotNames.includes(record.victim.name))   ? '(BOT) ' : '';
 
 					this.arrPlayerReport.push({
 						'rowId': rowId,
 						'matchTime': record.matchTime,
-						'attacker': record.attacker.name,
-						'victim': record.victim.name,
+						'attacker': _botAttacker + record.attacker.name,
+						'victim': _botVictim + record.victim.name,
 						'event': _event,
+						'damagerInfo': _damager,
 						'damage': _damage,
 						'distance': _distance,
 						'info': _info,
@@ -305,14 +321,39 @@ let vuePlayerReport = new Vue({
 				}
 			})
 		},
-		resolveZeroes: function (number) {
-			if (number == 0) {
-				return '-';
+		clearPlayerReport: function () {
+			this.arrPlayerReport = [];
+		},
+		resolveDamager: function (damageCauserName, damageReason, damageTypeCategory) {
+
+			let _damager = '';
+
+
+			if (damageTypeCategory == 'Gun') {
+				_damager = damageCauserName;
+			}
+			else if (damageTypeCategory == "Fall Damage"   		|| 
+					 damageTypeCategory == "Vehicle Crash") {
+				_damager = damageTypeCategory;
+			}
+			else if (damageTypeCategory == 'Grenade Explosion') {
+				_damager = damageCauserName;
+			}
+			else if (damageTypeCategory == 'Bluezone') {
+				_damager = damageTypeCategory;
+			}
+			else if (damageTypeCategory == 'Melee') {
+				_damager = damageCauserName;
 			}
 			else {
-				return number;
+				console.log(strLine);
+				console.log('unaccounted damager...');
+				console.log('damageTypeCategory', damageTypeCategory + ' | damageCauserName', damageCauserName + ' + damageReason', damageReason);
 			}
-		},
+
+			return _damager;
+
+		}
 
 	}
 });

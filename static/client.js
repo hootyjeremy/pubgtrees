@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.012'
+let   version 			= '0.014'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -120,16 +120,22 @@ window.addEventListener('load', (event) => {
 
 	// modal close button
 	document.getElementById('btnCloseModal').addEventListener('click', (event) => {
-		document.getElementById('div-modal').style.display = 'none';
+		//document.getElementById('div-modal').style.display = 'none';
+		HideModal();
 	})
+
+	document.getElementById('btnCloseModal2').addEventListener('click', (event) => {
+		//document.getElementById('div-modal').style.display = 'none';
+		HideModal();
+	})
+
 
 	// Show damage button
 	document.getElementById('btnShowDamage').addEventListener('click', (event) => {
 
 		//console.log(glSelectedPlayer);
 
-
-		// $ reprint the report
+		// reprint the report
 
 		if (blShowDamage) {
 			document.getElementById('btnShowDamage').textContent = 'Show damage';
@@ -171,10 +177,13 @@ window.addEventListener('click', (event) => {
 function ShowModal() {
 	// display the modal report
 	document.getElementById('div-modal').style.display = 'block';
+	document.getElementById('div-modal').scrollIntoView({behavior: "smooth"});
+
 }
 
 function HideModal() {
 	document.getElementById('div-modal').style.display = 'none';
+	vuePlayerReport.clearPlayerReport();
 }
 
 
@@ -518,8 +527,8 @@ async function GetTelemetry(_matchID) {
 		// once tree is generically created, update color for context and get data
 
 		if (strPlayerName != '') {
-		// need to remember who the looked up player is so that they will stay 'hightlighted'
-		document.getElementById(strPlayerName).classList.add('searchedPlayer');
+			// need to remember who the looked up player is so that they will stay 'hightlighted'
+			document.getElementById(strPlayerName).classList.add('searchedPlayer');
 		}
 
 		// don't update tree context on the first look
@@ -587,7 +596,10 @@ function OpenModalDamageReport(selectedPlayer) {
 
 	// $ identify the player's card and send that record over
 	// $ this will give the player's name and from there, you can get 
-	vuePlayerReport.updatePlayerReport(selectedPlayer, playerTeamId, axios_telemetry_response.data.arrPlayerCards, axios_telemetry_response.data.arrPlayersDamageLog);
+	vuePlayerReport.updatePlayerReport(selectedPlayer, playerTeamId, 
+										axios_telemetry_response.data.arrPlayerCards, 
+										axios_telemetry_response.data.arrPlayersDamageLog,
+										axios_telemetry_response.data.allBotNames);
 
 
 
@@ -601,6 +613,7 @@ function OpenModalDamageReport(selectedPlayer) {
 
 
 // ! ------------------------------------------------------------------------------------------------------>
+// $ DEPRECATED
 //#region // ! [Region] Damage console logging
 //
 
@@ -1015,7 +1028,7 @@ function UpdateTreeContext(selectedPlayer) {
 
 	// update data data for the selected player
 	if (prevSelectedPlayer == selectedPlayer) {
-		PrintReportForSelectedPlayer(selectedPlayer);
+		//PrintReportForSelectedPlayer(selectedPlayer);
 		OpenModalDamageReport(selectedPlayer);
 	}
 

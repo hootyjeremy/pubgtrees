@@ -47,7 +47,7 @@
 <header class='page-header'>
 	<br>
 	
-	<a href='https://hooty-pubg01.herokuapp.com'>PUBG Trees : ver.0.012</a>
+	<a href='https://hooty-pubg01.herokuapp.com'>PUBG Trees : ver.0.014</a>
 	
 	<br>
 	<br>
@@ -244,10 +244,16 @@
 
 
 <div id='div-modal'>
-	<div id='player-report' style='margin-top: 80px; margin-bottom: 80px; margin-left: 200px; margin-right: 200px;'>
+	<div id='player-report' style='margin-top: 80px; margin-bottom: 80px; margin-left: 500px; margin-right: 500px;'>
 		<span id='btnCloseModal'>&times;</span>
+
+		<center>
+
 		<br>
-		<h1><span class='selectedPlayer'>{{selectedPlayer}}</span></h1>
+		<br>
+		<span class='spanBoxy' style="text-align: center; font-size: 24px">{{selectedPlayer}}</span>
+		<br>
+		<br>
 
 		<br>
 		<span class='spanBoxy'>Time survived: {{timeSurvived}}</span>
@@ -263,39 +269,50 @@
 		<br>
 		<br>
 
-
-
 		<center>
 			<table>
 				<thead>
 					<tr>
-						<th>Time</th>
-						<th>Attacker</th>
+						<th style="width: 40px;">Time</th>
+						<th style="width: 120px;">Attacker</th>
 						<th>kkr</th>
-						<th>Victim</th>
+						<th style="width: 120px;">Victim</th>
+						<th>Weapon</th>
 						<th>Dmg</th>
-						<th>Dist</th>
+						<th style="width: 40px;">Dist</th>
 						<th>Info</th>
 					</tr>
 				</thead>
-	
-	
+		
 				<tbody>
 					<tr class='matchRow'
 						v-for='(reportRow, index) in arrPlayerReport' :key='reportRow.id'
 					>
-						<td>{{reportRow.matchTime}}</td>
+						<td style='border-radius: 6px 0px 0px 6px; text-align: center;'>{{reportRow.matchTime}}</td>
 						<td>{{reportRow.attacker}}</td>
 						<td style='text-align: center;'>{{reportRow.event}}</td>
 						<td>{{reportRow.victim}}</td>
+						<td>{{reportRow.damagerInfo}}</td>
 						<td style='text-align: right;'>{{reportRow.damage}}</td>
 						<td style='text-align: right;'>{{reportRow.distance}}</td>
-						<td style='text-align: left;'>{{reportRow.info}}</td>
+						<td style='border-radius: 0px 6px 6px 0px; text-align: left;'>{{reportRow.info}}</td>
 					</tr>
 				</tbody>
 			</table>
 			</center>
 
+		<br>
+		<br>
+
+		<span class='spanBoxy'>╳ : Kill</span>
+		<span class='spanBoxy'>▼ : Knock</span>
+		<span class='spanBoxy'>∧ : Revive</span>
+		
+		
+		<br>
+		<br>
+		<br>
+		<button id="btnCloseModal2" style="width: 120; margin-left: 10;">Close</button>
 		<br>
 		<br>
 		<br>

@@ -965,7 +965,19 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     playerDamageLog.victim      = _victim;
 
                     playerDamageLog.damage              = record.damage;
-                    playerDamageLog.distance            = _distance;
+                    
+                    //playerDamageLog.distance            = _distance;
+
+                    if ((record.attacker.location.x == 0 && record.attacker.location.y == 0 && record.attacker.location.z == 0) || 
+                        (record.victim.location.x   == 0 && record.victim.location.y   == 0 && record.victim.location.z   == 0)) {
+                        // this is probably a bot that is throwing the distances off so just return -1
+                        playerDamageLog.distance = -1;
+                    }
+                    else {
+                        playerDamageLog.distance = hf.getDistanceXYZ(record.attacker.location, record.victim.location);
+                    }
+
+
                     playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.damageTypeCategory);
                     playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.damageCauserName);
                     playerDamageLog.damageReason        = record.damageReason;
@@ -1069,7 +1081,17 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 playerDamageLog.victim      = _victim;
 
                 playerDamageLog.damage              = record.damage;
-                playerDamageLog.distance            = hf.getDistanceXYZ(record.attacker.location, record.victim.location);
+                //playerDamageLog.distance            = hf.getDistanceXYZ(record.attacker.location, record.victim.location);
+
+                if ((record.attacker.location.x == 0 && record.attacker.location.y == 0 && record.attacker.location.z == 0) || 
+                    (record.victim.location.x   == 0 && record.victim.location.y   == 0 && record.victim.location.z   == 0)) {
+                    // this is probably a bot that is throwing the distances off so just return -1
+                    playerDamageLog.distance = -1;
+                }
+                else {
+                    playerDamageLog.distance = hf.getDistanceXYZ(record.attacker.location, record.victim.location);
+                }
+
                 playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.damageTypeCategory);
                 playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.damageCauserName);
                 playerDamageLog.damageReason        = record.damageReason;
@@ -1524,7 +1546,16 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // playerDamageLog.victim      = _victim;
 
                     playerDamageLog.damage              = record.damage;
-                    playerDamageLog.distance            = hf.getDistanceXYZ(record.killer.location, record.victim.location);
+
+                    if ((record.killer.location.x == 0 && record.killer.location.y == 0 && record.killer.location.z == 0) || 
+                        (record.victim.location.x == 0 && record.victim.location.y == 0 && record.victim.location.z == 0)) {
+                            // this is probably a bot that is throwing the distances off so just return -1
+                        playerDamageLog.distance = -1;
+                    }
+                    else {
+                        playerDamageLog.distance = hf.getDistanceXYZ(record.killer.location, record.victim.location);
+                    }
+
                     playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.damageTypeCategory);
                     playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.damageCauserName);
                     playerDamageLog.damageReason        = record.damageReason;

@@ -156,14 +156,15 @@ span.killerTeammate {
 }
 
 span.spanBoxy {
-	font-size: 16px;
+	font-size: 14px;
+	font-weight: bold;
 	background-color: #313135;
-	color: #ab97e0;
+	color: #60b6f0;
 	padding-left: 10px;
 	padding-right: 10px;
 	padding-top: 4px;
 	padding-bottom: 4px;
-
+	border-radius: 4px;
 }
 
 svg#d3-svg01 {
@@ -207,7 +208,7 @@ div#search-div, div#vueapp, div#d3-tree01, div#player-report {
 }
 
 div#div-modal {
-	background-color: rgba(0,0,0,0.5);	
+	background-color: rgba(0,0,0,0.6);	
 
 	display: none;
 	position: fixed;
