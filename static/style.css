@@ -74,7 +74,7 @@ td.botPlayer {
 }
 
 td.killer {
-	color: #f75a5a;
+	color: #ef6565;
 }
 
 
@@ -119,7 +119,7 @@ text.playerTeammate {
 
 text.killer {
 	/* fill: #ffbb71; */
-	fill: #f75a5a;
+	fill: #ef6565;
 	/* fill: #f07d60; */
 }
 
@@ -158,7 +158,7 @@ span.playerTeammate {
 }
 
 span.killer {
-	color: #f75a5a;
+	color: #ef6565;
 	/* color: #ffbb71; */
 	/* color: #f07d60; */
 }

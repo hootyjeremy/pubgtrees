@@ -23,7 +23,7 @@ const zlib = require('zlib');
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = !true;
+const blTestingVersion = true;
 
 
 
