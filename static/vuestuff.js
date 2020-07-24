@@ -179,7 +179,7 @@ let vuePlayerReport = new Vue({
 	},
 	methods: {
 
-		updatePlayerReport: function (name, playerTeamId, arrPlayerCards, arrPlayersDamageLog, allBotNames) {
+		updatePlayerReport: function (name, killer, playerTeamId, arrPlayerCards, arrPlayersDamageLog, allBotNames, allHumanNames) {
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
 
@@ -232,6 +232,9 @@ let vuePlayerReport = new Vue({
 					let _info 	= '';		// this should be a combo string of random stuff like "self-kill, thirst, bleedout/no-revive/team-wipe"
 					let _distance = '';		// $ BUG: bots have distance problems on kills
 
+					let attackerName = record.attacker.name;
+					let victimName = record.victim.name;
+
 					// ! unicode characters
 					// https://en.wikipedia.org/wiki/List_of_Unicode_characters
 
@@ -242,8 +245,7 @@ let vuePlayerReport = new Vue({
 							return;
 						}
 
-
-						_damage = parseInt(record.damage);
+						_damage = (record.damage < 1) ? record.damage.toFixed(2) : parseInt(record.damage);
 
 						_info = this.resolveDamageReason(record.damageCauserName, record.damageReason, record.damageTypeCategory);
 
@@ -318,20 +320,66 @@ let vuePlayerReport = new Vue({
 
 
 
-					let _botAttacker = (allBotNames.includes(record.attacker.name)) ? '(BOT) ' : '';
-					let _botVictim   = (allBotNames.includes(record.victim.name))   ? '(BOT) ' : '';
+					//let _botAttacker = (allBotNames.includes(record.attacker.name)) ? '(BOT) ' : '';
+					//let _botVictim   = (allBotNames.includes(record.victim.name))   ? '(BOT) ' : '';
+
+
+					// ! set classes for the table data
+					let attackerClass = '';
+					let victimClass = '';
+
+					// selected player ---------------------------->
+					if (record.attacker.name == this.selectedPlayer) {
+						attackerClass = 'selectedPlayer'
+					}					
+
+					if (record.victim.name == this.selectedPlayer) {
+						victimClass = 'selectedPlayer';
+					}
+
+
+					// bots ----------------------------------------->
+					if (allBotNames.includes(record.attacker.name)) {
+						attackerClass = 'botPlayer';
+					}
+
+					if (allBotNames.includes(record.victim.name)) {
+						victimClass = 'botPlayer';
+					}
+
+					// killer ------------------------------------->
+					if (record.attacker.name == killer) {
+						attackerClass = 'killer'
+
+						// if the killer is a bot, then let it be known (since they are colored as killer and not bot anymore)
+						if (allBotNames.includes(killer)) {
+							attackerName = '[BOT] ' + attackerName;
+						}
+					}					
+
+					if (record.victim.name == killer) {
+						victimClass = 'killer';
+
+						// if the killer is a bot, then let it be known (since they are colored as killer and not bot anymore)
+						if (allBotNames.includes(killer)) {
+							victimName = '[BOT] ' + victim;
+						}
+					}
+
 
 					this.arrPlayerReport.push({
 						'rowId': rowId,
 						'matchTime': record.matchTime,
-						'attacker': _botAttacker + record.attacker.name,
-						'victim': _botVictim + record.victim.name,
+						'attacker': attackerName,
+						'victim': victimName,
 						'event': _event,
 						'damagerInfo': _damager,
 						'damage': _damage,
 						'distance': _distance,
 						'info': _info,
-						
+						'attackerClass': attackerClass,
+						'victimClass': victimClass,
+
 					});
 
 					rowId++;
@@ -350,8 +398,10 @@ let vuePlayerReport = new Vue({
 			if (damageTypeCategory == 'Gun') {
 				_damager = damageCauserName;
 			}
-			else if (damageTypeCategory == "Fall Damage"   		|| 
-					 damageTypeCategory == "Vehicle Crash") {
+			else if (damageTypeCategory == 'Fall Damage'   || 
+					 damageTypeCategory == 'Vehicle Crash' ||
+					 damageTypeCategory == 'Vehicle Hit'   ||
+					 damageTypeCategory == 'Punch') {
 				_damager = damageTypeCategory;
 			}
 			else if (damageTypeCategory == 'Grenade Explosion') {

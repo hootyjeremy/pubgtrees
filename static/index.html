@@ -47,7 +47,7 @@
 <header class='page-header'>
 	<br>
 	
-	<a href='https://hooty-pubg01.herokuapp.com'>PUBG Trees : ver.0.014b</a>
+	<a href='https://hooty-pubg01.herokuapp.com'>PUBG Trees : ver.0.015</a>
 	
 	<br>
 	<br>
@@ -301,9 +301,9 @@
 						v-for='(reportRow, index) in arrPlayerReport' :key='reportRow.id'
 					>
 						<td style='border-radius: 6px 0px 0px 6px; text-align: center;'>{{reportRow.matchTime}}</td>
-						<td style='text-align: right;'>{{reportRow.attacker}}</td>
+						<td :class='reportRow.attackerClass' style='text-align: right;'>{{reportRow.attacker}}</td>
 						<td style='text-align: center;'>{{reportRow.event}}</td>
-						<td>{{reportRow.victim}}</td>
+						<td :class='reportRow.victimClass'>{{reportRow.victim}}</td>
 						<td>{{reportRow.damagerInfo}}</td>
 						<td style='text-align: right;'>{{reportRow.damage}}</td>
 						<td style='text-align: right;'>{{reportRow.distance}}</td>

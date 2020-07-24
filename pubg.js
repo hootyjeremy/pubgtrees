@@ -12,9 +12,8 @@ const compression   = require('compression');       // http://expressjs.com/en/r
 
 const hf            = require('./hooty_modules/hf_server'); // helper functions
 
-const port = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
-
-console.log('process.env.DATABASE_URL: ' + process.env.DATABASE_URL);
+const port          = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
+const databaseUrl   = process.env.DATABASE_URL;
 
 const zlib = require('zlib');
 //const { translateMapName, } = require('./hooty_modules/hf_server');
@@ -49,6 +48,7 @@ app.listen(port, () => {
     console.log(strLine);
     console.log('test version: ' + blTestingVersion);
     console.log(getDate() + ' -> hooty-pubg server listening on port ' + port);
+    console.log('process.env.DATABASE_URL: ' + process.env.DATABASE_URL);
     console.log('__dirname: ' + __dirname + '\\');
 });
 

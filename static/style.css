@@ -63,8 +63,22 @@ th, td {
 }
 
 
+/* rows for damage report (attackerClass, victimClass) */
+
+td.selectedPlayer {
+	color: #60b6f0;
+}
+
+td.botPlayer {
+	color: #98a0a6;
+}
+
+td.killer {
+	color: #f75a5a;
+}
 
 
+/* text for svg tree */
 text.categories {
 	/* fill: #97b2de; */
 	fill: #d6b1ca;
@@ -105,7 +119,7 @@ text.playerTeammate {
 
 text.killer {
 	/* fill: #ffbb71; */
-	fill: #ea7456;
+	fill: #f75a5a;
 	/* fill: #f07d60; */
 }
 
@@ -121,6 +135,7 @@ text.tradedPaint {
 
 
 
+/* spans for legend */
 span.winner {
 	color: #73eca0;
 }
@@ -143,7 +158,7 @@ span.playerTeammate {
 }
 
 span.killer {
-	color: #ea7456;
+	color: #f75a5a;
 	/* color: #ffbb71; */
 	/* color: #f07d60; */
 }
@@ -153,6 +168,8 @@ span.killerTeammate {
 	/* color: #f58f75; */
 	/* color: #f07d60; */
 }
+
+
 
 span.spanBoxy {
 	font-size: 14px;

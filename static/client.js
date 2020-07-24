@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.014b'
+let   version 			= '0.015'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -595,10 +595,24 @@ function RunPlayerDamageReport(selectedPlayer) {
 
 	// $ identify the player's card and send that record over
 	// $ this will give the player's name and from there, you can get 
-	vuePlayerReport.updatePlayerReport(selectedPlayer, playerTeamId, 
+
+	// get player's killer if they have one...
+	let tmpKiller = '';
+
+	axios_telemetry_response.data.arrKillLog.forEach(element => {
+		if (element.victim == selectedPlayer) {
+			console.log(element);
+			tmpKiller = element.killer;
+
+			return;
+		}
+	})
+
+	vuePlayerReport.updatePlayerReport(selectedPlayer, tmpKiller, playerTeamId, 
 										axios_telemetry_response.data.arrPlayerCards, 
 										axios_telemetry_response.data.arrPlayersDamageLog,
-										axios_telemetry_response.data.allBotNames);
+										axios_telemetry_response.data.allBotNames,
+										axios_telemetry_response.data.allHumanNames);
 
 
 
