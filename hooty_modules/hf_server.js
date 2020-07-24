@@ -257,6 +257,7 @@ var _damageCauserName = {
     "Uaz_B_01_C": "UAZ",
     "Uaz_B_01_esports_C": "UAZ",
     "Uaz_C_01_C": "UAZ",
+    "WeapLunchmeatsAK47_C": "AKM",
     "WeapAK47_C": "AKM",
     "WeapAUG_C": "AUG A3",
     "WeapAWM_C": "AWM",
