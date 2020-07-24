@@ -591,7 +591,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     if (blTestingVersion) {
         console.log('match_data...');
-        //console.dir(match_data);
+        console.dir(match_data);
     }
 
 
@@ -661,7 +661,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             if (blTestingVersion) {
                 console.dir('telemetry_response...');
-                //console.dir(telemetry_response);
+                console.dir(telemetry_response);
             }
         }
         catch (err)
@@ -695,7 +695,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             if (blTestingVersion) {
                 console.log('telemetry_response...');
-                //console.dir(telemetry_response);
+                console.dir(telemetry_response);
             }
         }
         catch (error) {
@@ -1817,10 +1817,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     console.log(arrKillFeedLog[j]);
         // }
 
-        //console.log('arrDamageLog...');
-        // for (let j = 0; j < arrDamageLog.length; j++){
-        //     console.log(arrDamageLog[j]);
-        // }
+        console.log('arrDamageLog...');
+        for (let j = 0; j < arrDamageLog.length; j++){
+            console.log(arrDamageLog[j]);
+        }
 
         //console.dir(arr_T);
         console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);

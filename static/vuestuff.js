@@ -309,6 +309,9 @@ let vuePlayerReport = new Vue({
 							// invalid bot stuff
 							_distance = '- - - - -';
 						}
+						else if (record.distance == 0) {
+							_distance = '- - - - -';
+						}
 						else {
 							_distance = record.distance.toLocaleString('en') + ' m';
 						}

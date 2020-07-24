@@ -601,7 +601,7 @@ function RunPlayerDamageReport(selectedPlayer) {
 
 	axios_telemetry_response.data.arrKillLog.forEach(element => {
 		if (element.victim == selectedPlayer) {
-			console.log(element);
+			//console.log(element);
 			tmpKiller = element.killer;
 
 			return;

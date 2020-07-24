@@ -74,7 +74,7 @@ td.botPlayer {
 }
 
 td.killer {
-	color: #ef6565;
+	color: #ef8b65;
 }
 
 
@@ -119,12 +119,12 @@ text.playerTeammate {
 
 text.killer {
 	/* fill: #ffbb71; */
-	fill: #ef6565;
+	fill: #ef8b65;
 	/* fill: #f07d60; */
 }
 
 text.killerTeammate {
-	fill: #eaa559;
+	fill: #ffbd74;
 	/* fill: #f58f75; */
 	/* fill: #f07d60; */
 }
@@ -158,13 +158,13 @@ span.playerTeammate {
 }
 
 span.killer {
-	color: #ef6565;
+	color: #ef8b65;
 	/* color: #ffbb71; */
 	/* color: #f07d60; */
 }
 
 span.killerTeammate {
-	color: #eaa559;
+	color: #ffbd74;
 	/* color: #f58f75; */
 	/* color: #f07d60; */
 }
