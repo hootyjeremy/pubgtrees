@@ -47,7 +47,7 @@
 <header class='page-header'>
 	<br>
 	
-	<a href='https://hooty-pubg01.herokuapp.com'>PUBG Trees : ver.0.015b</a>
+	<a href='https://hooty-pubg01.herokuapp.com'>PUBG Trees : ver.0.016</a>
 	
 	<br>
 	<br>
@@ -264,22 +264,33 @@
 			</span>			
 		</div>
 
-		<div id='div-reportStats'>
-			<span class='spanBoxy' style="text-align: center; font-size: 32px; color: #60b6f0;">{{selectedPlayer}}</span>
-			<br>
-			<br>
-			<br>
-			<span class='spanBoxy'>Placement: #{{winPlace}}</span> 
-			<span class='spanBoxy'>Time survived: {{timeSurvived}}</span>
-			<br>
-			<br>
-			<span class='spanBoxy'>Kills: {{kills}}</span>
-			<span class='spanBoxy'>Knocks: {{DBNOs}}</span>
-			<span class='spanBoxy'>Damage: {{damageDealt}}</span>
-			<br>
-			<br>
+		<div id='div-reportStats' style='width: 800px; border: 2px solid #60b6f0; border-radius: 6px;'>
+
+			<center>
+			<table>
+				<tr>
+					<td>
+						<div style="display: inline;">
+							<span class='spanBoxy' style="height: 50px; text-align: center; font-size: 32px; color: #60b6f0;">{{selectedPlayer}}</span>
+						</div>
+					</td>
+
+					<td>
+						<div style='display: inline;'>
+							<span class='spanBoxy' style='width: 136px;'>Placement: #{{winPlace}}</span> 
+							<span class='spanBoxy' style='width: 136px;'>Time survived: {{timeSurvived}}</span>
+							<br>
+							<span class='spanBoxy' style='width: 80px;'>Kills: {{kills}}</span>
+							<span class='spanBoxy' style='width: 80px;'>Knocks: {{DBNOs}}</span>
+							<span class='spanBoxy' style='width: 80px;'>Damage: {{damageDealt}}</span>
+						</div>
+					</td>
+				</tr>
+			</table>
+			</center>
 		</div>
 
+		<br>
 		<br>
 
 		<center>
@@ -316,6 +327,7 @@
 
 		<br>
 		<br>
+
 
 		<span class='spanBoxy'>╳ &ensp; Kill</span>
 		<span class='spanBoxy'>▼ &ensp; Knock</span>
