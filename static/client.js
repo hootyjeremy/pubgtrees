@@ -29,7 +29,10 @@ if (!blTestingVersion) {
 		blHttpRedirected = true;
 	}
 
-	console.log('redirect http to https');
+	if ( blHttpRedirected) {
+		console.log('redirected http to https');
+	}
+
 	console.log('you are at: ' + location.href);
 }
 else {
