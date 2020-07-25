@@ -20,7 +20,7 @@ button {
 }
 
 button.disabledButton {
-    background-color: #313135;
+    background-color: #373738;
 }
 
 input {
@@ -48,7 +48,7 @@ table {
 }
 
 tr.matchRow {
-	background-color: #313135;
+	background-color: #373738;
 	cursor: pointer;
 }
 
@@ -174,7 +174,7 @@ span.killerTeammate {
 span.spanBoxy {
 	font-size: 14px;
 	font-weight: bold;
-	background-color: #313135;
+	background-color: #646470;
 	color: #dcddde;
 	padding: 4px 10px;
 	margin: 4px;
