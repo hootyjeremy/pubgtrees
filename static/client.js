@@ -24,7 +24,7 @@ if (!blTestingVersion) {
 	if (location.protocol == 'http:') {
 		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
 		
-		location.replace('https://www.pubgtrees.com');		
+		//location.replace('https://www.pubgtrees.com');		
 	}
 
 	console.log('you are at: ' + location.href);
