@@ -21,12 +21,15 @@ if (!blTestingVersion) {
 	defaultPlayer 		= '';
 	console.log('live version: ' + version);
 
+	let blHttpRedirected = false;
 	if (location.protocol == 'http:') {
 		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
 		
-		//location.replace('https://www.pubgtrees.com');		
+		location.replace('https://www.pubgtrees.com');		
+		blHttpRedirected = true;
 	}
 
+	console.log('redirect http to https');
 	console.log('you are at: ' + location.href);
 }
 else {
