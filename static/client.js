@@ -21,17 +21,19 @@ if (!blTestingVersion) {
 	defaultPlayer 		= '';
 	console.log('live version: ' + version);
 
-	let blHttpRedirected = false;
+	//let blHttpRedirected = false;
 	if (location.protocol == 'http:') {
 		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
+
+		// ? this seems to work but is weird. 
 		
 		location.replace('https://www.pubgtrees.com');		
-		blHttpRedirected = true;
+		//blHttpRedirected = true;
 	}
 
-	if ( blHttpRedirected) {
-		console.log('redirected http to https');
-	}
+	// if ( blHttpRedirected) {
+	// 	console.log('redirected http to https');
+	// }
 
 	console.log('you are at: ' + location.href);
 }
