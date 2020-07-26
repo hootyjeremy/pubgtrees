@@ -12,8 +12,8 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.019'
-const blTestingVersion 	= !true;
+let   version 			= '0.020'
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	//hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';

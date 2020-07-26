@@ -13,9 +13,39 @@ const compression   = require('compression');       // http://expressjs.com/en/r
 const hf            = require('./hooty_modules/hf_server'); // helper functions
 
 const port          = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
-const databaseUrl   = process.env.DATABASE_URL;
+// const databaseUrl   = process.env.DATABASE_URL;
 const apiKey        = process.env.PUBG_API_KEY;
 const zlib          = require('zlib');
+
+
+// database stuff
+const { Client } = require('pg');
+
+if (!blTestingVersion) {
+    // only do database stuff if 
+}
+const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
+client.connect();
+
+client.query('SELECT * FROM weather;', (err, res) => {
+    if (err) {
+        console.log('database error: ' + err);
+    }
+    else {
+        for (let row of res.rows) {
+            console.log(JSON.stringify(row));
+          }
+    }
+
+    client.end();
+});
+
 
 //const { translateMapName, } = require('./hooty_modules/hf_server');
 //const { debug } = require('console');
@@ -24,7 +54,7 @@ const zlib          = require('zlib');
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = !true;
+const blTestingVersion = true;
 
 
 
