@@ -228,12 +228,21 @@ let vuePlayerReport = new Vue({
 				if (record.attacker.name == this.selectedPlayer || record.victim.name == this.selectedPlayer) {
 
 					let _event 	= '';
-					let _damage = '';
+					//let _damage = '';
 					let _info 	= '';		// this should be a combo string of random stuff like "self-kill, thirst, bleedout/no-revive/team-wipe"
 					let _distance = '';		// $ BUG: bots have distance problems on kills
 
 					let attackerName = record.attacker.name;
 					let victimName = record.victim.name;
+
+					let attackerHealth = '';
+					let victimHealth = '';
+
+					let attackerClass = '';
+					let victimClass = '';
+					let rowClass = '';
+
+					let zone = '';
 
 					// ! unicode characters
 					// https://en.wikipedia.org/wiki/List_of_Unicode_characters
@@ -245,9 +254,15 @@ let vuePlayerReport = new Vue({
 							return;
 						}
 
-						_damage = (record.damage < 1) ? record.damage.toFixed(2) : parseInt(record.damage);
+						//_damage = (record.damage < 1) ? record.damage.toFixed(2) : parseInt(record.damage);
+
+						// put damage into the event column...
+						_event 			= (record.damage % 1 == 0) ? record.damage : record.damage.toFixed(1);
+						attackerHealth 	= (record.attacker.health % 1 == 0) ? record.attacker.health:  record.attacker.health.toFixed(1);
+						victimHealth 	= (record.victim.healthAfterDamage % 1 == 0) ? record.victim.healthAfterDamage : record.victim.healthAfterDamage.toFixed(1);
 
 						_info = this.resolveDamageReason(record.damageCauserName, record.damageReason, record.damageTypeCategory);
+
 
 						if (record.selfDamage){
 							_info += ' (Self-damage)'
@@ -285,6 +300,8 @@ let vuePlayerReport = new Vue({
 						_event = '\u2573'; // '╳'; // 'x';
 
 						//_info = '(kill)';
+
+						rowClass = 'rowKill';
 
 						if (record.isThirst) {
 							_info += ' (Thirsted)';
@@ -328,9 +345,6 @@ let vuePlayerReport = new Vue({
 
 
 					// ! set classes for the table data
-					let attackerClass = '';
-					let victimClass = '';
-
 					// selected player ---------------------------->
 					if (record.attacker.name == this.selectedPlayer) {
 						attackerClass = 'selectedPlayer'
@@ -370,6 +384,15 @@ let vuePlayerReport = new Vue({
 					}
 
 
+					// don't show distance for grenades or molotov damage
+					if (_damager == 'Grenade' || _damager == 'Molotov') {
+						_distance = '';
+					}
+
+					if (record.victim.zone[0] != '') {
+						zone = record.victim.zone[0];
+					}
+
 					this.arrPlayerReport.push({
 						'rowId': rowId,
 						'matchTime': record.matchTime,
@@ -377,11 +400,14 @@ let vuePlayerReport = new Vue({
 						'victim': victimName,
 						'event': _event,
 						'damagerInfo': _damager,
-						'damage': _damage,
 						'distance': _distance,
 						'info': _info,
 						'attackerClass': attackerClass,
 						'victimClass': victimClass,
+						'attackerHealth': attackerHealth,
+						'victimHealth': victimHealth,
+						'zone': zone,
+						'rowClass': rowClass,
 
 					});
 

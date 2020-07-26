@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.017'
+let   version 			= '0.018'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -144,20 +144,41 @@ window.addEventListener('load', (event) => {
 
 		//console.log(glSelectedPlayer);
 
-		// reprint the report
+
+
+		// hide and show damage
+		let arrElements = document.getElementsByClassName('tdHealth');
 
 		if (blShowDamage) {
+			// currently showing damage, now hide it
+
 			document.getElementById('btnShowDamage').textContent = 'Show damage';
+
+			// if hiding damage, hide health data..
+			for (let i = 0; i < arrElements.length; i++) {
+				arrElements[i].style.width = 0;
+				//arrElements[i].style.display = 'none';
+				//console.log(i + '=' + arrElements[i].style.display + ' -> ' + arrElements[i].innerHTML);
+			}
 		}
 		else {
+			// currently hiding damage, now show it
 			document.getElementById('btnShowDamage').textContent = 'Hide damage';
+
+			// if hiding damage, hide health data..
+			for (let i = 0; i < arrElements.length; i++) {
+				arrElements[i].style.width = 36;
+				//arrElements[i].style.display = 'table-cell';
+				//console.log(i + '=' + arrElements[i].style.display + ' -> ' + arrElements[i].innerHTML);
+			}
 		}
 
 		blShowDamage = !blShowDamage;
 
 		// re-draw the report
 		RunPlayerDamageReport(glSelectedPlayer);
-	})
+
+	});
 
 });
 
@@ -626,7 +647,6 @@ function RunPlayerDamageReport(selectedPlayer) {
 
 
 	ShowModal();
-
 }
 
 

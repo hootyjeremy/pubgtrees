@@ -14,7 +14,7 @@ const hf            = require('./hooty_modules/hf_server'); // helper functions
 
 const port          = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 const databaseUrl   = process.env.DATABASE_URL;
-
+const apiKey        = process.env.PUBG_API_KEY;
 const zlib = require('zlib');
 //const { translateMapName, } = require('./hooty_modules/hf_server');
 //const { debug } = require('console');
@@ -28,8 +28,6 @@ const blTestingVersion = !true;
 
 
 // ! Global variables...
-var   apiKey    = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJjZDhlMDFkMC02ODAwLTAxMzgtZTQ4Ny0wNjc0ZmE5YWVjOGYiLCJpc3MiOiJnYW1lbG9ja2VyIiwiaWF0Ijo'
-      apiKey   += 'xNTg3Njk1MTM1LCJwdWIiOiJibHVlaG9sZSIsInRpdGxlIjoicHViZyIsImFwcCI6Im1pbmlzdGVya2F0YW9rIn0.HiuLi97rFSW-ho5zE1XBYmpV9E6M0Nj90qXIY1TWsco';
 const strLine   = "--------------------------------------------";
 
 
@@ -49,6 +47,7 @@ app.listen(port, () => {
     console.log('test version: ' + blTestingVersion);
     console.log(getDate() + ' -> hooty-pubg server listening on port ' + port);
     console.log('process.env.DATABASE_URL: ' + process.env.DATABASE_URL);
+    console.log('process.env.PUBG_API_KEY: ' + apiKey);
     console.log('__dirname: ' + __dirname + '\\');
 });
 
@@ -949,6 +948,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.teamId              = record.victim.teamId;
                     _victim.healthBeforeDamage  = record.victim.health;
                     _victim.healthAfterDamage   = record.victim.health - record.damage;
+                    _victim.zone                = record.victim.zone;
 
                     // ! add to bot names if this bot is a late spawner
                     if (_attacker.isBot) {
@@ -1078,6 +1078,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 _victim.name                = record.victim.name;
                 _victim.isBot               = hf.isBot(record.victim.accountId);
                 _victim.teamId              = record.victim.teamId;
+                _victim.zone                = record.victim.zone;
 
                 playerDamageLog.attacker    = _attacker;
                 playerDamageLog.victim      = _victim;
@@ -1130,6 +1131,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 _victim.name    = record.victim.name;
                 _victim.isBot   = hf.isBot(record.victim.accountId);
                 _victim.teamId  = record.victim.teamId;
+                _victim.zone    = record.victim.zone;
 
                 playerDamageLog.attacker    = _attacker;
                 playerDamageLog.victim      = _victim;
@@ -1142,7 +1144,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             }
 
             //
-            //#endregion
+            //#endregion LogPlayerMakeGroggy
 
         }
         else if (record._T == 'LogPlayerRevive') {
@@ -1194,7 +1196,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
             //
-            //#endregion -----------------------------
+            //#endregion LogPlayerRevive -----------------------------
 
         }
         else if (record._T == 'LogPlayerKill') {
@@ -1261,6 +1263,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.name    = record.victim.name;
                     _victim.isBot   = hf.isBot(record.victim.accountId);
                     _victim.teamId  = record.victim.teamId;
+                    _victim.zone    = record.victim.zone;
 
                     // ! add to bot names if this bot is a late spawner
                     if (_victim.isBot) {
@@ -1533,6 +1536,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     _victim.name        = record.victim.name;
                     _victim.isBot       = hf.isBot(record.victim.accountId);
                     _victim.teamId      = record.victim.teamId;
+                    _victim.zone        = record.victim.zone;
 
                     // ! add to bot names if this bot is a late spawner
                     // if (_attacker.isBot) {

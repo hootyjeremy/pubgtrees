@@ -57,11 +57,19 @@ tr.activeMatchRow {
 	cursor: pointer;
 }
 
+tr.rowKill {
+	background-color: #262628;
+}
+
 th, td {
 	color: #dcddde;
 	padding: 6px;
 }
 
+.tdHealth {
+	/* display: none; */
+	width: 0px;
+}
 
 /* rows for damage report (attackerClass, victimClass) */
 

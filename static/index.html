@@ -299,27 +299,32 @@
 					<tr>
 						<th style="width: 40px;">Time</th>
 						<th style="width: 130px; text-align: right;">Attacker</th>
-						<th></th>
+						<th class='tdHealth'></th>
+						<th style="width: 36px">Dmg</th>
+						<th class='tdHealth'></th>
 						<th style="width: 130px; text-align: left;">Victim</th>
 						<th>Weapon</th>
-						<th>Dmg</th>
 						<th style="width: 40px;">Dist</th>
 						<th>Info</th>
+						<th>Zone</th>
 					</tr>
 				</thead>
 		
 				<tbody>
 					<tr class='matchRow'
+						:class='reportRow.rowClass'
 						v-for='(reportRow, index) in arrPlayerReport' :key='reportRow.id'
 					>
 						<td style='border-radius: 6px 0px 0px 6px; text-align: center;'>{{reportRow.matchTime}}</td>
 						<td :class='reportRow.attackerClass' style='text-align: right; font-weight: bold;'>{{reportRow.attacker}}</td>
+						<td style='text-align: center;' class='tdHealth'>{{reportRow.attackerHealth}}</td>
 						<td style='text-align: center; font-weight: bold;'>{{reportRow.event}}</td>
+						<td style='text-align: center;' class='tdHealth'>{{reportRow.victimHealth}}</td>
 						<td :class='reportRow.victimClass' style='font-weight: bold;'>{{reportRow.victim}}</td>
 						<td>{{reportRow.damagerInfo}}</td>
-						<td style='text-align: right;'>{{reportRow.damage}}</td>
 						<td style='text-align: right;'>{{reportRow.distance}}</td>
-						<td style='border-radius: 0px 6px 6px 0px; text-align: left; padding-right: 10px;'>{{reportRow.info}}</td>
+						<td style='text-align: left;'>{{reportRow.info}}</td>
+						<td style='border-radius: 0px 6px 6px 0px; text-align: left; padding-right: 10px;'>{{reportRow.zone}}</td>
 					</tr>
 				</tbody>
 			</table>
