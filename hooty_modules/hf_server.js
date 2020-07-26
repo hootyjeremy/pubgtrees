@@ -295,6 +295,7 @@ var _damageCauserName = {
     "WeapPanProjectile_C": "Pan Throw",
     "WeapPanzerFaust100M1_C": "Panzerfaust",
     "WeapQBU88_C": "QBU",
+    "WeapMadsQBU88_C": "QBU",
     "WeapQBZ95_C": "QBZ",
     "WeapRhino_C": "R45",
     "WeapSaiga12_C": "S12K",

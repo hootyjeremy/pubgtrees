@@ -390,7 +390,8 @@ let vuePlayerReport = new Vue({
 					}
 
 					if (record.victim.zone[0] != '') {
-						zone = record.victim.zone[0];
+						zone = translateZone(record.victim.zone[0]);
+
 					}
 
 					this.arrPlayerReport.push({

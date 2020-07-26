@@ -16,6 +16,7 @@ const port          = process.env.PORT || 3000;    // https://stackoverflow.com/
 const databaseUrl   = process.env.DATABASE_URL;
 const apiKey        = process.env.PUBG_API_KEY;
 const zlib          = require('zlib');
+
 //const { translateMapName, } = require('./hooty_modules/hf_server');
 //const { debug } = require('console');
 
@@ -23,7 +24,7 @@ const zlib          = require('zlib');
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = !true;
+const blTestingVersion = true;
 
 
 
@@ -182,6 +183,8 @@ app.get('/getplayermatches', async (req, res) => {
             pubgApiResponseInfo = { 'hootyserver': 'fetched', 'status': pubgapi_player_response.status, 'statusText': pubgapi_player_response.statusText,
                                     'x-ratelimit-remaining' : pubgapi_player_response.headers['x-ratelimit-remaining'] + ' of ' + 
                                     pubgapi_player_response.headers['x-ratelimit-limit'], };
+
+
 
             if (blTestingVersion) {
                 console.log('fetched player_url: ' + player_url);

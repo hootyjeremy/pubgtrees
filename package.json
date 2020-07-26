@@ -19,6 +19,7 @@
     "moment": "^2.25.3",
     "moment-timezone": "^0.5.31",
     "node-fetch": "^2.6.0",
-    "node-gzip": "^1.1.2"
+    "node-gzip": "^1.1.2",
+    "pg": "^8.3.0"
   }
 }
