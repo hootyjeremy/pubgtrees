@@ -21,6 +21,24 @@ const zlib          = require('zlib');
 // database stuff
 const { Client } = require('pg');
 
+
+
+//const { translateMapName, } = require('./hooty_modules/hf_server');
+//const { debug } = require('console');
+
+
+
+// ---------------------------->
+// ! Deploy/Testing Version...
+const blTestingVersion = !true;
+
+
+
+// ! Global variables...
+const strLine   = "--------------------------------------------";
+
+
+// ! database stuff
 if (!blTestingVersion) {
     // only do database stuff if 
 }
@@ -46,20 +64,6 @@ client.query('SELECT * FROM weather;', (err, res) => {
     client.end();
 });
 
-
-//const { translateMapName, } = require('./hooty_modules/hf_server');
-//const { debug } = require('console');
-
-
-
-// ---------------------------->
-// ! Deploy/Testing Version...
-const blTestingVersion = true;
-
-
-
-// ! Global variables...
-const strLine   = "--------------------------------------------";
 
 
 
