@@ -15,7 +15,7 @@ const hf            = require('./hooty_modules/hf_server'); // helper functions
 const port          = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
 const databaseUrl   = process.env.DATABASE_URL;
 const apiKey        = process.env.PUBG_API_KEY;
-const zlib = require('zlib');
+const zlib          = require('zlib');
 //const { translateMapName, } = require('./hooty_modules/hf_server');
 //const { debug } = require('console');
 
@@ -47,7 +47,7 @@ app.listen(port, () => {
     console.log('test version: ' + blTestingVersion);
     console.log(getDate() + ' -> hooty-pubg server listening on port ' + port);
     console.log('process.env.DATABASE_URL: ' + process.env.DATABASE_URL);
-    console.log('process.env.PUBG_API_KEY: ' + apiKey);
+    //console.log('process.env.PUBG_API_KEY: ' + apiKey);
     console.log('__dirname: ' + __dirname + '\\');
 });
 
