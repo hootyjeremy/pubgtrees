@@ -97,13 +97,13 @@ async function UpdateDatabaseRows(playername, platform, ratelimitremaining, ip) 
 
     if (dbRowsToInsert == '') {
         // currently blank
-        dbRowsToInsert = `(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, 'no')`;
+        dbRowsToInsert = `(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`;
     }
     else {
-        dbRowsToInsert += `,\n(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, 'no')`;
+        dbRowsToInsert += `,\n(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`;
     }
 
-    console.log(`inserting row: (${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, 'no')`);
+    console.log(`inserting row: (${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`);
 }
 
 
@@ -2193,7 +2193,7 @@ function UpdateDatabase() {
 
 
         // dateTimeMS, dateTimeEN, searchedPlayer, searchedPlatform, rateLimitRemaining
-        let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, searchedplayer, searchedplatform, ratelimitremaining, ip) VALUES \n${rows};`;
+        let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, player, platform, remain, ip) VALUES \n${rows};`;
         console.log('queryString: ' + queryString);
 
         client.query(queryString, (err, res) => {
