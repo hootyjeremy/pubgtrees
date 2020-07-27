@@ -90,20 +90,21 @@ else {
 }
 
 
-async function UpdateDatabaseRows(playername, platform, ratelimitremaining, ip) {
+async function UpdateDatabaseRows(playername, platform, ratelimitremaining, ip, bypassCache) {
 
     let dbDate = new Date();
     let dbTime = dbDate.getTime();
+    let bypass = (bypassCache == 'y') ? 'true' : 'false';
 
     if (dbRowsToInsert == '') {
         // currently blank
-        dbRowsToInsert = `(${dbTime}, '${dbDate.toString().substring(0,33)}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`;
+        dbRowsToInsert = `(${dbTime}, '${dbDate.toString().substring(0,33)}', '${playername}', '${platform}', ${ratelimitremaining}, '${ip}', '${bypass}')`;
     }
     else {
-        dbRowsToInsert += `,\n(${dbTime}, '${dbDate.toString().substring(0,33)}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`;
+        dbRowsToInsert += `,\n(${dbTime}, '${dbDate.toString().substring(0,33)}', '${playername}', '${platform}', ${ratelimitremaining}, '${ip}', '${bypass}')`;
     }
 
-    console.log(`inserting row: (${dbTime}, '${dbDate.toString().substring(0,33)}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`);
+    console.log(`inserting row: (${dbTime}, '${dbDate.toString().substring(0,33)}', '${playername}', '${platform}', ${ratelimitremaining}, '${ip}', '${bypass}')`);
 }
 
 
@@ -233,7 +234,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
             // successful get, update database
-            UpdateDatabaseRows(req.query.player_name, req.query.platform, pubgapi_player_response.headers['x-ratelimit-remaining'], req.ip);
+            UpdateDatabaseRows(req.query.player_name, req.query.platform, pubgapi_player_response.headers['x-ratelimit-remaining'], req.ip, req.query.bypassCache);
 
         }
         catch (error)
@@ -245,7 +246,7 @@ app.get('/getplayermatches', async (req, res) => {
                     // database logging for after ratelimit is reached
 
                     // rate limit reached, update database
-                    UpdateDatabaseRows(req.query.player_name, req.query.platform, -1, req.ip);
+                    UpdateDatabaseRows(req.query.player_name, req.query.platform, -1, req.ip, req.query.bypassCache);
                 }
 
                 console.log('could not fetch player from pubg api: ' + player_url);
@@ -2205,7 +2206,7 @@ function UpdateDatabase() {
             //dbRowsToInsert = ''; // clear all the rows to be inserted
     
             // dateTimeMS, dateTimeEN, searchedPlayer, searchedPlatform, rateLimitRemaining
-            let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, player, platform, remain, ip) VALUES \n${rows};`;
+            let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, player, platform, remain, ip, bypass) VALUES \n${rows};`;
             console.log('queryString: ' + queryString);
     
             client.query(queryString, (err, res) => {
