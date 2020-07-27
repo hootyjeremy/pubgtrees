@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.023'
+let   version 			= '0.024'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -1303,6 +1303,10 @@ function _printRoster(roster) {
 
 function openTwitter() {
 	window.open('https://twitter.com/pubgtrees', '_blank');
+}
+
+function pubgtrees() {
+	location.replace('https://www.pubgtrees.com');
 }
 
 function ClickedSomething(_matchID) {
