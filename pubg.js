@@ -103,7 +103,7 @@ async function UpdateDatabaseRows(playername, platform, ratelimitremaining) {
         dbRowsToInsert += `,\n(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining})`;
     }
 
-    console.log('inserting row: ' + dbRowsToInsert);
+    console.log(`inserting row: (${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining})`);
 
     // client.query(queryString, (err, res) => {
     //     if (err) {
