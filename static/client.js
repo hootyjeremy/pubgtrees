@@ -354,6 +354,7 @@ async function GetPlayerMatches() {
 	// ! check for any errors from the pubg api response...
 	if (axios_response.data.pubgResponse.status != 200 && axios_response.data.pubgResponse.status != null) {
 		console.log('ERROR: could not find player in pubg api: ' + axios_response.data.status + ', ' + axios_response.data.statusText);
+		console.log(axios_response);
 
 		alert('Could not find player in pubg api.');
 

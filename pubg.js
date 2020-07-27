@@ -19,8 +19,9 @@ const zlib          = require('zlib');
 
 
 // database stuff
-const { Client } = require('pg');
-
+const { Client }    = require('pg');
+let databaseURL     = '';
+let dbRowsToInsert  = '';
 
 
 //const { translateMapName, } = require('./hooty_modules/hf_server');
@@ -38,38 +39,10 @@ const blTestingVersion = !true;
 const strLine   = "--------------------------------------------";
 
 
-// ! database stuff
-if (!blTestingVersion) {
-    // only do database stuff if 
-}
-const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
-});
-
-client.connect();
-
-client.query('SELECT * FROM weather;', (err, res) => {
-    if (err) {
-        console.log('database error: ' + err);
-    }
-    else {
-        for (let row of res.rows) {
-            console.log(JSON.stringify(row));
-          }
-    }
-
-    client.end();
-});
-
-
-
-
 // ---------------------------->
-// ! Cache Purging...
-setInterval(clearCache, 300000);    // check for cache clear every 5 minutes (300,000 milliseconds)
+// ! Cache Purging and Database Updating
+setInterval(clearCache,     300000);    // check for cache clear every 5 minutes (300,000 milliseconds)
+setInterval(UpdateDatabase, 300000);    // check for cache clear every 5 minutes (300,000 milliseconds)
 CreateCacheFolders();
 
 // alias, literal
@@ -101,6 +74,54 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/static/index.html');
     //res.sendFile('/static/index.html');
 });
+
+
+
+
+//#region // ! [region] database setup
+//
+
+if (!blTestingVersion) {
+    // hard code whatever heroku has when doing local testing
+    databaseURL = process.env.DATABASE_URL;
+}
+else {
+    databaseURL = 'postgres://tgovfrczazrsnm:6974fe69669f35826a71d1c0c1991a0f86f4ccc28544c66a596d69697f48aac8@ec2-18-215-99-63.compute-1.amazonaws.com:5432/d9srr2mjrsmilo';
+}
+
+
+async function UpdateDatabaseRows(playername, platform, ratelimitremaining) {
+
+    let dbDate = new Date();
+    let dbTime = dbDate.getTime();
+
+    if (dbRowsToInsert == '') {
+        // currently blank
+        dbRowsToInsert = `(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining})`;
+    }
+    else {
+        dbRowsToInsert += `,\n(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining})`;
+    }
+
+    console.log('inserting row: ' + dbRowsToInsert);
+
+    // client.query(queryString, (err, res) => {
+    //     if (err) {
+    //         console.log('database error: ' + err);
+    //     }
+    //     else {
+    //         // for (let row of res.rows) {
+    //         //     console.log(JSON.stringify(row));
+    //         // }
+    //     }
+
+    //     client.end();
+    // });
+
+}
+
+
+
 
 
 
@@ -224,10 +245,25 @@ app.get('/getplayermatches', async (req, res) => {
                 console.log('fetched player_url: ' + player_url);
                 console.log('pubgapi_player_response.headers.x-ratelimit-remaining: ' + pubgapi_player_response.headers['x-ratelimit-remaining'] + ' of ' + pubgapi_player_response.headers['x-ratelimit-limit']);
             }
+
+
+
+            // successful get, update database
+            UpdateDatabaseRows(req.query.player_name, req.query.platform, pubgapi_player_response.headers['x-ratelimit-remaining']);
+
         }
         catch (error)
         {
             if (error.response.status != 200) {
+
+                if (error.response.status == 429) {
+                    // too many requests (over the rate limit)
+                    // database logging for after ratelimit is reached
+
+                    // rate limit reached, update database
+                    UpdateDatabaseRows(req.query.player_name, req.query.platform, 0);
+                }
+
                 console.log('could not fetch player from pubg api: ' + player_url);
                 console.log('error.response.status: ' + error.response.status + ' -> error.response.statusText: ' + error.response.statusText);
 
@@ -2134,18 +2170,57 @@ function clearCache() {
         }
     })
     
+    if (purge_count > 0) {
+        console.log(getDate() + ' ' + purge_count + ' cache files purged');
+    }
+    else {
+        console.log(getDate() + ' no files to purge.');
+    }
+
 
     //
     //#endregion ----------------------------------------------------------------------
 
+}
 
-    if (purge_count > 0) {
-        console.log(chalk.green(getDate() + ' ' + purge_count + ' cache files purged'));
-    }
-    else {
-        console.log(chalk.green(getDate() + ' no files to purge.'));
-    }
 
+function UpdateDatabase() {
+
+    // at whatever the interval is, update the database with whatever rows you have
+    
+    if (!blTestingVersion && dbRowsToInsert != '') {
+        // if there is something to insert then insert it
+
+        console.log('Updating database at interval.');
+
+        const client = new Client({
+            connectionString: databaseURL,
+            ssl: {
+                rejectUnauthorized: false
+            }
+        });
+    
+        client.connect();
+
+        let rows = dbRowsToInsert;
+        //dbRowsToInsert = ''; // clear all the rows to be inserted
+
+
+        // dateTimeMS, dateTimeEN, searchedPlayer, searchedPlatform, rateLimitRemaining
+        let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, searchedplayer, searchedplatform, ratelimitremaining) VALUES \n${rows};`;
+        console.log('queryString: ' + queryString);
+
+        client.query(queryString, (err, res) => {
+            if (err) {
+                console.log('database error: ' + err);
+            }
+            else {
+                dbRowsToInsert = '';
+            }
+
+            client.end();
+        });
+    }
 }
 
 
@@ -2183,22 +2258,6 @@ function getTimeSinceMatch(strDate) {
 }
 
 
-// function ConvertSecondsToMinutes(seconds) {
-// 	var sec = parseInt(seconds);
-
-// 	// https://stackoverflow.com/a/25279399/1940465
-// 	var date = new Date(0);
-// 	date.setSeconds(sec); // specify value for SECONDS here
-
-// 	//console.log(date.toISOString());
-
-// 	var timeString = date.toISOString().substr(14, 5);
-
-// 	//console.log(timeString)
-
-// 	return timeString;
-// }
-
 
 function printTeamRoster(dctRoster) {
     var strRoster = ''
@@ -2210,66 +2269,3 @@ function printTeamRoster(dctRoster) {
     return strRoster;
 }
 
-
-function addBotToTeamsArray(botName, botTeamId, arrTeams) {
-    
-    // $ DEPRECATED
-    // $ this function is breaking the tree for some reason. not sure why it breaks bot detection but for now, i'm taking it back out.
-
-    return;
-
-    // because there are bots that spawn after the round stars, there is no record of their team so they have to be caught 
-    // during damage and kill events during the round. once that happens, they are added.
-    // ? can you also use this to detect late spawn winning bots who were not detected through damage and kills?
-    // ? maybe the best way to figure out if there is an invisible bot is to check arrSurvivors against the 'end of match' event's alive player accounts
-    //   and then create them if arrSurvivors is empty.
-
-    //console.log(botName + ' -> ' + botTeamId);
-    //console.log(arrTeams);
-
-    let blTeamFound     = false;
-    let blTeammateFound = false;
-
-
-    // does the team exist?
-    arrTeams.forEach(team => {
-        if (botTeamId == team.teamId) {
-            blTeamFound = true;
-
-            // if the team exists, does the teammate exist?
-            team.teammates.forEach(element => {
-                if (element.isBot && element.name == botName) {
-                    blTeammateFound = true;
-                }
-            })
-        }
-
-        if (blTeamFound && !blTeammateFound) {
-            // if team is found but teammate is not, then add the new teammate object to the team
-            // $ test this case
-            // ! test this case
-            // ? test this case
-            team.push({ 'isBot': true, 'teammate': botName });
-        }
-    })
-
-
-    // if (!blTeammateFound) {
-    //     console.log('bot teammate NOT found: ' + botName);
-    // }
-
-    if (!blTeamFound) {
-        //console.log('bot team NOT found: ' + botTeamId);
-
-        // let newTeammate = new Object();
-        // newTeammate.isBot = true;
-        // newTeammate.teammate = botName;
-
-        let newTeamId   = { 'teamId': botTeamId, 'teammates':  [{ 'isBot': true, 'name': botName }] };
-        
-        arrTeams.push(newTeamId);
-
-        //debugger;
-    }
-
-}
