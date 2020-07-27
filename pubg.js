@@ -188,10 +188,8 @@ app.get('/getplayermatches', async (req, res) => {
     
             player_data = readCacheFileJSON(player_cache_file);
 
-            if (blTestingVersion) {
-                console.log('player cache exists... ');
-            }
-    
+            console.log(getDate() + ' player cached (no need to fetch): ' + req.query.platform + '/' + req.query.player_name);
+
             pubgApiResponseInfo = { 'hootyserver': 'cached', 'status': null, 'statusText': 'no need to fetch from pubg api' };
         }
         catch (err) {
@@ -226,12 +224,12 @@ app.get('/getplayermatches', async (req, res) => {
                                     pubgapi_player_response.headers['x-ratelimit-limit'], };
 
 
+            console.log(getDate() + ' fetching player from pubg api: ' + req.query.platform + '/' + req.query.player_name);
 
             if (blTestingVersion) {
                 console.log('fetched player_url: ' + player_url);
                 console.log('pubgapi_player_response.headers.x-ratelimit-remaining: ' + pubgapi_player_response.headers['x-ratelimit-remaining'] + ' of ' + pubgapi_player_response.headers['x-ratelimit-limit']);
             }
-
 
 
             // successful get, update database
