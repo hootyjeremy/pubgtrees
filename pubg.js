@@ -7,7 +7,7 @@ const app           = express();
 const fs            = require('fs');
 const path          = require('path');
 const glob          = require('glob');
-const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
+//const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
 const compression   = require('compression');       // http://expressjs.com/en/resources/middleware/compression.html
 
 const hf            = require('./hooty_modules/hf_server'); // helper functions
@@ -471,7 +471,7 @@ app.get('/getplayermatches', async (req, res) => {
                 // })
             }
             else {
-                console.log(chalk.yellow(j + ' included type is not participant, roster, or asset. this is unexpected.'));
+                console.log(j + ' included type is not participant, roster, or asset. this is unexpected.');
             }
         } // .included[j] loop
 
@@ -2055,7 +2055,7 @@ function clearCache() {
     // check players cache...
     glob(playersCacheGlobPattern, function (err, files) {
         if (err){
-            console.log(chalk.yellow(getDate() +  " purge glob error: " + err));
+            console.log(getDate() +  " purge glob error: " + err);
         } else {
             //console.log(files);
 
@@ -2075,7 +2075,7 @@ function clearCache() {
                         if (err) {
                             console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
                         } else {
-                            console.log(chalk.green( getDate() + ' purged player file -> ' + file));
+                            console.log(getDate() + ' purged player file -> ' + file);
                             purge_count++;
                         }
                     })
@@ -2088,7 +2088,7 @@ function clearCache() {
     // check matches cache for files to purge...
     glob(matchesCacheGlobPattern, function (err, files) {
         if (err){
-            console.log(chalk.yellow(getDate() +  " purge glob error: " + err));
+            console.log(getDate() +  " purge glob error: " + err);
         } else {
             //console.log(files);
 
@@ -2111,7 +2111,7 @@ function clearCache() {
                         if (err) {
                             console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
                         } else {
-                            console.log(chalk.green(getDate() + ' purged match file -> ' + file));
+                            console.log(getDate() + ' purged match file -> ' + file);
                             purge_count++;
                         }
                     })
@@ -2124,7 +2124,7 @@ function clearCache() {
     // check matches cache for files to purge...
     glob(telemetryCacheGlobPattern, function (err, files) {
         if (err){
-            console.log(chalk.yellow(getDate() +  " purge glob error: " + err));
+            console.log(getDate() +  " purge glob error: " + err);
         } else {
             //console.log(files);
 
@@ -2147,7 +2147,7 @@ function clearCache() {
                         if (err) {
                             console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
                         } else {
-                            console.log(chalk.green(getDate() + ' purged match file -> ' + file));
+                            console.log(getDate() + ' purged match file -> ' + file);
                             purge_count++;
                         }
                     })
@@ -2157,10 +2157,10 @@ function clearCache() {
     })
     
     if (purge_count > 0) {
-        console.log(getDate() + ' ' + purge_count + ' cache files purged');
+        console.log(getDate() + ' -> Purge Interval: ' + purge_count + ' cache files purged');
     }
     else {
-        console.log(getDate() + ' no files to purge.');
+        console.log(getDate() + ' -> Purge interval: No files to purge.');
     }
 
 
@@ -2177,7 +2177,7 @@ function UpdateDatabase() {
     if (!blTestingVersion && dbRowsToInsert != '') {
         // if there is something to insert then insert it
 
-        console.log('Updating database at interval.');
+        console.log(getDate() + ' -> Database update interval...');
 
         const client = new Client({
             connectionString: databaseURL,
@@ -2190,7 +2190,6 @@ function UpdateDatabase() {
 
         let rows = dbRowsToInsert;
         //dbRowsToInsert = ''; // clear all the rows to be inserted
-
 
         // dateTimeMS, dateTimeEN, searchedPlayer, searchedPlatform, rateLimitRemaining
         let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, player, platform, remain, ip) VALUES \n${rows};`;
@@ -2213,6 +2212,7 @@ function UpdateDatabase() {
 function getDate() {
     // https://momentjs.com/timezone/docs/
 
+    //return moment().tz("America/Chicago").format('YYYY.MM.DD__hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
     return moment().tz("America/Chicago").format('YYYY.MM.DD__hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
 }   
 

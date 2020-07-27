@@ -257,9 +257,9 @@ let vuePlayerReport = new Vue({
 						//_damage = (record.damage < 1) ? record.damage.toFixed(2) : parseInt(record.damage);
 
 						// put damage into the event column...
-						_event 			= (record.damage % 1 == 0) ? record.damage : record.damage.toFixed(1);
-						attackerHealth 	= (record.attacker.health % 1 == 0) ? record.attacker.health:  record.attacker.health.toFixed(1);
-						victimHealth 	= (record.victim.healthAfterDamage % 1 == 0) ? record.victim.healthAfterDamage : record.victim.healthAfterDamage.toFixed(1);
+						_event 			= (record.damage > 0 && record.damage < 2) ? record.damage.toFixed(1) : parseInt(record.damage);
+						attackerHealth 	= (record.attacker.health > 0 && record.attacker.health < 2) ? record.attacker.health.toFixed(1): parseInt(record.attacker.health);
+						victimHealth 	= (record.victim.healthAfterDamage > 0 && record.victim.healthAfterDamage < 2) ? record.victim.healthAfterDamage.toFixed(1) : parseInt(record.victim.healthAfterDamage);
 
 						_info = this.resolveDamageReason(record.damageCauserName, record.damageReason, record.damageTypeCategory);
 
@@ -274,6 +274,8 @@ let vuePlayerReport = new Vue({
 					}
 					else if (record._T == 'LogPlayerMakeGroggy') {
 						_event = '\u25BC'; // '\u2228'; //'\u25BD'; //'v';
+
+						rowClass = 'rowKill';
 
 						if (record.teammateKnock) {
 							_info += ' (Teammate-knock)';

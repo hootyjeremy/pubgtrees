@@ -166,7 +166,7 @@ window.addEventListener('load', (event) => {
 
 			// if hiding damage, hide health data..
 			for (let i = 0; i < arrElements.length; i++) {
-				arrElements[i].style.width = 36;
+				arrElements[i].style.width = 26;
 				//arrElements[i].style.display = 'table-cell';
 				//console.log(i + '=' + arrElements[i].style.display + ' -> ' + arrElements[i].innerHTML);
 			}
