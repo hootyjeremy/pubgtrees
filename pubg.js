@@ -247,7 +247,7 @@ app.get('/getplayermatches', async (req, res) => {
                     // database logging for after ratelimit is reached
 
                     // rate limit reached, update database
-                    UpdateDatabaseRows(req.query.player_name, req.query.platform, 0, req.ip);
+                    UpdateDatabaseRows(req.query.player_name, req.query.platform, -1, req.ip);
                 }
 
                 console.log('could not fetch player from pubg api: ' + player_url);

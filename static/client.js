@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.020'
+let   version 			= '0.021'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
