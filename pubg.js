@@ -54,7 +54,7 @@ app.listen(port, () => {
     console.log(strLine);
     console.log('test version: ' + blTestingVersion);
     console.log(getDate() + ' -> hooty-pubg server listening on port ' + port);
-    console.log('process.env.DATABASE_URL: ' + process.env.DATABASE_URL);
+    //console.log('process.env.DATABASE_URL: ' + process.env.DATABASE_URL);
     //console.log('process.env.PUBG_API_KEY: ' + apiKey);
     console.log('__dirname: ' + __dirname + '\\');
 });
@@ -2193,7 +2193,7 @@ function UpdateDatabase() {
 
 
         // dateTimeMS, dateTimeEN, searchedPlayer, searchedPlatform, rateLimitRemaining
-        let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, searchedplayer, searchedplatform, ratelimitremaining) VALUES \n${rows};`;
+        let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, searchedplayer, searchedplatform, ratelimitremaining, ip) VALUES \n${rows};`;
         console.log('queryString: ' + queryString);
 
         client.query(queryString, (err, res) => {
