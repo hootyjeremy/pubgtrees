@@ -97,13 +97,13 @@ async function UpdateDatabaseRows(playername, platform, ratelimitremaining, ip) 
 
     if (dbRowsToInsert == '') {
         // currently blank
-        dbRowsToInsert = `(${dbTime}, '${getDate()}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`;
+        dbRowsToInsert = `(${dbTime}, '${dbDate.toString().substring(0,34)}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`;
     }
     else {
-        dbRowsToInsert += `,\n(${dbTime}, '${getDate()}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`;
+        dbRowsToInsert += `,\n(${dbTime}, '${dbDate.toString().substring(0,34)}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`;
     }
 
-    console.log(`inserting row: (${dbTime}, '${getDate()}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`);
+    console.log(`inserting row: (${dbTime}, '${dbDate.toString().substring(0,34)}', '${playername}', '${platform}', ${ratelimitremaining}, 'nah')`);
 }
 
 
@@ -2213,7 +2213,7 @@ function UpdateDatabase() {
 function getDate() {
     // https://momentjs.com/timezone/docs/
 
-    return moment().tz("America/Chicago").format('YYYY.MM.DD_hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
+    return moment().tz("America/Chicago").format('YYYY.MM.DD__hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
 }   
 
 
