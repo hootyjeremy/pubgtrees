@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.021'
+let   version 			= '0.022'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -287,7 +287,10 @@ async function GetPlayerMatches() {
 
 	if (strPlatform != prevPlatform || strPlayerName != prevPlayerName) {
 		// reset match_floor if a new player or platform is selected...
-		console.log('resetting match_floor for new player');
+
+		if (blTestingVersion) {
+			console.log('resetting match_floor for new player');
+		}
 
 		match_floors = [0];
 		match_floors_index = 0;
@@ -352,13 +355,22 @@ async function GetPlayerMatches() {
 
 	// ! check for any errors from the pubg api response...
 	if (axios_response.data.pubgResponse.status != 200 && axios_response.data.pubgResponse.status != null) {
-		console.log('ERROR: could not find player in pubg api: ' + axios_response.data.status + ', ' + axios_response.data.statusText);
-		console.log(axios_response);
 
-		alert('Could not find player in pubg api.');
+		if (axios_response.data.pubgResponse.status == 429) {
+			console.log('ERROR: pubg api rate limit hit: ' + axios_response.data.pubgResponse.status + ', ' + axios_response.data.pubgResponse.statusText);
+			console.log(axios_response);
+	
+			alert('Rate limited exceeded. Please try again in 60 seconds.');
+		}
+		else {
+			console.log('ERROR: could not find player in pubg api: ' + axios_response.data.status + ', ' + axios_response.data.statusText);
+			console.log(axios_response);
+	
+			alert('Could not find player in pubg api.');
+		}
 
 		btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
-		document.getElementById('fetching').style.display 	= "none";	// turn this on
+		document.getElementById('fetching').style.display = "none";	// turn this on
 	
 		return;
 	}
@@ -1272,7 +1284,7 @@ function prelim() {
 
 	//console.log("btnSearchPlayer_Click() handler. name: " + document.getElementById("inputPlayerName").value);
 	console.log(strLine);
-	console.log("Searching: " + strPlatform + "/" + strPlayerName);
+	//console.log("Searching: " + strPlatform + "/" + strPlayerName);
 
 	GetPlayerMatches();
 }
