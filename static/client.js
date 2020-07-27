@@ -80,6 +80,7 @@ let match_floors_index = 0;
 let searchDirection = null;	// this will be for "next" or "previous" matches
 
 let blShowDamage = false;
+let blShowHealth = false;
 
 let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
 
@@ -144,15 +145,13 @@ window.addEventListener('load', (event) => {
 
 		//console.log(glSelectedPlayer);
 
-
-
 		// hide and show damage
 		let arrElements = document.getElementsByClassName('tdHealth');
 
 		if (blShowDamage) {
 			// currently showing damage, now hide it
 
-			document.getElementById('btnShowDamage').textContent = 'Show damage';
+			document.getElementById('btnShowDamage').textContent = 'Show damage/health';
 
 			// if hiding damage, hide health data..
 			for (let i = 0; i < arrElements.length; i++) {
@@ -163,7 +162,7 @@ window.addEventListener('load', (event) => {
 		}
 		else {
 			// currently hiding damage, now show it
-			document.getElementById('btnShowDamage').textContent = 'Hide damage';
+			document.getElementById('btnShowDamage').textContent = 'Hide damage/health';
 
 			// if hiding damage, hide health data..
 			for (let i = 0; i < arrElements.length; i++) {
@@ -603,29 +602,16 @@ function RunPlayerDamageReport(selectedPlayer) {
 	glSelectedPlayer = selectedPlayer;
 
 	// get teamId of selected player
-	let playerTeamId = 0;
+	let playerTeam = 0;
 	axios_telemetry_response.data.arrTeams.forEach(team => {
 		//console.log(team);
 		team.teammates.forEach(teammate => {
 			if (teammate.name == selectedPlayer) {
-				playerTeamId = team.teamId;
+				playerTeam = team;
 			}
 		})
 	})
 
-	// $ need to update vue variables for the table. 
-	// pull table values from the damage report (kills, knocks, and damage)
-	// have a player summary at the top (how many kills, how much damage, etc) -> might need to make a player card class that gets the same information
-	// that you get on the searched player initially.
-
-	// events:
-	// LogPlayerTakeDamage
-	// LogPlayerMakeGroggy
-	// LogPlayerRevivie
-	// LogPlayerKill
-
-	// $ identify the player's card and send that record over
-	// $ this will give the player's name and from there, you can get 
 
 	// get player's killer if they have one...
 	let tmpKiller = '';
@@ -639,12 +625,30 @@ function RunPlayerDamageReport(selectedPlayer) {
 		}
 	})
 
-	vuePlayerReport.updatePlayerReport(selectedPlayer, tmpKiller, playerTeamId, 
+	// get killer's teamId
+	let killerTeam = 0;
+	if (tmpKiller != '') {
+
+		axios_telemetry_response.data.arrTeams.forEach(team => {
+			team.teammates.forEach(teammate => {
+				if (teammate.name == tmpKiller) {
+					killerTeam = team;
+
+					return;
+				}
+			})
+
+			if (killerTeam != 0) {
+				return;
+			}
+		});
+	}
+
+	vuePlayerReport.updatePlayerReport(selectedPlayer, tmpKiller, playerTeam, killerTeam,
 										axios_telemetry_response.data.arrPlayerCards, 
 										axios_telemetry_response.data.arrPlayersDamageLog,
 										axios_telemetry_response.data.allBotNames,
 										axios_telemetry_response.data.allHumanNames);
-
 
 
 	ShowModal();

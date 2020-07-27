@@ -179,7 +179,7 @@ let vuePlayerReport = new Vue({
 	},
 	methods: {
 
-		updatePlayerReport: function (name, killer, playerTeamId, arrPlayerCards, arrPlayersDamageLog, allBotNames, allHumanNames) {
+		updatePlayerReport: function (name, killer, playerTeam, killerTeam, arrPlayerCards, arrPlayersDamageLog, allBotNames, allHumanNames) {
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
 
@@ -345,27 +345,30 @@ let vuePlayerReport = new Vue({
 
 
 					// ! set classes for the table data
-					// selected player ---------------------------->
+					// selected player : attacker ---------------------------->
 					if (record.attacker.name == this.selectedPlayer) {
 						attackerClass = 'selectedPlayer'
 					}					
 
+					// selected player : victim ---------------------------->
 					if (record.victim.name == this.selectedPlayer) {
 						victimClass = 'selectedPlayer';
 					}
 
 
-					// bots ----------------------------------------->
+					// bot: attacker ----------------------------------------->
 					if (allBotNames.includes(record.attacker.name)) {
 						attackerClass = 'botPlayer';
 					}
 
+					// bot: victim ----------------------------------------->
 					if (allBotNames.includes(record.victim.name)) {
 						victimClass = 'botPlayer';
 					}
 
-					// killer ------------------------------------->
-					if (record.attacker.name == killer) {
+
+					// killer : attacker ------------------------------------->
+					if (attackerName == killer && attackerName != name) {
 						attackerClass = 'killer'
 
 						// if the killer is a bot, then let it be known (since they are colored as killer and not bot anymore)
@@ -374,7 +377,8 @@ let vuePlayerReport = new Vue({
 						}
 					}					
 
-					if (record.victim.name == killer) {
+					// killer : victim ------------------------------------->
+					if (victimName == killer && victimName != name) {
 						victimClass = 'killer';
 
 						// if the killer is a bot, then let it be known (since they are colored as killer and not bot anymore)
@@ -382,6 +386,70 @@ let vuePlayerReport = new Vue({
 							victimName = '[BOT] ' + victim;
 						}
 					}
+
+
+
+					// killer teammate: attacker
+					if (attackerName != killer && killer != '' && killerTeam != 0) {
+						// check if they are on the killer team
+						killerTeam.teammates.forEach(teammate => {
+							if (attackerName == teammate.name) {
+
+								if (teammate.isBot) {
+									attackerName = '[BOT] ' + attackerName;
+								}
+	
+								attackerClass = 'killerTeammate';
+							}
+						});
+					}
+
+					// killer teammate: victim
+					if (victimName != killer && killer != '' && killerTeam != 0) {
+						// check if they are on the killer team
+						killerTeam.teammates.forEach(teammate => {
+							if (victimName == teammate.name) {
+								if (teammate.isBot) {
+									victimName = '[BOT] ' + victimName;
+								}
+	
+								victimClass = 'killerTeammate';
+							}
+						});
+					}
+
+
+					// player teammate: attacker
+					if (attackerName != name) {
+						// check if they are on the killer team
+						playerTeam.teammates.forEach(teammate => {
+							if (attackerName == teammate.name) {
+
+								if (teammate.isBot) {
+									attackerName = '[BOT] ' + attackerName;
+								}
+	
+								attackerClass = 'playerTeammate';
+							}
+						});
+					}
+
+					// player teammate: victim
+					if (victimName != name) {
+						// check if they are on the killer team
+						playerTeam.teammates.forEach(teammate => {
+							if (victimName == teammate.name) {
+								if (teammate.isBot) {
+									victimName = '[BOT] ' + victimName;
+								}
+	
+								victimClass = 'playerTeammate';
+							}
+						});
+					}
+
+
+					// $ if you are your own killer, don't paint as killer
 
 
 					// don't show distance for grenades or molotov damage

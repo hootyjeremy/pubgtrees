@@ -275,6 +275,7 @@ var _damageCauserName = {
     "WeapG36C_C": "G36C",
     "WeapGroza_C": "Groza",
     "WeapHK416_C": "M416",
+    "WeapDuncansHK416_C": "M416",
     "WeapKar98k_C": "Kar98k",
     "WeapJuliesKar98k_C": "Kar98k",
     "WeapM16A4_C": "M16A4",

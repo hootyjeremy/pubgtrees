@@ -85,6 +85,15 @@ td.killer {
 	color: #ef8b65;
 }
 
+td.killerTeammate {
+	color: #ffbd74;
+}
+
+td.playerTeammate {
+	color: #ab97e0;
+}
+
+
 
 /* text for svg tree */
 text.categories {
