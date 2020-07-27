@@ -97,13 +97,13 @@ async function UpdateDatabaseRows(playername, platform, ratelimitremaining, ip) 
 
     if (dbRowsToInsert == '') {
         // currently blank
-        dbRowsToInsert = `(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, '${ip}')`;
+        dbRowsToInsert = `(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, 'no')`;
     }
     else {
-        dbRowsToInsert += `,\n(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, '${ip}')`;
+        dbRowsToInsert += `,\n(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, 'no')`;
     }
 
-    console.log(`inserting row: (${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, '${ip}')`);
+    console.log(`inserting row: (${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, 'no')`);
 }
 
 
