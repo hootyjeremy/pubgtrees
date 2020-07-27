@@ -90,34 +90,20 @@ else {
 }
 
 
-async function UpdateDatabaseRows(playername, platform, ratelimitremaining) {
+async function UpdateDatabaseRows(playername, platform, ratelimitremaining, ip) {
 
     let dbDate = new Date();
     let dbTime = dbDate.getTime();
 
     if (dbRowsToInsert == '') {
         // currently blank
-        dbRowsToInsert = `(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining})`;
+        dbRowsToInsert = `(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, ${ip})`;
     }
     else {
-        dbRowsToInsert += `,\n(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining})`;
+        dbRowsToInsert += `,\n(${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, ${ip})`;
     }
 
-    console.log(`inserting row: (${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining})`);
-
-    // client.query(queryString, (err, res) => {
-    //     if (err) {
-    //         console.log('database error: ' + err);
-    //     }
-    //     else {
-    //         // for (let row of res.rows) {
-    //         //     console.log(JSON.stringify(row));
-    //         // }
-    //     }
-
-    //     client.end();
-    // });
-
+    console.log(`inserting row: (${dbTime}, '${dbDate}', '${playername}', '${platform}', ${ratelimitremaining}, ${ip})`);
 }
 
 
@@ -249,7 +235,7 @@ app.get('/getplayermatches', async (req, res) => {
 
 
             // successful get, update database
-            UpdateDatabaseRows(req.query.player_name, req.query.platform, pubgapi_player_response.headers['x-ratelimit-remaining']);
+            UpdateDatabaseRows(req.query.player_name, req.query.platform, pubgapi_player_response.headers['x-ratelimit-remaining'], req.ip);
 
         }
         catch (error)
@@ -261,7 +247,7 @@ app.get('/getplayermatches', async (req, res) => {
                     // database logging for after ratelimit is reached
 
                     // rate limit reached, update database
-                    UpdateDatabaseRows(req.query.player_name, req.query.platform, 0);
+                    UpdateDatabaseRows(req.query.player_name, req.query.platform, 0, req.ip);
                 }
 
                 console.log('could not fetch player from pubg api: ' + player_url);
