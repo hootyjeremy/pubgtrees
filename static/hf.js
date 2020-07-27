@@ -27,7 +27,7 @@ function translateZone(zone) {
 }
 
 let zoneDictionary = {
-	// miramar
+	// Miramar
 	"alcantara": "Alcantara",
     "ruins": "Ruins",
     "lacobreria": "La Cobreria",

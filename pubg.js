@@ -31,7 +31,7 @@ let dbRowsToInsert  = '';
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-const blTestingVersion = !true;
+const blTestingVersion = true;
 
 
 
@@ -188,7 +188,7 @@ app.get('/getplayermatches', async (req, res) => {
     
             player_data = readCacheFileJSON(player_cache_file);
 
-            console.log(getDate() + ' player cached (no need to fetch): ' + req.query.platform + '/' + req.query.player_name);
+            console.log(getDate() + ' -> player cached (no need to fetch): ' + req.query.platform + '/' + req.query.player_name);
 
             pubgApiResponseInfo = { 'hootyserver': 'cached', 'status': null, 'statusText': 'no need to fetch from pubg api' };
         }
@@ -224,7 +224,7 @@ app.get('/getplayermatches', async (req, res) => {
                                     pubgapi_player_response.headers['x-ratelimit-limit'], };
 
 
-            console.log(getDate() + ' fetching player from pubg api: ' + req.query.platform + '/' + req.query.player_name);
+            console.log(getDate() + ' -> fetching player from pubg api: ' + req.query.platform + '/' + req.query.player_name);
 
             if (blTestingVersion) {
                 console.log('fetched player_url: ' + player_url);
@@ -2067,7 +2067,6 @@ function clearCache() {
                 // purge cache files older than 30 minutes (1,800,000 milliseconds)
                 // 15 minutes = 900,000 milliseconds
                 if (Date.now() - stat.birthtimeMs > 900000) { 
-
                     
                     fs.unlinkSync(file, (err) =>{
                         if (err) {
@@ -2102,7 +2101,7 @@ function clearCache() {
                 // 86,400 * 3       = 259,200 seconds per 3 days
                 // 259,200 * 1,000  = 259,200,000 milliseconds per 3 days
                 // 86,400,000 = 24 hours?
-                if (Date.now() - stat.birthtimeMs > 86400000) {  // testing 24 hours
+                if (Date.now() - stat.birthtimeMs > 900000) {  // testing 15 minutes
 
                     // 600,000 = 10 minutes
                     fs.unlinkSync(file, (err) =>{
@@ -2138,7 +2137,7 @@ function clearCache() {
                 // 86,400 * 3       = 259,200 seconds per 3 days
                 // 259,200 * 1,000  = 259,200,000 milliseconds per 3 days
                 // 86,400,000 = 24 hours?
-                if (Date.now() - stat.birthtimeMs > 86400000) {  // testing 24 hours
+                if (Date.now() - stat.birthtimeMs > 900000) {  // testing 24 hours
 
                     // 600,000 = 10 minutes
                     fs.unlinkSync(file, (err) =>{
@@ -2158,7 +2157,7 @@ function clearCache() {
         console.log(getDate() + ' -> Purge Interval: ' + purge_count + ' cache files purged');
     }
     else {
-        console.log(getDate() + ' -> Purge interval: No files to purge.');
+        console.log(getDate() + ' -> Purge interval: No files to purge. purge_count=' + purge_count);
     }
 
 
@@ -2210,8 +2209,8 @@ function UpdateDatabase() {
 function getDate() {
     // https://momentjs.com/timezone/docs/
 
-    //return moment().tz("America/Chicago").format('YYYY.MM.DD__hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
     return moment().tz("America/Chicago").format('YYYY.MM.DD__hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
+    // return moment().tz("America/Chicago").format('YYYY.MM.DD__hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
 }   
 
 

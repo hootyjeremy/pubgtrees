@@ -12,8 +12,8 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.022'
-const blTestingVersion 	= !true;
+let   version 			= '0.023'
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	//hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -1298,6 +1298,11 @@ function _printRoster(roster) {
 	});
 
 	return strRoster;
+}
+
+
+function openTwitter() {
+	window.open('https://twitter.com/pubgtrees', '_blank');
 }
 
 function ClickedSomething(_matchID) {

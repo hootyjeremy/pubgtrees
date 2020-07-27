@@ -275,9 +275,7 @@ var _damageCauserName = {
     "WeapG36C_C": "G36C",
     "WeapGroza_C": "Groza",
     "WeapHK416_C": "M416",
-    "WeapDuncansHK416_C": "M416",
     "WeapKar98k_C": "Kar98k",
-    "WeapJuliesKar98k_C": "Kar98k",
     "WeapM16A4_C": "M16A4",
     "WeapM1911_C": "P1911",
     "WeapM249_C": "M249",
@@ -296,7 +294,6 @@ var _damageCauserName = {
     "WeapPanProjectile_C": "Pan Throw",
     "WeapPanzerFaust100M1_C": "Panzerfaust",
     "WeapQBU88_C": "QBU",
-    "WeapMadsQBU88_C": "QBU",
     "WeapQBZ95_C": "QBZ",
     "WeapRhino_C": "R45",
     "WeapSaiga12_C": "S12K",
@@ -312,5 +309,10 @@ var _damageCauserName = {
     "WeapVSS_C": "VSS",
     "Weapvz61Skorpion_C": "Skorpion",
     "WeapWin94_C": "Win94",
-    "WeapWinchester_C": "S1897"
+    "WeapWinchester_C": "S1897",
+
+    "WeapDuncansHK416_C": "M416",
+    "WeapJuliesKar98k_C": "Kar98k",
+    "WeapMadsQBU88_C": "QBU",
+
 }

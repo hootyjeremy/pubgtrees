@@ -231,13 +231,14 @@ a:link, a:visited {
 	font-weight: bold;
 }
 
-div#search-div, div#vueapp, div#d3-tree01, div#player-report {
+div#search-div, div#vueapp, div#d3-tree01, div#player-report, div.cube {
 	border-radius: 10px;
 	background-color: #414144;
 	margin-left: 14px;
 	margin-right: 14px;
-	margin-top: 30px;
+	margin-top: 20px;
 }
+
 
 div#player-report {
 	border: 2px solid #efb8df;
