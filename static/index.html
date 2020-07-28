@@ -322,11 +322,11 @@
 				<thead>
 					<tr>
 						<th style="width: 40px;">Time</th>
-						<th style="width: 130px; text-align: right;">Attacker</th>
+						<th style="width:130px; text-align: right;">Attacker</th>
+						<th class='tdHealth'>Hlth</th>
+						<th style="text-align: center;">Dmg</th>
 						<th class='tdHealth'></th>
-						<th style="width: 36px">Dmg</th>
-						<th class='tdHealth'></th>
-						<th class='tdHealth'></th>
+						<th class='tdHealth'>Hlth</th>
 						<th style="width: 130px; text-align: left;">Victim</th>
 						<th>Weapon</th>
 						<th style="width: 40px;">Dist</th>
@@ -344,8 +344,8 @@
 						<td :class='reportRow.attackerClass' style='text-align: right; font-weight: bold;'>{{reportRow.attacker}}</td>
 						<td style='text-align: center;' class='tdHealth'>{{reportRow.attackerHealth}}</td>
 						<td style='text-align: center; font-weight: bold;'>{{reportRow.event}}</td>
-						<td style='text-align: center;' class='tdHealth'>{{reportRow.victimHealth}}</td>
 						<td style='text-align: center;' class='tdHealth'><img :src='reportRow.armor'></td>
+						<td style='text-align: center;' class='tdHealth'>{{reportRow.victimHealth}}</td>
 						<td :class='reportRow.victimClass' style='font-weight: bold;'>{{reportRow.victim}}</td>
 						<td>{{reportRow.damagerInfo}}</td>
 						<td style='text-align: right;'>{{reportRow.distance}}</td>

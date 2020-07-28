@@ -2244,7 +2244,7 @@ function clearCache() {
                         // 86,400,000 = 24 hours?
                         if (Date.now() - stat.birthtimeMs > 900000) {  // testing 15 minutes
     
-                            console.log(getDate() + ' purging match file -> ' + file);
+                            //console.log(getDate() + ' purging match file -> ' + file);
                             purge_count++;
     
                             // 600,000 = 10 minutes
@@ -2287,7 +2287,7 @@ function clearCache() {
                         // 86,400,000 = 24 hours?
                         if (Date.now() - stat.birthtimeMs > 900000) { 
     
-                            console.log(getDate() + ' purging telemetry file -> ' + file);
+                            //console.log(getDate() + ' purging telemetry file -> ' + file);
                             purge_count++;
     
                             // 600,000 = 10 minutes
@@ -2313,7 +2313,7 @@ function clearCache() {
         console.log(getDate() + ' -> Purge Interval: ' + purge_count + ' of ' + file_count + ' cache files purged');
     }
     else {
-        console.log(getDate() + ' -> Purge interval: No files to purge. purge_count=' + purge_count + ' of ' + file_count);
+        console.log(getDate() + ' -> Purge interval: No files to purge.');
     }
 
 
