@@ -310,6 +310,7 @@ var _damageCauserName = {
     "Weapvz61Skorpion_C": "Skorpion",
     "WeapWin94_C": "Win94",
     "WeapWinchester_C": "S1897",
+    "JerrycanFire": "Jerrycan",
 
     "WeapDuncansHK416_C": "M416",
     "WeapJuliesKar98k_C": "Kar98k",

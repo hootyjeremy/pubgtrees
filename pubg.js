@@ -20,6 +20,7 @@ const zlib          = require('zlib');
 
 // database stuff
 const { Client }    = require('pg');
+const { O_NOATIME } = require('constants');
 let databaseURL     = '';
 let dbRowsToInsert  = '';
 
@@ -189,7 +190,7 @@ app.get('/getplayermatches', async (req, res) => {
     
             player_data = readCacheFileJSON(player_cache_file);
 
-            console.log(getDate() + ' -> player cached (no need to fetch): ' + req.query.platform + '/' + req.query.player_name);
+            console.log(getDate() + ' -> player is cached (no need to fetch): ' + req.query.platform + '/' + req.query.player_name);
 
             pubgApiResponseInfo = { 'hootyserver': 'cached', 'status': null, 'statusText': 'no need to fetch from pubg api' };
         }
@@ -800,7 +801,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //var arrKillerVictims    = [];   // [ { killerinfo, [{victims}] } ]
     var arrKillLog          = [];   // just need to know killer:victim to know who didn't die
     var arrSurvivors        = [];   // hold a list of living players. remove when they die.
-    // $ remove each living player from a list when they die
+
+                                    // ? could this event help identify late spawning bots? (check if name doesn't exist in humans or bots to see if it catches them)
+    let arrArmor            = [];   // $ keep up with what armor is currently worn by each player
 
     //var null_attacker   = [];   // for testing bluezone/redzone/blackzone
 
@@ -950,6 +953,110 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
+        //#region // ! [Region] Armor awareness
+        //
+
+        if (record._T == 'LogItemPickup' || record._T == 'LogItemDrop' || record._T == 'LogArmorDestroy') {
+
+            // record._T == 'LogItemEquip' || record._T == 'LogItemUnequip'
+
+            if (record.item != undefined && record.item.itemId != undefined) {
+                if (record.item.itemId == 'Item_Armor_C_01_Lv3_C' || record.item.itemId == 'Item_Armor_D_01_Lv2_C' || record.item.itemId == 'Item_Armor_E_01_Lv1_C' || 
+                    record.item.itemId == 'Item_Head_E_01_Lv1_C'  || record.item.itemId == 'Item_Head_E_02_Lv1_C'  || record.item.itemId == 'Item_Head_F_01_Lv2_C'  || 
+                    record.item.itemId == 'Item_Head_F_02_Lv2_C'  || record.item.itemId == 'Item_Head_G_01_Lv3_C') {
+
+
+                    // store armor details in the victim only
+
+                    // arrArmor...
+                    // .name
+                    // .head
+                    // .vest
+
+                    let blPlayerFound = false;
+                    
+                    // is this a pickup or a drop?
+                    if (record._T == 'LogItemPickup') {
+                        arrArmor.forEach(element => {
+                            if (element.name == record.character.name) {
+                                blPlayerFound = true;
+
+                                // if you find the player, just update whatever type this item is
+
+                                if (record.item.subCategory == 'Headgear') {
+                                    element.head = record.item.itemId;
+                                }
+                                else if (record.item.subCategory == 'Vest') {
+                                    element.vest = record.item.itemId;
+                                }    
+                            }
+                        })    
+
+
+                        // if no record of player, add player
+                        if (!blPlayerFound) {
+
+                            let p  = new Object();
+                            p.name = record.character.name;
+                            p.head = null;
+                            p.vest = null;
+
+                            // is this a helment or vest?
+                            if (record.item.subCategory == 'Headgear') {
+                                p.head = record.item.itemId;
+                            }
+                            else if (record.item.subCategory == 'Vest') {
+                                p.vest = record.item.itemId;
+                            }
+
+                            arrArmor.push(p);
+                        }
+                    }
+                    else if (record._T == 'LogItemDrop') {
+                        // set armor type to null
+
+                        arrArmor.forEach(element => {
+                            if (element.name == record.character.name) {
+                                blPlayerFound = true;
+
+                                // if you find the player, just update whatever type this item is
+
+                                if (record.item.subCategory == 'Headgear') {
+                                    element.head = null;
+                                }
+                                else if (record.item.subCategory == 'Vest') {
+                                    element.vest = null;
+                                }    
+                            }
+                        })   
+                    }
+                    else if (record._T == 'LogArmorDestroy') {
+
+                        arrArmor.forEach(element => {
+                            if (element.name == record.victim.name) {
+                                blPlayerFound = true;
+
+                                // if you find the player, just update whatever type this item is
+
+                                if (record.item.subCategory == 'Headgear') {
+                                    element.head = null;
+                                }
+                                else if (record.item.subCategory == 'Vest') {
+                                    element.vest = null;
+                                }    
+                            }
+                        })    
+                    }
+
+                    //console.log(record._T,  record);
+                }
+            }
+        }
+
+        //#endregion - armor awareness
+
+
+
         if (record._T == 'LogPlayerTakeDamage') {
             
             //#region //! [Region] LogPlayerTakeDamage...
@@ -968,6 +1075,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 // if not a solo, check for teammate damage
 
                 if (record.attacker != null && record.damageTypeCategory != 'Damage_Groggy' && record.damage > 0) {
+                    // player attacker, most likely
 
                     // filter out bot vs. bot damage:
                     if (hf.isBot(record.attacker.accountId) && hf.isBot(record.victim.accountId)) {
@@ -1021,6 +1129,23 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         }
                     }
 
+                    
+                    // get current armor situation for victim
+                    let armor = new Object();
+                    armor.name = record.victim.name;
+                    armor.head = null;
+                    armor.vest = null;
+                    
+                    arrArmor.forEach(element => {
+                        if (element.name == record.victim.name) {
+                            armor.head = element.head;
+                            armor.vest = element.vest;
+                        }
+                    })
+
+                    _victim.armor = armor;
+
+
                     playerDamageLog.attacker    = _attacker;
                     playerDamageLog.victim      = _victim;
 
@@ -1053,6 +1178,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     arrPlayersDamageLog.push(playerDamageLog);
                 }
                 else if (record.attacker == null) {
+                    // environment knock, most likely
                     //null_attacker.push(record.damageTypeCategory);
                     // pretty much just bluezone and blackzone. why not redzone? because insta-knock?
                 }
@@ -1879,10 +2005,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     console.log(arrKillFeedLog[j]);
         // }
 
-        console.log('arrDamageLog...');
-        for (let j = 0; j < arrDamageLog.length; j++){
-            console.log(arrDamageLog[j]);
-        }
+        // console.log('arrDamageLog...');
+        // for (let j = 0; j < arrDamageLog.length; j++){
+        //     console.log(arrDamageLog[j]);
+        // }
 
         //console.dir(arr_T);
         console.log('human deaths: ' + human_deaths + ', ai deaths: ' + ai_deaths);
@@ -2066,7 +2192,7 @@ function clearCache() {
 
                     file_count++;
 
-                    //console.log('curr time: ' + Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
+                    console.log(Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
                     //curr time: 1589928871171 
                     //birthtime: 1589928825360.3643
 

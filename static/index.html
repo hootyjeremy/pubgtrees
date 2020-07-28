@@ -47,23 +47,22 @@
 <center>
 	<div class='top-boxes' style='width:700px; margin-bottom: 180px;'>
 
-		<div class='cube' style='width: 320px; height: 130px; float: left; cursor: pointer;' onclick="pubgtrees()">
-			<br>	
-			<br>
-			<!-- <a href='https://www.pubgtrees.com' style='font-size: 24px;'>PUBG Trees</a>	 -->
-			<span style="font-size: 24px; font-weight: bold; text-decoration: underline;">PUBG Trees</span>
-			<br>
-			built by hooty__
-			<br>
-			version 0.024
-			<br>
-
-		</div>
+		<a href='https://www.pubgtrees.com'>
+			<div class='cube' style='width: 320px; height: 130px; float: left;'">
+				<!-- <a href='https://www.pubgtrees.com' style='font-size: 24px;'>PUBG Trees</a>	 -->
+				<div style="font-size: 24px; font-weight: bold; text-decoration: underline; margin-top: 30px;">PUBG Trees</div>
+				<div style='font-size: 14px; font-weight: normal;'>
+					built by hooty__
+					<br>
+					version 0.025
+				</div>
+				<br>
+			</div>
+			</a>
 
 		<div class="cube" style='width: 320px; height: 130px; float:right'>
 			<br>
-			<br>
-			<img src='static/images/twitter-icon-purple-40x40.png' style='cursor: pointer; ' onclick='openTwitter();'>
+			<img src='static/images/twitter-icon-purple-40x40.png' style='cursor: pointer; margin-top: 10px;' onclick='openTwitter();'>
 			<br>
 			<br>
 			pubgtrees@outlook.com
@@ -327,6 +326,7 @@
 						<th class='tdHealth'></th>
 						<th style="width: 36px">Dmg</th>
 						<th class='tdHealth'></th>
+						<th class='tdHealth'></th>
 						<th style="width: 130px; text-align: left;">Victim</th>
 						<th>Weapon</th>
 						<th style="width: 40px;">Dist</th>
@@ -345,6 +345,7 @@
 						<td style='text-align: center;' class='tdHealth'>{{reportRow.attackerHealth}}</td>
 						<td style='text-align: center; font-weight: bold;'>{{reportRow.event}}</td>
 						<td style='text-align: center;' class='tdHealth'>{{reportRow.victimHealth}}</td>
+						<td style='text-align: center;' class='tdHealth'><img :src='reportRow.armor'></td>
 						<td :class='reportRow.victimClass' style='font-weight: bold;'>{{reportRow.victim}}</td>
 						<td>{{reportRow.damagerInfo}}</td>
 						<td style='text-align: right;'>{{reportRow.distance}}</td>

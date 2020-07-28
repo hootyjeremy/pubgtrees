@@ -238,6 +238,10 @@ let vuePlayerReport = new Vue({
 					let attackerHealth = '';
 					let victimHealth = '';
 
+					let armor = '';
+					//let head = '';
+					//let vest = '';
+
 					let attackerClass = '';
 					let victimClass = '';
 					let rowClass = '';
@@ -262,6 +266,16 @@ let vuePlayerReport = new Vue({
 						victimHealth 	= (record.victim.healthAfterDamage > 0 && record.victim.healthAfterDamage < 2) ? record.victim.healthAfterDamage.toFixed(1) : parseInt(record.victim.healthAfterDamage);
 
 						_info = this.resolveDamageReason(record.damageCauserName, record.damageReason, record.damageTypeCategory);
+
+						// $ need to translate the gear type
+						// $ only show armor and vest if it is a headshot or a body shot
+
+						if (record.damageReason == 'HeadShot') {
+							armor = this.translateHead(record.victim.armor.head);
+						}
+						else if (record.damageReason == 'TorsoShot') {
+							armor = this.translateVest(record.victim.armor.vest);
+						}
 
 
 						if (record.selfDamage){
@@ -479,6 +493,10 @@ let vuePlayerReport = new Vue({
 						'victimHealth': victimHealth,
 						'zone': zone,
 						'rowClass': rowClass,
+						'armor': armor,
+						// 'head': head,
+						// 'vest': vest,
+						
 
 					});
 
@@ -550,7 +568,51 @@ let vuePlayerReport = new Vue({
 			}
 
 			return r;
+		},
+		translateHead(head) {
+			
+			let r = '';
+			
+			if (head == null) {
+				r = 'static/images/gear/minus (1)-white-small.png';
+			}
+			else if (head == 'Item_Head_E_01_Lv1_C') {
+				r = 'static/images/gear/helmet-level1.png';
+			}
+			else if (head == 'Item_Head_E_02_Lv1_C') {
+				r = 'static/images/gear/helmet-level1.png';
+			}
+			else if (head == 'Item_Head_F_01_Lv2_C') {
+				r = 'static/images/gear/helmet-level2.png';
+			}
+			else if (head == 'Item_Head_F_02_Lv2_C') {
+				r = 'static/images/gear/helmet-level2.png';
+			}
+			else if (head == 'Item_Head_G_01_Lv3_C') {
+				r = 'static/images/gear/helmet-level3.png';
+			}
+
+			return r;
+		},
+		translateVest(vest) {
+
+			let r = '';
+			if (vest == null) {
+				r = 'static/images/gear/minus (1)-white-small.png';
+			}
+			else if (vest == 'Item_Armor_C_01_Lv3_C') {
+				r = 'static/images/gear/vest-level3.png';
+			}
+			else if (vest == 'Item_Armor_D_01_Lv2_C') {
+				r = 'static/images/gear/vest-level2.png';
+			}
+			else if (vest == 'Item_Armor_E_01_Lv1_C') {
+				r = 'static/images/gear/vest-level1.png';
+			}
+
+			return r;
 		}
+
 
 	}
 });

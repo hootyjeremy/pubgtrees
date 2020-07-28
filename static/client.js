@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.024'
+let   version 			= '0.025'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -1305,9 +1305,6 @@ function openTwitter() {
 	window.open('https://twitter.com/pubgtrees', '_blank');
 }
 
-function pubgtrees() {
-	location.replace('https://www.pubgtrees.com');
-}
 
 function ClickedSomething(_matchID) {
 	console.log('ClickedSomething() -> ' + _matchID);
