@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.025'
+let   version 			= '0.026'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -79,10 +79,9 @@ let match_floors = [0];
 let match_floors_index = 0;
 let searchDirection = null;	// this will be for "next" or "previous" matches
 
-let blShowDamage = false;
-let blShowHealth = false;
-
 let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
+
+let blShowDamage = false;
 
 
 
@@ -145,38 +144,19 @@ window.addEventListener('load', (event) => {
 
 		//console.log(glSelectedPlayer);
 
-		// hide and show damage
-		let arrElements = document.getElementsByClassName('tdHealth');
-
-		if (blShowDamage) {
-			// currently showing damage, now hide it
-
-			document.getElementById('btnShowDamage').textContent = 'Show damage/health';
-
-			// if hiding damage, hide health data..
-			for (let i = 0; i < arrElements.length; i++) {
-				arrElements[i].style.width = 0;
-				//arrElements[i].style.display = 'none';
-				//console.log(i + '=' + arrElements[i].style.display + ' -> ' + arrElements[i].innerHTML);
-			}
+		if (vuePlayerReport.isHidden) {
+			// if currently hiding columns, 
+			document.getElementById('btnShowDamage').textContent = 'Hide damage/health';
 		}
 		else {
-			// currently hiding damage, now show it
-			document.getElementById('btnShowDamage').textContent = 'Hide damage/health';
-
-			// if hiding damage, hide health data..
-			for (let i = 0; i < arrElements.length; i++) {
-				arrElements[i].style.width = 26;
-				//arrElements[i].style.display = 'table-cell';
-				//console.log(i + '=' + arrElements[i].style.display + ' -> ' + arrElements[i].innerHTML);
-			}
+			document.getElementById('btnShowDamage').textContent = 'Show damage/health';
 		}
 
-		blShowDamage = !blShowDamage;
+		vuePlayerReport.isHidden = !vuePlayerReport.isHidden;
+
 
 		// re-draw the report
 		RunPlayerDamageReport(glSelectedPlayer);
-
 	});
 
 });
@@ -205,11 +185,13 @@ window.addEventListener('click', (event) => {
 
 function ShowModal() {
 	// display the modal report
+	console.log('show modal()');
 	document.getElementById('div-modal').style.display = 'block';
 	document.getElementById('div-modal').scrollIntoView({behavior: "smooth"});	
 }
 
 function HideModal() {
+	console.log('hide modal()');
 	document.getElementById('div-modal').style.display = 'none';
 	vuePlayerReport.clearPlayerReport();
 }
@@ -627,7 +609,6 @@ function RunPlayerDamageReport(selectedPlayer) {
 
 	// get player's killer if they have one...
 	let tmpKiller = '';
-
 	axios_telemetry_response.data.arrKillLog.forEach(element => {
 		if (element.victim == selectedPlayer) {
 			//console.log(element);
@@ -661,6 +642,46 @@ function RunPlayerDamageReport(selectedPlayer) {
 										axios_telemetry_response.data.arrPlayersDamageLog,
 										axios_telemetry_response.data.allBotNames,
 										axios_telemetry_response.data.allHumanNames);
+
+
+	// $ maybe hide the rows here?
+
+	
+	// hide and show damage
+	// if (blShowDamage) {
+	// 	// currently showing damage, now hide it
+
+	// 	document.getElementById('btnShowDamage').textContent = 'Show damage/health';
+
+	// 	let arrElements = document.getElementsByClassName('tdHealth');
+
+	// 	let records = vuePlayerReport.arrPlayerReport.length;
+
+	// 	// if hiding damage, hide health data..
+	// 	for (let i = 0; i < arrElements.length; i++) {
+	// 		arrElements[i].style.width = 0;
+	// 		//arrElements[i].style.display = 'none';
+	// 		//console.log(i + '=' + arrElements[i].style.display + ' -> ' + arrElements[i].innerHTML);
+	// 	}
+	// }
+	// else {
+	// 	// currently hiding damage, now show it
+	// 	document.getElementById('btnShowDamage').textContent = 'Hide damage/health';
+
+	// 	let arrElements = document.getElementsByClassName('tdHealth');
+
+	// 	let records = vuePlayerReport.arrPlayerReport.length;
+
+	// 	// if hiding damage, hide health data..
+	// 	for (let i = 0; i < arrElements.length; i++) {
+	// 		arrElements[i].style.width = 20;
+	// 		//arrElements[i].style.display = 'table-cell';
+	// 		//console.log(i + '=' + arrElements[i].style.display + ' -> ' + arrElements[i].innerHTML);
+	// 	}
+	// }
+
+	//blShowDamage = !blShowDamage;
+
 
 
 	ShowModal();

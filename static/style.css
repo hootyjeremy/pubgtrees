@@ -68,9 +68,8 @@ th, td {
 	padding: 6px;
 }
 
-.tdHealth {
-	/* display: none; */
-	width: 0px;
+.tdHidden {
+	display: none;
 }
 
 /* rows for damage report (attackerClass, victimClass) */

@@ -165,6 +165,8 @@ let vuePlayerReport = new Vue({
 		// rowAttackerName: null, 
 		// rowVictimName: null, 
 		// rowAction: null,
+
+		isHidden: true,			// hide damage/health
 		
 		
 
@@ -182,6 +184,7 @@ let vuePlayerReport = new Vue({
 		updatePlayerReport: function (name, killer, playerTeam, killerTeam, arrPlayerCards, arrPlayersDamageLog, allBotNames, allHumanNames) {
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
+			console.log('isHidden: ' + this.isHidden);
 
 			if (allBotNames.includes(name)) {
 				document.getElementById('botReportDisclaimer').style.display = 'block';
@@ -254,7 +257,7 @@ let vuePlayerReport = new Vue({
 					if (record._T == 'LogPlayerTakeDamage') {
 
 						// skip adding a record if not chosen to show damage.
-						if (!blShowDamage) {
+						if (this.isHidden) {
 							return;
 						}
 
