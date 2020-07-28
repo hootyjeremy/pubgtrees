@@ -2187,29 +2187,34 @@ function clearCache() {
             } else {
                 //console.log(files);
 
-                files.forEach(file => {
-                    const stat = fs.statSync(file);
-
-                    file_count++;
-
-                    console.log(Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
-                    //curr time: 1589928871171 
-                    //birthtime: 1589928825360.3643
-
-                    // purge cache files older than 30 minutes (1,800,000 milliseconds)
-                    // 15 minutes = 900,000 milliseconds
-                    if (Date.now() - stat.birthtimeMs > 900000) { 
+                try {
+                    files.forEach(file => {
+                        const stat = fs.statSync(file);
+    
+                        file_count++;
+    
+                        //console.log(Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
+                        //curr time: 1589928871171 
+                        //birthtime: 1589928825360.3643
                         
-                        fs.unlinkSync(file, (err) =>{
-                            if (err) {
-                                console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
-                            } else {
-                                console.log(getDate() + ' purged player file -> ' + file);
-                                purge_count++;
-                            }
-                        })
-                    }
-                })
+                        // purge cache files older than 30 minutes (1,800,000 milliseconds)
+                        // 15 minutes = 900,000 milliseconds
+                        if (Date.now() - stat.birthtimeMs > 900000) { 
+                            
+                            console.log(getDate() + ' purging player file -> ' + file);
+                            purge_count++;
+    
+                            fs.unlinkSync(file, (err) =>{
+                                if (err) {
+                                    console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
+                                    purge_count--;
+                                }
+                            })
+                        }
+                    })
+                } catch (error) {
+                    console.log('error in player cache purge: ' + error);
+                }
             }
         })
 
@@ -2222,30 +2227,36 @@ function clearCache() {
                 //console.log(files);
 
                 files.forEach(file => {
-                    const stat = fs.statSync(file);
 
-                    file_count++;
+                    try {
+                        const stat = fs.statSync(file);
 
-                    //console.log('curr time: ' + Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
-                    //curr time: 1589928871171 
-                    //birthtime: 1589928825360.3643
-
-                    // purge match cache files older than 3 days...
-                    // 24 * 60 * 60     =  86,400 seconds per day
-                    // 86,400 * 3       = 259,200 seconds per 3 days
-                    // 259,200 * 1,000  = 259,200,000 milliseconds per 3 days
-                    // 86,400,000 = 24 hours?
-                    if (Date.now() - stat.birthtimeMs > 900000) {  // testing 15 minutes
-
-                        // 600,000 = 10 minutes
-                        fs.unlinkSync(file, (err) =>{
-                            if (err) {
-                                console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
-                            } else {
-                                console.log(getDate() + ' purged match file -> ' + file);
-                                purge_count++;
-                            }
-                        })
+                        file_count++;
+    
+                        //console.log('curr time: ' + Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
+                        //curr time: 1589928871171 
+                        //birthtime: 1589928825360.3643
+    
+                        // purge match cache files older than 3 days...
+                        // 24 * 60 * 60     =  86,400 seconds per day
+                        // 86,400 * 3       = 259,200 seconds per 3 days
+                        // 259,200 * 1,000  = 259,200,000 milliseconds per 3 days
+                        // 86,400,000 = 24 hours?
+                        if (Date.now() - stat.birthtimeMs > 900000) {  // testing 15 minutes
+    
+                            console.log(getDate() + ' purging match file -> ' + file);
+                            purge_count++;
+    
+                            // 600,000 = 10 minutes
+                            fs.unlinkSync(file, (err) =>{
+                                if (err) {
+                                    console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
+                                    purge_count--;
+                                } 
+                            })
+                        }
+                    } catch (error) {
+                        console.log('error in matches cache purge: ' + error);
                     }
                 })
             }
@@ -2259,36 +2270,40 @@ function clearCache() {
             } else {
                 //console.log(files);
 
-                files.forEach(file => {
-                    const stat = fs.statSync(file);
-
-                    file_count++;
-
-                    //console.log('curr time: ' + Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
-                    //curr time: 1589928871171 
-                    //birthtime: 1589928825360.3643
-
-                    // purge match cache files older than 3 days...
-                    // 24 * 60 * 60     =  86,400 seconds per day
-                    // 86,400 * 3       = 259,200 seconds per 3 days
-                    // 259,200 * 1,000  = 259,200,000 milliseconds per 3 days
-                    // 86,400,000 = 24 hours?
-                    if (Date.now() - stat.birthtimeMs > 900000) { 
-
-                        // 600,000 = 10 minutes
-                        fs.unlinkSync(file, (err) =>{
-                            if (err) {
-                                console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
-                            } else {
-                                console.log(getDate() + ' purged match file -> ' + file);
-                                purge_count++;
-                            }
-                        })
-                    }
-                })
+                try {
+                    files.forEach(file => {
+                        const stat = fs.statSync(file);
+    
+                        file_count++;
+    
+                        //console.log('curr time: ' + Date.now() + ' birthtime: ' + stat.birthtimeMs + ' age: ' + (Date.now() - stat.birthtimeMs) + ' -> ' + file);
+                        //curr time: 1589928871171 
+                        //birthtime: 1589928825360.3643
+    
+                        // purge match cache files older than 3 days...
+                        // 24 * 60 * 60     =  86,400 seconds per day
+                        // 86,400 * 3       = 259,200 seconds per 3 days
+                        // 259,200 * 1,000  = 259,200,000 milliseconds per 3 days
+                        // 86,400,000 = 24 hours?
+                        if (Date.now() - stat.birthtimeMs > 900000) { 
+    
+                            console.log(getDate() + ' purging telemetry file -> ' + file);
+                            purge_count++;
+    
+                            // 600,000 = 10 minutes
+                            fs.unlinkSync(file, (err) =>{
+                                if (err) {
+                                    console.log(getDate() + ' error purging cache file: ' + file + ' -> ' + err);
+                                    purge_count--;
+                                }
+                            })
+                        }
+                    })
+                } catch (error) {
+                    console.log('error in telemetry purge: ' + error);                    
+                }
             }
         })
-
     } catch (error) {
         console.log('error during cache purge: ' + error.message);
     }
