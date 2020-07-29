@@ -1847,7 +1847,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }   // i loop
 
 
-    // $ debugger is breaking before this point
 
     //#region // ! [Region] Create csv data for D3
     //
@@ -1937,10 +1936,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     // [Environment kills branch] -------------------------
     if (arrEnvironmentKills.length > 0) {
-        csvDataForD3 += 'Environment kills,Match\n';
+        csvDataForD3 += 'Environment,Match\n';
 
         // arrEnvironmentKills.forEach(element => {
         //     csvDataForD3 += element.damageCauserName + ',environment kills\n'
+        // })
+
+        // $ attaching each type to match instead of 'env kills'
+        // arrEnvironmentKills.forEach(element => {
+        //     if (!csvDataForD3.includes()) {
+        //         console.log(element + ' not included');
+        //         csvDataForD3 += '<' + element.damageCauserName + '>,Match\n';
+        //     }
         // })
     }
     
@@ -1959,7 +1966,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // create parent connection for this environment kill type
             if (!tmpEnv.includes(element.killer)) {
                 tmpEnv += element.killer + ',';
-                csvDataForD3 += element.killer + ',Environment kills\n';
+                csvDataForD3 += element.killer + ',Environment\n';
             }
 
             csvDataForD3 += element.victim + ',' + element.killer + '\n';
@@ -1968,7 +1975,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // this is a regular player kill
 
             // $ SELF KILLS CURRENTLY BREAK, SO GET READY TO FIX THAT
-            // $ AMBIGUOUS means they already exist?
             if (element.killer == element.victim) {
                 csvDataForD3 += element.victim + ',Self kills\n';
             }
@@ -1977,10 +1983,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
             }
         }
     })
-
-
-    // $ cycle through the kill log and get parents of each kill
-    // $ if the killer name contains '<' then the killer's parent is evironment kill, and it's victims is added to those kills
 
 
     //#endregion -------------------------------------------------------

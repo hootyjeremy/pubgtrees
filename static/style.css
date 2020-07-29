@@ -89,11 +89,11 @@ td.botPlayer {
 }
 
 td.killer {
-	color: #ef8b65;
+	color: #ffc588;
 }
 
 td.killerTeammate {
-	color: #ffbd74;
+	color: #ef8b65;
 }
 
 td.playerTeammate {
@@ -104,8 +104,8 @@ td.playerTeammate {
 
 /* text for svg tree */
 text.categories {
-	/* fill: #97b2de; */
-	fill: #d6b1ca;
+	fill: #98a0a6;
+	/* fill: #0e0d0e; */
 }
 
 text.allPlayers {
@@ -121,12 +121,12 @@ text.botPlayers {
 }
 
 text.searchedPlayer {
-	/* fill: #7dde98; */
-	fill: #0e0d0e;
+	fill: #efb8df;
+	/* fill: #0e0d0e; */
 }
 
 text.winner {
-	fill: #73eca0;
+	fill: #7ada9e;
 }
 
 
@@ -142,56 +142,17 @@ text.playerTeammate {
 }
 
 text.killer {
-	/* fill: #ffbb71; */
-	fill: #ef8b65;
-	/* fill: #f07d60; */
+	fill: #ffc588;
 }
 
 text.killerTeammate {
-	fill: #ffbd74;
-	/* fill: #f58f75; */
-	/* fill: #f07d60; */
+	fill: #ef8b65;
 }
 
 text.tradedPaint {
 	fill: #efb8df;
 }
 
-
-
-/* spans for legend */
-span.winner {
-	color: #73eca0;
-}
-
-span.searchedPlayer {
-	/* color: #7dde98; */
-	color: #0e0d0e;
-}
-
-span.botPlayers {
-	color: #98a0a6;
-}
-
-span.selectedPlayer {
-	color: #60b6f0;
-}
-
-span.playerTeammate {
-	color: #ab97e0;
-}
-
-span.killer {
-	color: #ef8b65;
-	/* color: #ffbb71; */
-	/* color: #f07d60; */
-}
-
-span.killerTeammate {
-	color: #ffbd74;
-	/* color: #f58f75; */
-	/* color: #f07d60; */
-}
 
 
 
@@ -209,13 +170,53 @@ span.spanBoxy {
 span.spanBoxyShots {
 	font-size: 14px;
 	font-weight: bold;
-	background-color: #dcddde;
+	background-color: #c5c5c5;
 	color: #343436;
 	padding: 4px 10px;
 	margin: 4px;
 	border-radius: 4px;
 	display: inline-block;
 }
+
+span.spanBoxyName {
+	color: #60b6f0;
+}
+
+
+
+
+/* spans for legend */
+span.winner {
+	color: #7ada9e;
+}
+
+span.searchedPlayer {
+	/* color: #7dde98; */
+	color: #efb8df;
+}
+
+span.botPlayers {
+	color: #98a0a6;
+}
+
+span.selectedPlayer {
+	color: #60b6f0;
+}
+
+span.playerTeammate {
+	color: #ab97e0;
+}
+
+span.killer {
+	color: #ffc588;
+}
+
+span.killerTeammate {
+	color: #ef8b65;
+}
+
+
+
 
 
 svg#d3-svg01 {

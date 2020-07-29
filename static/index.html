@@ -58,7 +58,7 @@
 				<div style='font-size: 14px; font-weight: normal;'>
 					built by hooty__
 					<br>
-					version 0.028
+					version 0.029
 				</div>
 				<br>
 			</div>
@@ -243,7 +243,7 @@
 			<br>
 		</div>
 
-
+		<br>
 		<br>
 		Here's what the colors mean...
 		<div style='text-align: left;
@@ -292,21 +292,21 @@
 			</span>			
 		</div>
 
-		<div id='div-reportStats' style='background-color: #888b98; width: 760px; border: 1px solid #60b6f0; border-radius: 6px;'>
+		<div id='div-reportStats' style='background-color: #67676b; width: 760px; border: 1px solid #60b6f0; border-radius: 6px;'>
 
 			<center>
 			<table>
 				<tr>
 					<td>
 						<div style="display: inline;">
-							<span class='spanBoxy' style="height: 115px; text-align: center; font-size: 38px; color: #60b6f0;">{{selectedPlayer}}</span>
+							<span class='spanBoxy spanBoxyName' :class='{ winner : isWinner }'style="height: 48px; text-align: center; font-size: 38px;  ">{{selectedPlayer}}</span>
 						</div>
 					</td>
 
 					<td>
 						<div style='display: inline;'>
-							<span class='spanBoxy' style='width: 148px;'>Placement: #{{winPlace}}</span> 
-							<span class='spanBoxy' style='width: 147px;'>Time survived: {{timeSurvived}}</span>
+							<span class='spanBoxy' :class='{ winner : isWinner }' style='width: 148px;'>Placement: #{{winPlace}}</span> 
+							<span class='spanBoxy' :class='{ winner : isWinner }' style='width: 147px;'>Time survived: {{timeSurvived}}</span>
 							<br>
 							<span class='spanBoxy' style='width: 88px;'>Kills: {{kills}}</span>
 							<span class='spanBoxy' style='width: 88px;'>Knocks: {{DBNOs}}</span>

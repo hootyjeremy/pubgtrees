@@ -167,6 +167,7 @@ let vuePlayerReport = new Vue({
 		// rowAction: null,
 
 		isHidden: true,			// hide damage/health
+		isWinner: false,		// show as winner green in damage report
 
 		hitLocations: {},
 
@@ -230,6 +231,9 @@ let vuePlayerReport = new Vue({
 					this.timeSurvived	= element.timeSurvived;
 					this.winPlace 		= element.winPlace;
 					this.teamKills 		= element.teamKills;
+
+					// color some text green in the report.
+					this.isWinner = (this.winPlace == 1) ? true : false;
 				}
 			});
 
@@ -263,6 +267,9 @@ let vuePlayerReport = new Vue({
 					let rowClass = '';
 
 					let zone = '';
+
+					let blAttackerIsBot = false;	// add '[BOT]' to name if it's a bot, but do it just before sending variables back
+					let blVictimIsBot	= false;	// otherwise, it pollutes attackerName and victimName.
 
 					// ! unicode characters
 					// https://en.wikipedia.org/wiki/List_of_Unicode_characters
@@ -427,7 +434,7 @@ let vuePlayerReport = new Vue({
 
 						// if the killer is a bot, then let it be known (since they are colored as killer and not bot anymore)
 						if (allBotNames.includes(killer)) {
-							attackerName = '[BOT] ' + attackerName;
+							blAttackerIsBot = true;
 						}
 					}					
 
@@ -437,7 +444,8 @@ let vuePlayerReport = new Vue({
 
 						// if the killer is a bot, then let it be known (since they are colored as killer and not bot anymore)
 						if (allBotNames.includes(killer)) {
-							victimName = '[BOT] ' + victimName;
+							//victimName = '[BOT] ' + victimName;
+							blVictimIsBot = true;
 						}
 					}
 
@@ -463,7 +471,8 @@ let vuePlayerReport = new Vue({
 							if (attackerName == teammate.name) {
 
 								if (teammate.isBot) {
-									attackerName = '[BOT] ' + attackerName;
+									//attackerName = '[BOT] ' + attackerName;
+									blAttackerIsBot = true;
 								}
 	
 								if (killedByTeammate != 2) {
@@ -493,7 +502,8 @@ let vuePlayerReport = new Vue({
 						killerTeam.teammates.forEach(teammate => {
 							if (victimName == teammate.name) {
 								if (teammate.isBot) {
-									victimName = '[BOT] ' + victimName;
+									blVictimIsBot = true;
+									//victimName = '[BOT] ' + victimName;
 								}
 	
 								if (killedByTeammate != 2) {
@@ -512,7 +522,8 @@ let vuePlayerReport = new Vue({
 							if (attackerName == teammate.name) {
 
 								if (teammate.isBot) {
-									attackerName = '[BOT] ' + attackerName;
+									//attackerName = '[BOT] ' + attackerName;
+									blAttackerIsBot = true;
 								}
 	
 								attackerClass = 'playerTeammate';
@@ -526,7 +537,8 @@ let vuePlayerReport = new Vue({
 						playerTeam.teammates.forEach(teammate => {
 							if (victimName == teammate.name) {
 								if (teammate.isBot) {
-									victimName = '[BOT] ' + victimName;
+									//victimName = '[BOT] ' + victimName;
+									blVictimIsBot = true;
 								}
 	
 								victimClass = 'playerTeammate';
@@ -544,6 +556,16 @@ let vuePlayerReport = new Vue({
 					if (record.victim.zone[0] != '') {
 						zone = translateZone(record.victim.zone[0]);
 
+					}
+
+
+					// add '[BOT] to name
+					if (blAttackerIsBot) { 
+						attackerName = '[BOT] ' + attackerName;
+					}
+
+					if (blVictimIsBot){
+						victimName = '[BOT]' + victimName;
 					}
 
 					this.arrPlayerReport.push({

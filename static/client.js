@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.028'
+let   version 			= '0.029'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -665,6 +665,8 @@ function explodePie(e) {
 
 function PrintReportForSelectedPlayer(selectedPlayer) {
 
+	return; 
+	
 	// get teamId of selected player
 	let playerTeamId = 0;
 	axios_telemetry_response.data.arrTeams.forEach(team => {
@@ -840,6 +842,8 @@ function CreateTreeFromD3() {
 	// original sample...
 	// https://codesandbox.io/s/xwm4k88wp?file=/src/index.js
 
+
+
 	blCycledKillsFound = false;
 
 	const response = axios_telemetry_response.data;
@@ -849,7 +853,7 @@ function CreateTreeFromD3() {
 				.id(function(d) { return d.name; })
 				.parentId(function(d) { return d.parent; })
 				(table);
-	
+	 
 	
 	const path_width = 1200;                        // what is this the width of? path?
 	//const root = d3.hierarchy(data);            	// https://github.com/d3/d3-hierarchy
@@ -899,7 +903,7 @@ function CreateTreeFromD3() {
 	.select(document.getElementById("d3-svg01"))
 	.style("width",  custom_width)
 	.style("height", custom_height)
-	.style('background-color', '#373738');
+	.style('background-color', '#414144');
 
 	const g = svg
 	.append("g")                        // svg <g> tag is a group of elements : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g#:~:text=The%20SVG%20element%20is,with%20the%20element.
@@ -924,7 +928,7 @@ function CreateTreeFromD3() {
 
 		// draw the line invisible if it is coming from 'match' top node to any of the categories
 		if (d.source.id == 'Match') {
-			return '#373738';	// background color (the line is invisible)
+			return '#414144';	// background color (the line is invisible)
 		}
 		else {
 			return "#8f91a1";
@@ -955,7 +959,7 @@ function CreateTreeFromD3() {
 	//.attr("fill", d => (d.children ? "#8f91a1" : "#8f91a1"))    // the dot (nodes/leaves)
 	.attr("fill", d => {
 		// don't show the first dot for "Match" on the top level
-		return (d.id == 'Match') ? "#373738" : "#8f91a1";	// background-color : line color
+		return (d.id == 'Match') ? "#414144" : "#8f91a1";	// background-color : line color
 	})
 	.attr("r", 2.5);
 
@@ -991,9 +995,9 @@ function CreateTreeFromD3() {
 		else if (d.data.name == 'Winner' || d.data.name == 'Winners') {
 			// want to draw the winner category in winner's color so that the branch is somewhat separated from the rest.
 			return 'categories'
-			return 'categories winner'
+			//return 'categories winner'
 		}
-		else if (d.data.name == 'Match' || d.data.name == 'Environment kills' || 
+		else if (d.data.name == 'Match' || d.data.name == 'Environment' || 
 				 d.data.name == 'Self kills' || d.data.name == 'Cycled kills') {
 			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
 			return 'categories';
@@ -1022,9 +1026,10 @@ function CreateTreeFromD3() {
 		}
 	})
 	.attr('cursor', d => {
-		if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || 
-		    d.data.name == 'Self kills' || d.data.name == 'Cycled kills' || d.data.name.includes('<') || d.data.name.includes('(')) {
-			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
+		if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || 
+			d.data.name == 'Self kills' || d.data.name == 'Cycled kills' || d.data.name.includes('<') || d.data.name.includes('(') || 
+			!response.allHumanNames.includes(d.data.name)) {
+			// if it's not a player, then it's a category or a bot. (or an untracked late spawn bot?)
 			return 'normal';
 		}
 		else {
@@ -1037,18 +1042,18 @@ function CreateTreeFromD3() {
 	//.text(d => d.data.name)
 	.attr("x", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') ? -6 : 6;
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') ? -6 : 6;
 	}) 
 	.attr("text-anchor", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') ? "end" : "start";
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') ? "end" : "start";
 	}) 
 	.text(d => {
 		// add '<>' to the category names
 		if (d.data.name == 'Match') {
 			return '';
 		}
-		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment kills' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') {
+		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') {
 			
 			if (d.data.name == 'Cycled kills') {
 				// need to know if the footnote should be displayed.
@@ -1077,6 +1082,12 @@ function UpdateTreeContext(selectedPlayer) {
 	// 	RunPlayerDamageReport(selectedPlayer);
 	// }
 	//prevSelectedPlayer = selectedPlayer; 
+
+	// don't do any reporting on bots. just let them show up in relation to actual players.
+	if (!axios_telemetry_response.data.allHumanNames.includes(selectedPlayer)) {
+		//alert('this is a bot.');
+		return;
+	}
 
 
 	RunPlayerDamageReport(selectedPlayer);
