@@ -54,6 +54,12 @@ tr.matchRow {
 	cursor: pointer;
 }
 
+tr.reportRow {
+	background-color: #343436;
+	cursor: normal;
+}
+
+
 tr.activeMatchRow {
 	background-color: #448fc0;
 	cursor: pointer;

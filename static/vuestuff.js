@@ -167,6 +167,9 @@ let vuePlayerReport = new Vue({
 		// rowAction: null,
 
 		isHidden: true,			// hide damage/health
+
+		hitLocations: {},
+
 		
 		
 
@@ -184,7 +187,7 @@ let vuePlayerReport = new Vue({
 		updatePlayerReport: function (name, killer, playerTeam, killerTeam, arrPlayerCards, arrPlayersDamageLog, allBotNames, allHumanNames) {
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
-			console.log('isHidden: ' + this.isHidden);
+			//console.log('isHidden: ' + this.isHidden);
 
 			if (allBotNames.includes(name)) {
 				document.getElementById('botReportDisclaimer').style.display = 'block';
@@ -197,6 +200,14 @@ let vuePlayerReport = new Vue({
 
 
 			this.selectedPlayer = name;
+
+			//let hitLocations 	= new Object();
+			this.hitLocations.head 	= 0;
+			this.hitLocations.body 	= 0;
+			this.hitLocations.pelvis = 0;
+			this.hitLocations.arm  	= 0;
+			this.hitLocations.leg 	= 0;
+
 
 			// ! get playercard info...
 
@@ -242,8 +253,6 @@ let vuePlayerReport = new Vue({
 					let victimHealth = '';
 
 					let armor = '';
-					//let head = '';
-					//let vest = '';
 
 					let attackerClass = '';
 					let victimClass = '';
@@ -255,6 +264,29 @@ let vuePlayerReport = new Vue({
 					// https://en.wikipedia.org/wiki/List_of_Unicode_characters
 
 					if (record._T == 'LogPlayerTakeDamage') {
+
+						// hit locations
+						//if (victimName != attackerName) {
+							if (attackerName == name) {
+								if (record.damageReason == 'HeadShot') {
+									this.hitLocations.head++;
+								}
+								else if (record.damageReason == 'TorsoShot') {
+									this.hitLocations.body++;
+								}
+								else if (record.damageReason == 'PelvisShot') {
+									this.hitLocations.pelvis++;
+								}
+								else if (record.damageReason == 'LegShot') {
+									this.hitLocations.leg++;
+								}
+								else if (record.damageReason == 'ArmShot') {
+									this.hitLocations.arm++;
+								}
+							}
+						//}
+
+												
 
 						// skip adding a record if not chosen to show damage.
 						if (this.isHidden) {
@@ -270,9 +302,7 @@ let vuePlayerReport = new Vue({
 
 						_info = this.resolveDamageReason(record.damageCauserName, record.damageReason, record.damageTypeCategory);
 
-						// $ need to translate the gear type
-						// $ only show armor and vest if it is a headshot or a body shot
-
+						// only show armor and vest if it is a headshot or a body shot
 						if (record.damageReason == 'HeadShot') {
 							armor = this.translateHead(record.victim.armor.head);
 						}
@@ -288,6 +318,7 @@ let vuePlayerReport = new Vue({
 						if (record.killingStroke){
 							//_info += ' (kill/knock)'
 						}
+
 					}
 					else if (record._T == 'LogPlayerMakeGroggy') {
 						_event = '\u25BC'; // '\u2228'; //'\u25BD'; //'v';
@@ -402,7 +433,7 @@ let vuePlayerReport = new Vue({
 
 						// if the killer is a bot, then let it be known (since they are colored as killer and not bot anymore)
 						if (allBotNames.includes(killer)) {
-							victimName = '[BOT] ' + victim;
+							victimName = '[BOT] ' + victimName;
 						}
 					}
 
@@ -499,8 +530,6 @@ let vuePlayerReport = new Vue({
 					}
 
 
-					// $ if you are your own killer, don't paint as killer
-
 
 					// don't show distance for grenades or molotov damage
 					if (_damager == 'Grenade' || _damager == 'Molotov') {
@@ -584,7 +613,7 @@ let vuePlayerReport = new Vue({
 				r = damageReason;
 
 				if (damageReason == 'TorsoShot') {
-					r = 'Torso';
+					r = 'Body';
 				}
 				else if (damageReason == 'LegShot') {
 					r = 'Leg';
@@ -598,7 +627,6 @@ let vuePlayerReport = new Vue({
 				else if (damageReason == 'PelvisShot') {
 					r = 'Pelvis';
 				}
-
 			}
 
 			return r;

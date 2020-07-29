@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.027'
+let   version 			= '0.028'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -184,14 +184,11 @@ window.addEventListener('click', (event) => {
 
 
 function ShowModal() {
-	// display the modal report
-	console.log('show modal()');
 	document.getElementById('div-modal').style.display = 'block';
 	document.getElementById('div-modal').scrollIntoView({behavior: "smooth"});	
 }
 
 function HideModal() {
-	console.log('hide modal()');
 	document.getElementById('div-modal').style.display = 'none';
 	vuePlayerReport.clearPlayerReport();
 }
@@ -644,49 +641,81 @@ function RunPlayerDamageReport(selectedPlayer) {
 										axios_telemetry_response.data.allHumanNames);
 
 
-	// $ maybe hide the rows here?
-
-	
-	// hide and show damage
-	// if (blShowDamage) {
-	// 	// currently showing damage, now hide it
-
-	// 	document.getElementById('btnShowDamage').textContent = 'Show damage/health';
-
-	// 	let arrElements = document.getElementsByClassName('tdHealth');
-
-	// 	let records = vuePlayerReport.arrPlayerReport.length;
-
-	// 	// if hiding damage, hide health data..
-	// 	for (let i = 0; i < arrElements.length; i++) {
-	// 		arrElements[i].style.width = 0;
-	// 		//arrElements[i].style.display = 'none';
-	// 		//console.log(i + '=' + arrElements[i].style.display + ' -> ' + arrElements[i].innerHTML);
-	// 	}
-	// }
-	// else {
-	// 	// currently hiding damage, now show it
-	// 	document.getElementById('btnShowDamage').textContent = 'Hide damage/health';
-
-	// 	let arrElements = document.getElementsByClassName('tdHealth');
-
-	// 	let records = vuePlayerReport.arrPlayerReport.length;
-
-	// 	// if hiding damage, hide health data..
-	// 	for (let i = 0; i < arrElements.length; i++) {
-	// 		arrElements[i].style.width = 20;
-	// 		//arrElements[i].style.display = 'table-cell';
-	// 		//console.log(i + '=' + arrElements[i].style.display + ' -> ' + arrElements[i].innerHTML);
-	// 	}
-	// }
-
-	//blShowDamage = !blShowDamage;
 
 
+	if (vuePlayerReport.hitLocations.head + vuePlayerReport.hitLocations.body + vuePlayerReport.hitLocations.pelvis + vuePlayerReport.hitLocations.arm + vuePlayerReport.hitLocations.leg > 0) {
+		
+		// https://tobiasahlin.com/blog/chartjs-charts-to-get-you-started/#1-bar-chart
+
+		new Chart(document.getElementById("pie-chart"), {
+			type: 'pie',
+			data: {
+			  labels: ["Head", "Body", "Pelvis", "Arm", "Leg"],
+			  datasets: [{
+				label: "Hits",
+				backgroundColor: ["#60b6f0", "#ab97e0","#efb8df","#ef8b65","#ffbd74"],
+				data: [	vuePlayerReport.hitLocations.head, 
+					   	vuePlayerReport.hitLocations.body,
+						vuePlayerReport.hitLocations.pelvis,
+					 	vuePlayerReport.hitLocations.arm,
+					 	vuePlayerReport.hitLocations.leg	]
+			  }]
+			},
+			options: {
+			  title: {
+				display: false,
+				text: ''
+			  }
+			}
+		});
+		
+
+		if (!vuePlayerReport.isHidden) {
+			document.getElementById('div-pie-chart').style.display = 'block';
+		}
+		else {
+			document.getElementById('div-pie-chart').style.display = 'none';
+		}
+
+		// new Chart(document.getElementById("bar-chart"), {
+		// 	type: 'bar',
+		// 	data: {
+		// 	  labels: ["Head", "Body", "Pelvis", "Arm", "Leg"],
+		// 	  datasets: [
+		// 		{
+		// 		  label: "Hits",
+		// 		  backgroundColor: ["#3e95cd", "#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+		// 		  data: [vuePlayerReport.hitLocations.head, 
+		// 				 vuePlayerReport.hitLocations.body,
+		// 				 vuePlayerReport.hitLocations.pelvis,
+		// 				 vuePlayerReport.hitLocations.arm,
+		// 				 vuePlayerReport.hitLocations.leg]
+		// 		}
+		// 	  ]
+		// 	},
+		// 	options: {
+		// 	  legend: { display: false },
+		// 	  title: {
+		// 		display: false,
+		// 		text: 'Predicted world population (millions) in 2050'
+		// 	  }
+		// 	}
+		// });
+	}
+	else {
+		document.getElementById('div-pie-chart').style.display = 'none';
+	}
 
 	ShowModal();
 }
 
+
+function explodePie(e) {
+	for(var i = 0; i < e.dataSeries.dataPoints.length; i++) {
+		if(i !== e.dataPointIndex)
+			e.dataSeries.dataPoints[i].exploded = false;
+	}
+}
 
 
 //#endregion 

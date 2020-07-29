@@ -785,8 +785,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
     var matchStartTime      = null;
     var strRecordTimestamp  = null;
 
-    var arrDamageLog    = [];       // for server side console logging
-    var arrKillFeedLog  = [];
+    var arrDamageLog        = [];   // for server side console logging
+    var arrKillFeedLog      = [];
     var arrEnvironmentKills = [];   // just to identify environment killers for knowing what to look for (Redzone, Drowning, other stuff I don't know yet)
     let arrSelfKills        = [];   // just to identify self kill data
     

@@ -25,14 +25,20 @@
 	<!-- <script src="d3/d3.js"></script> -->
 
 
-
-
 	<script src="static/hf.js" type="text/javascript"></script>
 
-	<link rel="stylesheet" type="text/css" href="static/style.css" />
-	<script src="static/client.js" type="text/javascript">	</script>
-	<!-- <link rel="stylesheet" type="text/css" href="static/minified/style.min.css" />
-	<script src="static/minified/client.min.js" type="text/javascript">	</script> -->
+	<!-- HOOTY MINIFY STUFF -->
+	<!-- HOOTY MINIFY STUFF -->
+	<!-- HOOTY MINIFY STUFF -->
+	<!-- HOOTY MINIFY STUFF -->
+	<!-- HOOTY MINIFY STUFF -->
+	<!-- <link rel="stylesheet" type="text/css" href="static/style.css" />
+	<script src="static/client.js" type="text/javascript">	</script> -->
+	<link rel="stylesheet" type="text/css" href="static/minified/style.min.css" />
+	<script src="static/minified/client.min.js" type="text/javascript">	</script>
+
+	<!-- Chart.js pie chart -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 
 
 	<link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
@@ -40,6 +46,7 @@
 
 
 	<title>PUBG Trees</title>
+	<meta name="description" content="Search your recent PUBG games for match details about damage and kills.">
 
 </head>
 
@@ -54,7 +61,7 @@
 				<div style='font-size: 14px; font-weight: normal;'>
 					built by hooty__
 					<br>
-					version 0.027
+					version 0.028
 				</div>
 				<br>
 			</div>
@@ -211,7 +218,6 @@
 
 
 		<br>
-
 		<table>
 		<tr class='matchRow' style="cursor: auto;"> 
 			<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{createdAt}}</td>
@@ -223,22 +229,26 @@
 
 
 		<div id='div-d3-tree' style="overflow: auto;">
+			<br>
+			Click a player for match details...
+			<br>
 			<svg id='d3-svg01'></svg>
+
+			<br>
+			<button id="btnCopyMatchURL" style='width: 120;'>Copy match URL</button>
 		</div>
 
-		Click a player for match details.
-		<br>
-		<br>
-		<br>
 
 		<div id='div-cycle-footnote'>
+			<br>
 			<span>** Cycled kills occur if two players kill each other. If they kill each other, they are removed 
 				from the normal flow of kills since they derive from each other and that is a loop, not a branch.</span>
 			<br>
 		</div>
 
 
-
+		<br>
+		Colors...
 		<div style='text-align: left;
 					width: 300px; 
 					background-color: #373738; 
@@ -257,10 +267,6 @@
 			</table>
 		</div>
 
-		<br>
-		<br>
-		<button id="btnCopyMatchURL" style='width: 120;'>Copy match URL</button>
-		<br>
 		<br>
 
 
@@ -325,18 +331,18 @@
 						<th style="width:130px; text-align: right;">Attacker</th>
 						<th :class="{ tdHidden: isHidden}">Hlth</th>
 						<th style="text-align: center;">Dmg</th>
-						<th :class="{ tdHidden: isHidden}"></th>
 						<th :class="{ tdHidden: isHidden}">Hlth</th>
 						<th style="width: 130px; text-align: left;">Victim</th>
 						<th>Weapon</th>
 						<th style="width: 40px;" :class="{ tdHidden: isHidden}">Dist</th>
+						<th :class="{ tdHidden: isHidden}"></th>
 						<th>Info</th>
 						<th>Zone</th>
 					</tr>
 				</thead>
 		
 				<tbody>
-					<tr class='matchRow'
+					<tr class='reportRow'
 						:class='reportRow.rowClass'
 						v-for='(reportRow, index) in arrPlayerReport' :key='reportRow.id'
 					>
@@ -344,30 +350,38 @@
 						<td :class='reportRow.attackerClass' style='text-align: right; font-weight: bold;'>{{reportRow.attacker}}</td>
 						<td style='text-align: center;' :class="{ tdHidden: isHidden}">{{reportRow.attackerHealth}}</td>
 						<td style='text-align: center; font-weight: bold;'>{{reportRow.event}}</td>
-						<td style='text-align: center;' :class="{ tdHidden: isHidden}"><img :src='reportRow.armor'></td>
 						<td style='text-align: center;' :class="{ tdHidden: isHidden}">{{reportRow.victimHealth}}</td>
 						<td :class='reportRow.victimClass' style='font-weight: bold;'>{{reportRow.victim}}</td>
 						<td>{{reportRow.damagerInfo}}</td>
 						<td style='text-align: right;' :class="{ tdHidden: isHidden}">{{reportRow.distance}}</td>
+						<td style='text-align: center;' :class="{ tdHidden: isHidden}"><img :src='reportRow.armor'></td>
 						<td style='text-align: left;'>{{reportRow.info}}</td>
 						<td style='border-radius: 0px 6px 6px 0px; text-align: left; padding-right: 10px;'>{{reportRow.zone}}</td>
 					</tr>
 				</tbody>
 			</table>
-			</center>
+		</center>
 
 		<br>
 		<br>
 
 
-		<span class='spanBoxy'>╳ &ensp; Kill</span>
+		<!-- <span class='spanBoxy'>╳ &ensp; Kill</span>
 		<span class='spanBoxy'>▼ &ensp; Knock</span>
 		<span class='spanBoxy'>∧ &ensp; Revive</span>
+		<br> -->
+
+		<center>
+		<div id='div-pie-chart' 
+			 :class="{ tdHidden: isHidden}"
+			 style='width: 260px; height: 260px; margin-bottom: 36px;'>
+			<canvas id="pie-chart" width="260" height="260"></canvas>
+			<br>
+		</div>
+		</center>
+
 		
 		
-		<br>
-		<br>
-		<br>
 		<button id="btnShowDamage" style="width: 144; margin-left: 10;">Show details</button>
 
 		<button id="btnCloseModal2" style="width: 144; margin-left: 10;">Close</button>
@@ -383,8 +397,8 @@
 
 
 
-<!-- <script src="static/minified/vuestuff.min.js" type="text/javascript"></script> -->
-<script src="static/vuestuff.js" type="text/javascript"></script>
+<script src="static/minified/vuestuff.min.js" type="text/javascript"></script>
+<!-- <script src="static/vuestuff.js" type="text/javascript"></script> -->
 
 
 </body>
