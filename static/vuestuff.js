@@ -411,6 +411,19 @@ let vuePlayerReport = new Vue({
 					// killer teammate: attacker
 					if (attackerName != killer && killer != '' && killerTeam != 0) {
 						// check if they are on the killer team
+
+						// need to skip this if a player's killer is on the same team
+						let killedByTeammate = 0;		// if this is two (both killer and player are on the same team)
+						killerTeam.teammates.forEach(teammate => {
+							if (teammate.name == killer) {
+								killedByTeammate++;
+							}
+							else if (teammate.name == name) {
+								killedByTeammate++;
+							}
+						});
+
+
 						killerTeam.teammates.forEach(teammate => {
 							if (attackerName == teammate.name) {
 
@@ -418,13 +431,29 @@ let vuePlayerReport = new Vue({
 									attackerName = '[BOT] ' + attackerName;
 								}
 	
-								attackerClass = 'killerTeammate';
+								if (killedByTeammate != 2) {
+									attackerClass = 'killerTeammate';
+								}
 							}
 						});
+
 					}
 
 					// killer teammate: victim
 					if (victimName != killer && killer != '' && killerTeam != 0) {
+
+						// need to skip this if a player's killer is on the same team
+						let killedByTeammate = 0;
+						killerTeam.teammates.forEach(teammate => {
+							if (teammate.name == killer) {
+								killedByTeammate++;
+							}
+							else if (teammate.name == name) {
+								killedByTeammate++;
+							}
+						});
+
+						
 						// check if they are on the killer team
 						killerTeam.teammates.forEach(teammate => {
 							if (victimName == teammate.name) {
@@ -432,7 +461,9 @@ let vuePlayerReport = new Vue({
 									victimName = '[BOT] ' + victimName;
 								}
 	
-								victimClass = 'killerTeammate';
+								if (killedByTeammate != 2) {
+									victimClass = 'killerTeammate';
+								}
 							}
 						});
 					}

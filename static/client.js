@@ -12,7 +12,7 @@ let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.026'
+let   version 			= '0.027'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -146,10 +146,10 @@ window.addEventListener('load', (event) => {
 
 		if (vuePlayerReport.isHidden) {
 			// if currently hiding columns, 
-			document.getElementById('btnShowDamage').textContent = 'Hide damage/health';
+			document.getElementById('btnShowDamage').textContent = 'Hide details';
 		}
 		else {
-			document.getElementById('btnShowDamage').textContent = 'Show damage/health';
+			document.getElementById('btnShowDamage').textContent = 'Show details';
 		}
 
 		vuePlayerReport.isHidden = !vuePlayerReport.isHidden;
