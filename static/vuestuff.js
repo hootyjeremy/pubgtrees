@@ -170,9 +170,13 @@ let vuePlayerReport = new Vue({
 
 		hitLocations: {},
 
-		
-		
+		headPercentage: 0,
+		bodyPercentage: 0,
+		pelvisPercentage: 0,
+		armPercentage: 0,
+		legPercentage: 0,
 
+		
 
 
 		// teammates
@@ -229,11 +233,11 @@ let vuePlayerReport = new Vue({
 				}
 			});
 
-			//console.dir(this.match_data);
+			
 
-
-			// ! get damage log activity
-			// ? separate for damage and kills, and even teammate knock/revive stuff
+			// get damage log activity
+			//#region // ! [region] arrPlayersDamageLog loop...
+			//
 
 			rowId = 0;
 			this.arrPlayerReport = [];
@@ -500,6 +504,7 @@ let vuePlayerReport = new Vue({
 					}
 
 
+					
 					// player teammate: attacker
 					if (attackerName != name) {
 						// check if they are on the killer team
@@ -566,7 +571,24 @@ let vuePlayerReport = new Vue({
 					rowId++;
 					//debugger;
 				}
+
+
 			})
+
+			//#endregion -- arrPlayersDamage loop
+
+
+
+			// get percentages of shots
+			totalHits = this.hitLocations.head + this.hitLocations.body + this.hitLocations.pelvis + this.hitLocations.arm + this.hitLocations.leg;
+
+			if (totalHits > 0) {
+				this.headPercentage = ((this.hitLocations.head * 100) / totalHits).toFixed(1);
+				this.bodyPercentage = ((this.hitLocations.body * 100) / totalHits).toFixed(1);
+				this.pelvisPercentage = ((this.hitLocations.pelvis * 100) / totalHits).toFixed(1);
+				this.armPercentage = ((this.hitLocations.arm * 100) / totalHits).toFixed(1);
+				this.legPercentage = ((this.hitLocations.leg * 100) / totalHits).toFixed(1);
+			}
 		},
 		clearPlayerReport: function () {
 			this.arrPlayerReport = [];

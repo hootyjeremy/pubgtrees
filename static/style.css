@@ -206,6 +206,18 @@ span.spanBoxy {
 	display: inline-block;
 }
 
+span.spanBoxyShots {
+	font-size: 14px;
+	font-weight: bold;
+	background-color: #dcddde;
+	color: #343436;
+	padding: 4px 10px;
+	margin: 4px;
+	border-radius: 4px;
+	display: inline-block;
+}
+
+
 svg#d3-svg01 {
 	border: 2px solid #60b6f0;
 	border-radius: 10px;
