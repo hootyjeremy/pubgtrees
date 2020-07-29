@@ -642,10 +642,16 @@ function RunPlayerDamageReport(selectedPlayer) {
 
 
 
+	// $ pie chart is buggy. 
+	document.getElementById('div-pie-chart').style.display = 'none';
+	ShowModal();
+	return;
+
 
 	if (vuePlayerReport.hitLocations.head + vuePlayerReport.hitLocations.body + vuePlayerReport.hitLocations.pelvis + vuePlayerReport.hitLocations.arm + vuePlayerReport.hitLocations.leg > 0) {
 		
 		// https://tobiasahlin.com/blog/chartjs-charts-to-get-you-started/#1-bar-chart
+
 
 		new Chart(document.getElementById("pie-chart"), {
 			type: 'pie',
