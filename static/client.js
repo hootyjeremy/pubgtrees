@@ -150,9 +150,14 @@ window.addEventListener('load', (event) => {
 		if (vuePlayerReport.isHidden) {
 			// if currently hiding columns, 
 			document.getElementById('btnShowDamage').textContent = 'Hide details';
+			
+			chkIncoming.style.display = 'inline';
+			lblIncoming.style.display = 'inline';
 		}
 		else {
 			document.getElementById('btnShowDamage').textContent = 'Show details';
+			chkIncoming.style.display = 'none';
+			lblIncoming.style.display = 'none';
 		}
 
 		vuePlayerReport.isHidden = !vuePlayerReport.isHidden;
