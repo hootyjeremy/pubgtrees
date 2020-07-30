@@ -122,7 +122,7 @@ text.botPlayers {
 }
 
 text.searchedPlayer {
-	fill: #efb8df;
+	fill: #1b1b1b;
 	/* fill: #0e0d0e; */
 }
 
@@ -193,7 +193,7 @@ span.winner {
 
 span.searchedPlayer {
 	/* color: #7dde98; */
-	color: #efb8df;
+	color: #1b1b1b;
 }
 
 span.botPlayers {
