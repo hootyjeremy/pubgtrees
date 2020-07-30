@@ -299,10 +299,25 @@ let vuePlayerReport = new Vue({
 
 												
 
-						// skip adding a record if not chosen to show damage.
+						// ! filter: skip adding a record if not chosen to show damage.
 						if (this.isHidden) {
 							return;
 						}
+
+						// ! filter: don't add record if this is incoming damage
+						if (!chkIncoming.checked) {
+							if (attackerName != name) {
+								return;
+							}
+						}
+
+						// if (!chkOutgoing.checked) {
+						// 	if (victimName != name) {
+						// 		return;
+						// 	}
+						// }
+
+
 
 						//_damage = (record.damage < 1) ? record.damage.toFixed(2) : parseInt(record.damage);
 
@@ -567,6 +582,9 @@ let vuePlayerReport = new Vue({
 					if (blVictimIsBot){
 						victimName = '[BOT]' + victimName;
 					}
+
+
+
 
 					this.arrPlayerReport.push({
 						'rowId': rowId,

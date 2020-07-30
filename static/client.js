@@ -84,6 +84,9 @@ let axios_telemetry_response = null;	// global response so that functions know w
 let blShowDamage = false;
 
 
+let chkIncoming = null;
+//let chkOutgoing = null;
+
 
 // ! Window load
 window.addEventListener('load', (event) => {
@@ -158,6 +161,19 @@ window.addEventListener('load', (event) => {
 		// re-draw the report
 		RunPlayerDamageReport(glSelectedPlayer);
 	});
+
+
+	// filter for damage type -------------------------------->
+	chkIncoming = document.getElementById('checkbox-incoming');
+	chkIncoming.addEventListener('click', (event) => {
+		RunPlayerDamageReport(glSelectedPlayer);
+	})
+
+	// chkOutgoing = document.getElementById('checkbox-outgoing');
+	// chkOutgoing.addEventListener('click', (event) => {
+	// 	RunPlayerDamageReport(glSelectedPlayer);
+	// })
+
 
 });
 
@@ -666,7 +682,7 @@ function explodePie(e) {
 function PrintReportForSelectedPlayer(selectedPlayer) {
 
 	return; 
-	
+
 	// get teamId of selected player
 	let playerTeamId = 0;
 	axios_telemetry_response.data.arrTeams.forEach(team => {
