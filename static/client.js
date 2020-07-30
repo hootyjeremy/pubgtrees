@@ -8,7 +8,7 @@
 let strLine = "--------------------------------------------";
 
 let hooty_server_url 	= 'http://localhost:3000';
-let defaultPlayer		= 'hooty__';
+//let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
@@ -18,7 +18,7 @@ const blTestingVersion 	= !true;
 if (!blTestingVersion) {
 	//hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
 	hooty_server_url 	= 'https://www.pubgtrees.com';
-	defaultPlayer 		= '';
+	//defaultPlayer 		= '';
 	console.log('live version: ' + version);
 
 	//let blHttpRedirected = false;
@@ -81,18 +81,29 @@ let searchDirection = null;	// this will be for "next" or "previous" matches
 
 let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
 
-let blShowDamage = false;
-
+//let blShowDamage = false;
 
 let chkIncoming = null;
+let chkDefault 	= null;
 //let chkOutgoing = null;
+
 
 
 // ! Window load
 window.addEventListener('load', (event) => {
 	//console.log('page is fully loaded');
 
-	document.getElementById('inputPlayerName').value = defaultPlayer;
+
+	// load default player from local storage
+	let defaultPlayer 	= localStorage.getItem('defaultPlayer');
+	let defaultPlatform = localStorage.getItem('defaultPlatform');
+
+	if (defaultPlayer != null) {
+		document.getElementById('inputPlayerName').value = defaultPlayer;
+		document.getElementById('slcPlatform').value = defaultPlatform;
+	}
+
+
 
 	// check if this is going to launch a tree from url parameters...
 	checkURLQuery();
@@ -168,18 +179,24 @@ window.addEventListener('load', (event) => {
 	});
 
 
+	chkDefault = document.getElementById('checkbox-setDefault');
+
 	// filter for damage type -------------------------------->
 	chkIncoming = document.getElementById('checkbox-incoming');
-	chkIncoming.addEventListener('click', (event) => {
+
+	// console.log("localStorage.defaultPlayer: " + localStorage.defaultPlayer);
+	// console.log("localStorage.defaultPlatform: " + localStorage.defaultPlatform);
+	// console.log("localStorage.chkIncomingChecked: " + localStorage.chkIncomingChecked);
+
+	// if (localStorage.getItem('chkIncomingChecked') != null) {
+	// 	chkIncoming.checked = localStorage.getItem('chkIncomingChecked');
+	// }
+
+	chkIncoming.addEventListener('change', (event) => {
+		//localStorage.setItem('chkIncomingChecked', chkIncoming.checked)
+		
 		RunPlayerDamageReport(glSelectedPlayer);
-	})
-
-	// chkOutgoing = document.getElementById('checkbox-outgoing');
-	// chkOutgoing.addEventListener('click', (event) => {
-	// 	RunPlayerDamageReport(glSelectedPlayer);
-	// })
-
-
+	});	
 });
 
 
@@ -283,6 +300,16 @@ async function GetPlayerMatches() {
 
 	// clear out the current d3 tree
 	document.getElementById('d3-svg01').innerHTML = '';
+
+
+	if (chkDefault.checked) {
+		if (strPlayerName.length > 0) {
+			localStorage.setItem('defaultPlayer', strPlayerName);
+			localStorage.setItem('defaultPlatform', strPlatform);
+		}
+
+		chkDefault.checked = false;
+	}
 
 
 	if (strPlatform != prevPlatform || strPlayerName != prevPlayerName) {
