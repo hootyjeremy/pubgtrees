@@ -153,6 +153,7 @@ var _damageTypeCategory = {
     "Damage_Molotov": "Molotov",
     "Damage_Punch": "Punch",
     "Damage_TrainHit": "Train Damage",
+    "Damage_LootTruckHit": "Loot Truck Hit",
     "Damage_VehicleCrashHit": "Vehicle Crash",
     "Damage_VehicleHit": "Vehicle Hit",
     "SpikeTrap": "Spike Trap",

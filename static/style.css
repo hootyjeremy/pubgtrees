@@ -19,6 +19,7 @@ button {
     background-color: #82759c;
 	border: 1px solid #dcddde;
 	border-radius: 4px;
+	height: 26px;
 }
 
 button.disabledButton {
