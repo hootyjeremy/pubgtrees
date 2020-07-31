@@ -1196,7 +1196,12 @@ function CreateTreeFromD3() {
 		}
 		else if (!response.allHumanNames.includes(d.data.name) && !d.data.name.includes('<')) {
 			// this is a bot
-			return '(bot) ' + d.data.name;
+			if (d.data.name.length > 10) {
+				return '(bot) ' + d.data.name.substring(0, 10) + '~';
+			}
+			else {
+				return '(bot) ' + d.data.name;
+			}
 		}
 		else {
 			return d.data.name;
