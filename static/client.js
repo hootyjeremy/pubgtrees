@@ -12,7 +12,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.029'
+let   version 			= '0.030'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -93,6 +93,9 @@ let chkDefault 	= null;
 window.addEventListener('load', (event) => {
 	//console.log('page is fully loaded');
 
+	if (blTestingVersion) {
+		document.getElementById('test-version-indicator').style.display = 'block';
+	}
 
 	// load default player from local storage
 	let defaultPlayer 	= localStorage.getItem('defaultPlayer');
@@ -180,6 +183,12 @@ window.addEventListener('load', (event) => {
 
 
 	chkDefault = document.getElementById('checkbox-setDefault');
+	chkDefault.addEventListener('change', (event) => {
+		if (chkDefault.checked) {
+			document.getElementById('lblDefault').textContent = 'Set as default player (now click Search)';
+		}
+	})
+
 
 	// filter for damage type -------------------------------->
 	chkIncoming = document.getElementById('checkbox-incoming');
@@ -309,6 +318,8 @@ async function GetPlayerMatches() {
 		}
 
 		chkDefault.checked = false;
+
+		document.getElementById('lblDefault').textContent = 'Set as default player';
 	}
 
 
@@ -595,8 +606,11 @@ async function GetTelemetry(_matchID) {
 		// once tree is generically created, update color for context and get data
 
 		if (strPlayerName != '') {
+			
 			// need to remember who the looked up player is so that they will stay 'hightlighted'
+
 			document.getElementById(strPlayerName).classList.add('searchedPlayer');
+
 		}
 
 		// don't update tree context on the first look
@@ -605,8 +619,8 @@ async function GetTelemetry(_matchID) {
 		document.getElementById('d3-tree01').scrollIntoView({behavior: "smooth"});
 
 	} catch (error) {
-		console.log('error in UpdateTreeContext() -> ' + error);
-		alert('Error in UpdateTreeContext()');
+		console.log('error in UpdateTreeContext() for player ' + strPlayerName + ' -> ' + error);
+		alert('An error occurred while updating player colors. The player you searched for has possibly changed their name after this game was played.');
 
 		return;
 	}
@@ -1021,12 +1035,34 @@ function CreateTreeFromD3() {
 			// don't create id's for stuff like ""
 			//return 'allPlayers';
 
+			// if d.data.name is on the winning team, give them winner class
+			//let winningTeamId = null;
 
-			response.arrSurvivors.forEach(element => {
-				if (element.name == d.data.name) {
-					winnerClass = ' winner';
+			// response.arrSurvivors.forEach(element => {
+			// 	if (element.name == d.data.name) {
+			// 		winningTeamId = element.teamId;		
+			// 		winnerClass = ' winner';
+			// 	}
+			// })
+
+
+			response.arrPlayerCards.forEach(player => {
+				if (player.name == d.data.name) {
+					if (player.winPlace == 1) {
+						winnerClass = ' winner';
+					}
 				}
 			})
+
+			// response.arrTeams.forEach(team => {
+			// 	if (team.teamId == winningTeamId) {
+			// 		team.teammates.forEach(teammate => {
+			// 			if (teammate.name == d.data.name) {
+			// 				winnerClass = ' winner';
+			// 			}
+			// 		})
+			// 	}
+			// })
 
 			return 'allPlayers humanPlayers' + winnerClass;
 		}
@@ -1068,8 +1104,11 @@ function CreateTreeFromD3() {
 		}
 	})
 	.attr('onclick', d => {
-		if (response.allHumanNames.includes(d.data.name) || response.allBotNames.includes(d.data.name)) {
+		if (response.allHumanNames.includes(d.data.name)) {
 			// don't create id's for stuff like ""
+
+			//  || response.allBotNames.includes(d.data.name)
+
 			return 'UpdateTreeContext(\'' + d.data.name + '\')';
 		}
 	})
@@ -1084,7 +1123,7 @@ function CreateTreeFromD3() {
 			return 'pointer';
 		}
 	})
-	.attr("dy", "0.5em") // "dy", "0.31em"
+	.attr("dy", "0.36em") // "0.5em" // "dy", "0.31em"
 	//.attr("x", d => (d.children ? 6 : 6))                    	// seems to be the offset for text-anchor           // "x", d => (d.children ? -6 : 6)
 	//.attr("text-anchor", d => (d.children ? "start" : "start")) // where the text is in relation to the node dot    // "text-anchor", d => (d.children ? "end" : "start")
 	//.text(d => d.data.name)
@@ -1114,6 +1153,13 @@ function CreateTreeFromD3() {
 			return d.data.name;
 		}
 	})
+	.select(function() {
+		return this.parentNode.insertBefore(this.cloneNode(true), this);
+	  })
+	  .attr("stroke", "#414144")	// do the dark background color so that the text will "float" on top of the lines by obscuring them somewhat
+	  .attr("stroke-linejoin", "round")
+	  .attr("stroke-width", 4)
+	  .attr("id", 'fake-invalid-id');	// $ this probably needs to be handled better since it creates duplicate IDs, even though they won't likely be used.
 }
 
 //#endregion D3 tree -----------------------
@@ -1131,7 +1177,7 @@ function UpdateTreeContext(selectedPlayer) {
 	// }
 	//prevSelectedPlayer = selectedPlayer; 
 
-	// don't do any reporting on bots. just let them show up in relation to actual players.
+	// ! filter: don't do any reporting on bots. just let them show up in relation to actual players.
 	if (!axios_telemetry_response.data.allHumanNames.includes(selectedPlayer)) {
 		//alert('this is a bot.');
 		return;

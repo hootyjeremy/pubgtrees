@@ -1,13 +1,13 @@
 const express       = require('express');
+const app           = express();
+
 //const bodyParser    = require('body-parser');
 const axios         = require('axios');
 const moment        = require('moment-timezone');   //require('moment');
 
-const app           = express();
 const fs            = require('fs');
 const path          = require('path');
 const glob          = require('glob');
-//const chalk         = require('chalk');             // https://www.npmjs.com/package/chalk
 const compression   = require('compression');       // http://expressjs.com/en/resources/middleware/compression.html
 
 const hf            = require('./hooty_modules/hf_server'); // helper functions
@@ -431,7 +431,7 @@ app.get('/getplayermatches', async (req, res) => {
 					kills 			= included.attributes.stats.kills;
 					DBNOs 			= included.attributes.stats.DBNOs;
 					winPlace 		= included.attributes.stats.winPlace;
-                    timeSurvived 	= hf.ConvertSecondsToMinutes(included.attributes.stats.timeSurvived);                
+                    timeSurvived 	= hf.ConvertSecondsToMinutes(included.attributes.stats.timeSurvived);
                 }
 
                 dctParticipantNames[participantIndex] = { 'participantID': included.id, 'name': included.attributes.stats.name };
