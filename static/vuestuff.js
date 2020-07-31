@@ -169,6 +169,8 @@ let vuePlayerReport = new Vue({
 		isHidden: true,			// hide damage/health
 		isWinner: false,		// show as winner green in damage report
 
+
+
 		hitLocations: {},
 
 		headPercentage: 0,
@@ -192,7 +194,8 @@ let vuePlayerReport = new Vue({
 		updatePlayerReport: function (name, killer, playerTeam, killerTeam, arrPlayerCards, arrPlayersDamageLog, allBotNames, allHumanNames) {
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
-			//console.log('isHidden: ' + this.isHidden);
+			//console.log('vuePlayerReport.isHidden: ' + this.isHidden);
+
 
 			if (allBotNames.includes(name)) {
 				document.getElementById('botReportDisclaimer').style.display = 'block';
@@ -574,13 +577,20 @@ let vuePlayerReport = new Vue({
 					}
 
 
-					// add '[BOT] to name
+					// add '(bot)' to name if they are a killer or killer teammate
 					if (blAttackerIsBot) { 
-						attackerName = '[BOT] ' + attackerName;
+						attackerName = '(bot) ' + attackerName;
+					}
+					else if (!allHumanNames.includes(attackerName) && !attackerName.includes('<')) {
+						attackerName = '(bot) ' + attackerName;
 					}
 
+					// add '(bot)' to name if they are a regular attacker or victim
 					if (blVictimIsBot){
-						victimName = '[BOT]' + victimName;
+						victimName = '(bot) ' + victimName;
+					}
+					else if (!allHumanNames.includes(victimName) && !victimName.includes('<')) {
+						victimName = '(bot) ' + victimName;
 					}
 
 

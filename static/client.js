@@ -157,29 +157,6 @@ window.addEventListener('load', (event) => {
 
 
 	// Show damage button
-	document.getElementById('btnShowDamage').addEventListener('click', (event) => {
-
-		//console.log(glSelectedPlayer);
-
-		if (vuePlayerReport.isHidden) {
-			// if currently hiding columns, 
-			document.getElementById('btnShowDamage').textContent = 'Hide details';
-			
-			chkIncoming.style.display = 'inline';
-			lblIncoming.style.display = 'inline';
-		}
-		else {
-			document.getElementById('btnShowDamage').textContent = 'Show details';
-			chkIncoming.style.display = 'none';
-			lblIncoming.style.display = 'none';
-		}
-
-		vuePlayerReport.isHidden = !vuePlayerReport.isHidden;
-
-
-		// re-draw the report
-		RunPlayerDamageReport(glSelectedPlayer);
-	});
 
 
 	chkDefault = document.getElementById('checkbox-setDefault');
@@ -200,15 +177,77 @@ window.addEventListener('load', (event) => {
 	// console.log("localStorage.defaultPlatform: " + localStorage.defaultPlatform);
 	// console.log("localStorage.chkIncomingChecked: " + localStorage.chkIncomingChecked);
 
-	// if (localStorage.getItem('chkIncomingChecked') != null) {
-	// 	chkIncoming.checked = localStorage.getItem('chkIncomingChecked');
-	// }
+	if (localStorage.getItem('chkIncomingChecked') != null) {		
+
+		if (localStorage.getItem('chkIncomingChecked') == 'true') {
+			chkIncoming.checked = true;
+		}
+		else {
+			chkIncoming.checked = false;
+		}
+	}
 
 	chkIncoming.addEventListener('change', (event) => {
-		//localStorage.setItem('chkIncomingChecked', chkIncoming.checked)
+		localStorage.setItem('chkIncomingChecked', chkIncoming.checked)
 		
 		RunPlayerDamageReport(glSelectedPlayer);
-	});	
+	});
+
+
+	// show damage button
+	document.getElementById('btnShowDamage').addEventListener('click', (event) => {
+
+		//console.log(glSelectedPlayer);
+		
+		if (vuePlayerReport.isHidden) {
+			// if currently hiding columns, 
+			document.getElementById('btnShowDamage').textContent = 'Hide details';
+			
+			chkIncoming.style.display = 'inline';
+			lblIncoming.style.display = 'inline';
+
+			localStorage.setItem('isHidden', 'false');
+			vuePlayerReport.isHidden = false;
+		}
+		else {
+			document.getElementById('btnShowDamage').textContent = 'Show details';
+			chkIncoming.style.display = 'none';
+			lblIncoming.style.display = 'none';
+
+			localStorage.setItem('isHidden', 'true');
+			vuePlayerReport.isHidden = true;	
+		}
+
+		//vuePlayerReport.isHidden = !vuePlayerReport.isHidden;
+
+		// re-draw the report
+		RunPlayerDamageReport(glSelectedPlayer);
+	});
+
+
+	// set up report based on hidden or not
+	if (localStorage.getItem('isHidden') != null) {
+
+		if (localStorage.getItem('isHidden') == 'true') {
+			document.getElementById('btnShowDamage').textContent = 'Show details';
+
+			chkIncoming.style.display = 'none';
+			lblIncoming.style.display = 'none';
+
+			vuePlayerReport.isHidden = true;	
+		}
+		else {
+			document.getElementById('btnShowDamage').textContent = 'Hide details';
+
+			chkIncoming.style.display = 'inline';
+			lblIncoming.style.display = 'inline';
+
+			vuePlayerReport.isHidden = false;
+		}
+	}
+
+
+
 });
 
 
@@ -1152,6 +1191,10 @@ function CreateTreeFromD3() {
 
 			return '<' + d.data.name + '>';
 		}
+		else if (!response.allHumanNames.includes(d.data.name) && !d.data.name.includes('<')) {
+			// this is a bot
+			return '(bot) ' + d.data.name;
+		}
 		else {
 			return d.data.name;
 		}
@@ -1162,9 +1205,11 @@ function CreateTreeFromD3() {
 	  .attr("stroke", "#414144")	// do the dark background color so that the text will "float" on top of the lines by obscuring them somewhat
 	  .attr("stroke-linejoin", "round")
 	  .attr("stroke-width", 4)
-	  .attr("id", 'fake-invalid-id');	// $ this probably needs to be handled better since it creates duplicate IDs, even though they won't likely be used.
+	  .attr("id", 'fake-invalid-id')	// $ this probably needs to be handled better since it creates duplicate IDs, even though they won't likely be used.
+	  .attr('onclick', 'javacript.void(0);');
 }
 
+//
 //#endregion D3 tree -----------------------
 
 
@@ -1248,9 +1293,9 @@ function UpdateTreeContext(selectedPlayer) {
 	for (let i = 0; i < allPlayers.length; i++) {
 
 		let playerClassList = allPlayers[i].classList;
-		let currentPlayer 	= allPlayers[i].textContent;
+		let currentPlayer 	= stripBotText(allPlayers[i].textContent);
 
-		// addd/remove classes
+		// add/remove classes
 		// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
 
 		// prune all classes after the intial default classes that should not be removed (allPlayers, human/bot, 
@@ -1270,7 +1315,6 @@ function UpdateTreeContext(selectedPlayer) {
 		// -teammate?
 		// -killer?
 		// -killer teammate?
-		// -traded paint?
 
 		// selected player
 		if (selectedPlayer == currentPlayer) {
@@ -1280,20 +1324,20 @@ function UpdateTreeContext(selectedPlayer) {
 			// if not the selected player, what is currentPlayer's teamId? is it not the selected player?
 
 			// loop through arrTeams until you find the teamId of the selected player
-			response.arrTeams.forEach(element => {
+			response.arrTeams.forEach(team => {
 		
 				// loop through all of this team's teammates. if the selected player is there, then this is a teammate. 
-				element.teammates.forEach(teammate => {
+				team.teammates.forEach(teammate => {
 		
 					if (teammate.name == currentPlayer) {
 						//console.log('currentPlayer team found: ' + teammate.name + ' -> ' + currentPlayer);
 
-						if (element.teamId == selectedPlayerTeamId) {
+						if (team.teamId == selectedPlayerTeamId) {
 							//console.log('currentPlayer teammate found: ' + teammate.name + ' -> ' + currentPlayer);
 							// #7dde98 green
 							playerClassList.add('playerTeammate');
 						}
-						else if (element.teamId == selectedPlayerKillerTeamId) {
+						else if (team.teamId == selectedPlayerKillerTeamId) {
 							// this player is on the killer's team. is it the killer or just a teammate?
 							if (currentPlayer == selectedPlayerKiller) {
 								// this is the killer
@@ -1305,14 +1349,20 @@ function UpdateTreeContext(selectedPlayer) {
 							}
 						}
 					}
-				})
-			})
+				});
+			});
 		}
 	}
 }
 
 
+function stripBotText(name) {
+	if (name.includes('(bot) ')) {
+		name = name.substring(6, name.length);
+	}
 
+	return name;
+}
 
 
 
