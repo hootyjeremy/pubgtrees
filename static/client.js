@@ -96,6 +96,9 @@ window.addEventListener('load', (event) => {
 	if (blTestingVersion) {
 		document.getElementById('test-version-indicator').style.display = 'block';
 	}
+	else {
+		document.getElementById('test-version-indicator').style.display = 'none';
+	}
 
 	// load default player from local storage
 	let defaultPlayer 	= localStorage.getItem('defaultPlayer');
