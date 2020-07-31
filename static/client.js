@@ -187,6 +187,9 @@ window.addEventListener('load', (event) => {
 		if (chkDefault.checked) {
 			document.getElementById('lblDefault').textContent = 'Set as default player (now click Search)';
 		}
+		else {
+			document.getElementById('lblDefault').textContent = 'Set as default player';
+		}
 	})
 
 
