@@ -367,7 +367,7 @@ async function GetPlayerMatches() {
 	let blFloorHit 		= false;
 
 	// clear out the current d3 tree
-	document.getElementById('d3-svg01').innerHTML = '';
+	//document.getElementById('d3-svg01').innerHTML = '';
 
 
 	if (chkDefault.checked) {
@@ -396,8 +396,8 @@ async function GetPlayerMatches() {
 	prevPlatform 	= strPlatform;
 	prevPlayerName 	= strPlayerName;
 
-	console.log('client requesting from ' + hooty_server_url);
-	console.log('requesting player:     ' + strPlatform + '/' + strPlayerName);
+	//console.log('client requesting: ' + hooty_server_url);
+	console.log('requesting player: ' + strPlatform + '/' + strPlayerName);
 
 	const btnSearch 	= document.getElementById('btnSearchPlayer');
 	const btnPrevious 	= document.getElementById('btnPreviousMatches');
@@ -480,7 +480,7 @@ async function GetPlayerMatches() {
 		console.log('total matches: ' + axios_matches_response.data.totalMatches);
 	}
 
-	console.log('hootyserver getMatches() response: ' + axios_matches_response.data.pubgResponse.hootyserver);
+	console.log('hootyserver getMatches response -> ' + axios_matches_response.data.pubgResponse.hootyserver);
 
 
 
@@ -608,7 +608,7 @@ async function GetTelemetry(_matchID) {
 	// console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.hootyserver);
 	// console.log('pubgApiMatchResponseInfo.status:          ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.status);
 	// console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.statusText);
-	console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
+	console.log('pubgApiTelemetryResponseInfo.hootyserver -> ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
 	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
 	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
 
@@ -1405,7 +1405,7 @@ function UpdateTreeContext(selectedPlayer) {
 	}
 
 
-	//playerRectangle = document.getElementById('selectedPlayerRectangle');
+	//let playerRectangle = document.getElementById('selectedPlayerRectangle');
 	playerRectangle 				= glPlayerRectangle;
 	playerRectangle.x.baseVal.value = playerCoorindates.e;
 	playerRectangle.y.baseVal.value = translatedY + 6;

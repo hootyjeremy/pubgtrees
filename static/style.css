@@ -98,16 +98,16 @@ td.killerTeammate {
 }
 
 td.playerTeammate {
-	color: #60b6f0;
-	/* color: #ab97e0; */
+	/* color: #60b6f0; */
+	color: #ab97e0;
 }
 
 
 
 /* text for svg tree */
 text.categories {
-	fill: #dea7d4;
-	/* fill: #0e0d0e; */
+	/* fill: #dea7d4; */
+	fill: #98a0a6;
 }
 
 text.allPlayers {
@@ -140,8 +140,8 @@ text.selectedPlayer {
 
 text.playerTeammate {
 	/* fill: #60b6f0; */
-	/* fill: #ab97e0; */
-	fill: #60b6f0;
+	fill: #ab97e0;
+	/* fill: #60b6f0; */
 }
 
 text.killer {
@@ -207,8 +207,8 @@ span.selectedPlayer {
 }
 
 span.playerTeammate {
-	color: #60b6f0;
-	/* color: #ab97e0; */
+	/* color: #60b6f0; */
+	color: #ab97e0;
 }
 
 span.killer {
