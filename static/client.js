@@ -1256,7 +1256,7 @@ function CreateTreeFromD3() {
 
 function ClearTreeContext() {
 
-	console.log('ClearTreeContext()');
+	//console.log('ClearTreeContext()');
 
 
 	let allPlayers = document.getElementsByClassName('allPlayers');
