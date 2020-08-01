@@ -60,7 +60,7 @@
 				<div style='font-size: 14px; font-weight: normal;'>
 					built by hooty__
 					<br>
-					version 0.030
+					version 0.031
 				</div>
 				<br>
 			</div>
@@ -159,9 +159,9 @@
 		<thead>
 			<tr>
 				<th>Age</th>
-				<th>Map</th>
 				<th>Humans</th>
 				<th>Type</th>
+				<th>Map</th>
 				<th>Mode</th>
 				<th>Place</th>
 				<th style="padding: 4px;">Dmg</th>
@@ -177,12 +177,12 @@
 				v-on:click="analyzeMatch(match.matchId, index)"
 			> 					
 				<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{match.timeSinceMatch}}</td> 
-				<td style="text-align:left; width: 60px">{{match.mapName.toUpperCase()}}</td>
 				<td style="text-align:center; width: 50px">{{match.participantCount}}</td>
 				<td style="text-align:center; width: 80px">{{resolveMatchType(match.matchType)}}</td>
+				<td style="text-align:left; width: 60px">{{match.mapName.toUpperCase()}}</td>
 				<td style="text-align:center; width: 80px">{{match.gameMode.toUpperCase()}}</td> 
-				<td style="text-align:center; width: 50px">#{{match.winPlace}}</td> 
 
+				<td style="text-align:center; width: 50px">#{{match.winPlace}}</td> 
 				<td style="text-align:center; width: 50px">{{match.damageDealt}}</td> 
 				<td style="text-align:center; width: 50px">{{match.kills}}</td> 
 				<td style="text-align:center; width: 50px">{{resolveKnocks(match.gameMode, match.DBNOs)}}</td> 
@@ -233,6 +233,8 @@
 			<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{createdAt}}</td>
 			<td>{{mapName}}</td>
 			<td>{{gameMode}} </td>
+			<td>{{duration}}</td>
+			<td>{{participantCount}} humans</td>
 			<td style="border-radius: 0px 6px 6px 0px; padding-right: 14px;">{{matchType}}</td> 
 		</tr>
 		</table>
@@ -242,7 +244,13 @@
 			<br>
 			Click a player for match details...
 			<br>
-			<svg id='d3-svg01'></svg>
+			<svg id='d3-svg01'>
+			</svg>
+
+			<svg id='svg02' height='300' width=300 style='display: none;'>
+				<rect id='selectedPlayerRectangle' x="10" y="10" width="144" height="18" fill="#303032" rx='8' ry='8'/>
+				<!-- <rect id='killerRectangle' x="10" y="30" width="140" height="18" fill="#1b1b1b" rx='4' ry='4'/> -->
+			</svg>
 
 			<br>
 			<button id="btnCopyMatchURL" style='width: 120;'>Copy match URL</button>
@@ -299,7 +307,7 @@
 				Hey read this! 
 				<br>
 				<br>
-				Collected data for bots may be inaccurrate so don't rely too much on anything shown here. 
+				Collected data for bots may be inaccurate so don't rely too much on anything shown here. 
 				<br>
 				I'd rather not show any bot information but here it is anyway as a best effort. 
 			</span>			

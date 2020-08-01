@@ -1,6 +1,8 @@
 // PUBG Scheme Color
 //https://www.schemecolor.com/pubg.php
 
+// ? where is this automatic stuff coming from?
+// const { ConvertSecondsToMinutes } = require("../hooty_modules/hf_server");
 //const e = require("express");
 
 //const hf_server = require("../hooty_modules/hf_server");
@@ -12,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.030'
+let   version 			= '0.031'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -79,13 +81,23 @@ let match_floors = [0];
 let match_floors_index = 0;
 let searchDirection = null;	// this will be for "next" or "previous" matches
 
-let axios_telemetry_response = null;	// global response so that functions know what to do with the response objects
+var axios_matches_response 		= null;	// global response for matches returned
+let axios_telemetry_response 	= null;	// global response so that functions know what to do with the response objects
 
 //let blShowDamage = false;
 
 let chkIncoming = null;
 let chkDefault 	= null;
 //let chkOutgoing = null;
+
+
+// will need to know the height and positive/negative heights of the tree from the 
+// root so that you can position the rectangles behind the selected player.
+let glTreeWidth 	= null;
+let glTreeHeight 	= null;
+let glTreeHeightPos = null;
+let glTreeHeightNeg = null;
+let glPlayerRectangle = null;
 
 
 
@@ -250,8 +262,10 @@ window.addEventListener('load', (event) => {
 	}
 
 
+	glPlayerRectangle = document.getElementById('selectedPlayerRectangle');
 
-});
+
+});	// window load
 
 
 // if hitting escape, close the modal window
@@ -399,7 +413,7 @@ async function GetPlayerMatches() {
 	document.getElementById('d3-tree01').style.display 		= 'none';
 
 
-	var axios_response = null;
+	//var axios_response = null;
 
 	if (blTestingVersion) {
 		//console.log('req match_floor: ' + match_floor + ' of ' + total_matches);
@@ -408,7 +422,7 @@ async function GetPlayerMatches() {
 
 
 	try {
-		axios_response = await axios.get(hooty_server_url + '/getplayermatches', {
+		axios_matches_response = await axios.get(hooty_server_url + '/getplayermatches', {
 			params: {
 				'endpoint'		: 'players', 
 				'platform'		:  strPlatform,
@@ -437,17 +451,17 @@ async function GetPlayerMatches() {
 
 
 	// ! check for any errors from the pubg api response...
-	if (axios_response.data.pubgResponse.status != 200 && axios_response.data.pubgResponse.status != null) {
+	if (axios_matches_response.data.pubgResponse.status != 200 && axios_matches_response.data.pubgResponse.status != null) {
 
-		if (axios_response.data.pubgResponse.status == 429) {
-			console.log('ERROR: pubg api rate limit hit: ' + axios_response.data.pubgResponse.status + ', ' + axios_response.data.pubgResponse.statusText);
-			console.log(axios_response);
+		if (axios_matches_response.data.pubgResponse.status == 429) {
+			console.log('ERROR: pubg api rate limit hit: ' + axios_matches_response.data.pubgResponse.status + ', ' + axios_matches_response.data.pubgResponse.statusText);
+			console.log(axios_matches_response);
 	
 			alert('Rate limited exceeded. Please try again in 60 seconds.');
 		}
 		else {
-			console.log('ERROR: could not find player in pubg api: ' + axios_response.data.status + ', ' + axios_response.data.statusText);
-			console.log(axios_response);
+			console.log('ERROR: could not find player in pubg api: ' + axios_matches_response.data.status + ', ' + axios_matches_response.data.statusText);
+			console.log(axios_matches_response);
 	
 			alert('Could not find player in pubg api.');
 		}
@@ -460,11 +474,13 @@ async function GetPlayerMatches() {
 		
 	if (blTestingVersion) {
 		console.log('bypassCache: ' + bypassCache);
-		console.log('GetPlayerMatches() axios_response...');
-		console.log('current match_floor: ' + match_floors[match_floors_index] + ' of ' + axios_response.data.totalMatches + ', new ceiling: ' + axios_response.data.match_ceiling);
-		console.log('total matches: ' + axios_response.data.totalMatches);
-		console.dir(axios_response.data);
+		console.log('matches_response.data...');
+		console.dir(axios_matches_response.data);
+		console.log('current match_floor: ' + match_floors[match_floors_index] + ' of ' + axios_matches_response.data.totalMatches + ', new ceiling: ' + axios_matches_response.data.match_ceiling);
+		console.log('total matches: ' + axios_matches_response.data.totalMatches);
 	}
+
+	console.log('hootyserver getMatches() response: ' + axios_matches_response.data.pubgResponse.hootyserver);
 
 
 
@@ -474,11 +490,11 @@ async function GetPlayerMatches() {
 	// add the match ceiling if the current index doesn't exist
 	if (match_floors.length == match_floors_index + 1) {
 		// this is basically only going to happen when you click next and an index doesn't exist
-		match_floors.push(axios_response.data.match_ceiling);
+		match_floors.push(axios_matches_response.data.match_ceiling);
 	}
 
 	// be aware that you are at the beginning or end of the match list (for button enabling)
-	if (axios_response.data.match_ceiling < axios_response.data.totalMatches) {
+	if (axios_matches_response.data.match_ceiling < axios_matches_response.data.totalMatches) {
 		blCeilingHit = false;
 	}
 	else {
@@ -522,15 +538,15 @@ async function GetPlayerMatches() {
 
 
 	// don't show 0's on the board. show '-' instead so it's more clear...
-	for (i = 0; i < axios_response.data.matches.length; i++) {
-		if (axios_response.data.matches[i].DBNOs 		== 0) { axios_response.data.matches[i].DBNOs 		= '-'; }
-		if (axios_response.data.matches[i].kills 		== 0) { axios_response.data.matches[i].kills 		= '-'; }
-		if (axios_response.data.matches[i].damageDealt 	== 0) { axios_response.data.matches[i].damageDealt 	= '-'; }
+	for (i = 0; i < axios_matches_response.data.matches.length; i++) {
+		if (axios_matches_response.data.matches[i].DBNOs 		== 0) { axios_matches_response.data.matches[i].DBNOs 		= '-'; }
+		if (axios_matches_response.data.matches[i].kills 		== 0) { axios_matches_response.data.matches[i].kills 		= '-'; }
+		if (axios_matches_response.data.matches[i].damageDealt 	== 0) { axios_matches_response.data.matches[i].damageDealt 	= '-'; }
 	}
 
 
 
-	vm.getMatchData(axios_response.data.matches);
+	vm.getMatchData(axios_matches_response.data.matches);
 
 
 
@@ -592,11 +608,12 @@ async function GetTelemetry(_matchID) {
 	// console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.hootyserver);
 	// console.log('pubgApiMatchResponseInfo.status:          ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.status);
 	// console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.statusText);
-	// console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
+	console.log('pubgApiTelemetryResponseInfo.hootyserver: ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
 	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
 	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
 
-	vueMatchInfo.updateTreeMatchDetails(axios_telemetry_response.data.matchDetails);
+
+	vueMatchInfo.updateTreeMatchDetails(axios_telemetry_response.data.matchDetails, axios_matches_response.data.matches);
 
 
 	if (axios_telemetry_response.data.pubgApiMatchResponseInfo.status != 200 && axios_telemetry_response.data.pubgApiMatchResponseInfo.status != null) {
@@ -610,7 +627,7 @@ async function GetTelemetry(_matchID) {
 	}
 
 	if (blTestingVersion) {
-		console.log('axios_telemetry_response.data...');
+		console.log('telemetry_response.data...');
 		console.dir(axios_telemetry_response.data);
 	}
 
@@ -970,11 +987,10 @@ function CreateTreeFromD3() {
 	//const tree = d3.tree().nodeSize([dx, dy]);
 	const tree = d3.tree().nodeSize([dx, dy]); 	// static width for paths
 
-	let custom_width  = 160 + (root.height * dy);
-	let custom_height = 0;
-	
-	let custom_neg_height = 0;
-	let custom_pos_height = 0;
+	glTreeWidth 	= 160 + (root.height * dy);
+	glTreeHeight  	= 0;
+	glTreeHeightNeg = 0;
+	glTreeHeightPos = 0;
 
 	tree(root);
 
@@ -988,36 +1004,37 @@ function CreateTreeFromD3() {
 		// need to know how high above root and low below root so that you can get an accurate height of the final svg
 		if (d.x < 0) {
 			// keep up with the lowest negative value...
-			if (d.x < custom_neg_height) {
-				custom_neg_height = d.x;
+			if (d.x < glTreeHeightNeg) {
+				glTreeHeightNeg = d.x;
 				//console.log('new neg: ' + d.id + ': ' + d.x);
 			}
 		}
 		else {
 			// keep up with the hightest positive value...
-			if (d.x > custom_pos_height) {
-				custom_pos_height = d.x;
+			if (d.x > glTreeHeightPos) {
+				glTreeHeightPos = d.x;
 				//console.log('new pos: ' + d.id + ': ' + d.x);
 			}
 		}
 	});
 
-	custom_height = (Math.abs(custom_neg_height) + custom_pos_height) + 40;
+	glTreeHeight = (Math.abs(glTreeHeightNeg) + glTreeHeightPos) + 40;
 
 
 	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/svg
 	const svg = d3
 	.select(document.getElementById("d3-svg01"))
-	.style("width",  custom_width)
-	.style("height", custom_height)
+	.style("width",  glTreeWidth)
+	.style("height", glTreeHeight)
 	.style('background-color', '#414144');
 
 	const g = svg
 	.append("g")                        // svg <g> tag is a group of elements : https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g#:~:text=The%20SVG%20element%20is,with%20the%20element.
+	.attr("id", 'g-child')				// adding so that you can easily grab this child before inserting a rectangle
 	.attr("font-family", "sans-serif")
 	.attr("font-size", 12)
 	//.attr("transform", `translate(${dy / 3},${dx - x0})`);
-	.attr("transform", `translate(${10},${dx - x0})`); 	// ! if you hide the first branch out, the first paramater can drag the tree to the left	
+	.attr("transform", `translate(${10},${dx - x0})`); 	// ! if you hide the first branch out, the first paramater can drag the tree to the left
 
 	const link = g
 	.append("g")
@@ -1059,7 +1076,7 @@ function CreateTreeFromD3() {
 	.data(root.descendants())
 	.enter()
 	.append("g")
-	.attr("transform", d => `translate(${d.y},${d.x})`);  
+	.attr("transform", d => `translate(${d.y},${d.x})`);
 
 	node
 	.append("circle")
@@ -1197,10 +1214,10 @@ function CreateTreeFromD3() {
 		else if (!response.allHumanNames.includes(d.data.name) && !d.data.name.includes('<')) {
 			// this is a bot
 			if (d.data.name.length > 10) {
-				return '(bot) ' + d.data.name.substring(0, 10) + '~';
+				return 'bot--' + d.data.name.substring(0, 10) + '~';
 			}
 			else {
-				return '(bot) ' + d.data.name;
+				return 'bot--' + d.data.name;
 			}
 		}
 		else {
@@ -1212,7 +1229,7 @@ function CreateTreeFromD3() {
 	  })
 	  .attr("stroke", "#414144")	// do the dark background color so that the text will "float" on top of the lines by obscuring them somewhat
 	  .attr("stroke-linejoin", "round")
-	  .attr("stroke-width", 4)
+	  .attr("stroke-width", 3)
 	  .attr("id", 'fake-invalid-id')	// $ this probably needs to be handled better since it creates duplicate IDs, even though they won't likely be used.
 	  .attr('onclick', 'javacript.void(0);');
 }
@@ -1226,7 +1243,7 @@ function UpdateTreeContext(selectedPlayer) {
 
 	// update data data for the selected player
 
-	//console.log('clicked name: ' + name);
+	//console.log('clicked name: ' + selectedPlayer);
 	
 	// if (prevSelectedPlayer == selectedPlayer) {
 	// 	RunPlayerDamageReport(selectedPlayer);
@@ -1361,11 +1378,50 @@ function UpdateTreeContext(selectedPlayer) {
 			});
 		}
 	}
+
+
+
+	//#region // ! [Region] Add the rectangle behind the selected player's name
+	//
+
+	// get coordinates for the selected player and the player's killer so that you can put rectangles behind them
+	let playerCoorindates = document.getElementById(selectedPlayer).parentElement.transform.baseVal[0].matrix;
+	// console.log('x=' + playerCoorindates.e + ' y=' + playerCoorindates.f);
+	// console.log('glTreeHeightNeg: ' + glTreeHeightNeg + ', ' + 'glTreeHeighPos: ' + glTreeHeightPos)
+
+	// now that you know the D3 version of x/y, you will need to translate that to the actual
+	// y will need to be the total of absolute 
+	let translatedY = 0;
+
+	if (playerCoorindates.f < 0) {
+		// this is a negative value (above the left most root)
+
+		//console.log('translated y: ' + (playerCoorindates.f - glTreeHeightNeg));
+		translatedY = playerCoorindates.f - glTreeHeightNeg;
+	}
+	else {
+		//console.log('translated y: ' + (playerCoorindates.f + Math.abs(glTreeHeightNeg)));
+		translatedY = playerCoorindates.f + Math.abs(glTreeHeightNeg);
+	}
+
+
+	//playerRectangle = document.getElementById('selectedPlayerRectangle');
+	playerRectangle 				= glPlayerRectangle;
+	playerRectangle.x.baseVal.value = playerCoorindates.e;
+	playerRectangle.y.baseVal.value = translatedY + 6;
+	
+
+	// this will get the top most 
+	let existingChild = document.getElementById('g-child');
+	document.getElementById('d3-svg01').insertBefore(playerRectangle, existingChild);
+
+	//#endregion -- add rectangle to tree
+
 }
 
 
 function stripBotText(name) {
-	if (name.includes('(bot) ')) {
+	if (name.includes('bot--')) {
 		name = name.substring(6, name.length);
 	}
 
@@ -1459,6 +1515,16 @@ function openTwitter() {
 }
 
 
-function ClickedSomething(_matchID) {
-	console.log('ClickedSomething() -> ' + _matchID);
+function drawRectangle() {
+
+	let svg = document.getElementById('d3-svg01');
+
+	let rect = document.getElementById('selectedPlayerRectangle');
+
+	console.log(rect.x);
+	
+	rect.x.baseVal.value += 20;
+
+
 }
+

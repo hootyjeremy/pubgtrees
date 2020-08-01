@@ -125,10 +125,18 @@ let vueMatchInfo = new Vue({
 		id: null,
 		mapName: null,
 		matchType: null,
-		shardId: null
+		shardId: null,
+		participantCount: '0',
 	},
 	methods: {
-		updateTreeMatchDetails: function (matchDetails) {
+		updateTreeMatchDetails: function (matchDetails, arrMatches) {
+	
+			arrMatches.forEach(match => {
+				if (match.matchId == matchDetails.id) {
+					this.participantCount = match.participantCount;
+				}
+			})
+
 			this.createdAt	= matchDetails.createdAt;
 			this.duration 	= matchDetails.duration;
 			this.gameMode	= matchDetails.gameMode.toUpperCase();
@@ -419,8 +427,8 @@ let vuePlayerReport = new Vue({
 
 
 
-					//let _botAttacker = (allBotNames.includes(record.attacker.name)) ? '(BOT) ' : '';
-					//let _botVictim   = (allBotNames.includes(record.victim.name))   ? '(BOT) ' : '';
+					//let _botAttacker = (allBotNames.includes(record.attacker.name)) ? 'bot--' : '';
+					//let _botVictim   = (allBotNames.includes(record.victim.name))   ? 'bot--' : '';
 
 
 					// ! set classes for the table data
@@ -577,20 +585,20 @@ let vuePlayerReport = new Vue({
 					}
 
 
-					// add '(bot)' to name if they are a killer or killer teammate
+					// add 'bot--' to name if they are a killer or killer teammate
 					if (blAttackerIsBot) { 
-						attackerName = '(bot) ' + attackerName;
+						attackerName = 'bot--' + attackerName;
 					}
 					else if (!allHumanNames.includes(attackerName) && !attackerName.includes('<')) {
-						attackerName = '(bot) ' + attackerName;
+						attackerName = 'bot--' + attackerName;
 					}
 
-					// add '(bot)' to name if they are a regular attacker or victim
+					// add 'bot--' to name if they are a regular attacker or victim
 					if (blVictimIsBot){
-						victimName = '(bot) ' + victimName;
+						victimName = 'bot--' + victimName;
 					}
 					else if (!allHumanNames.includes(victimName) && !victimName.includes('<')) {
-						victimName = '(bot) ' + victimName;
+						victimName = 'bot--' + victimName;
 					}
 
 
@@ -654,24 +662,25 @@ let vuePlayerReport = new Vue({
 			else if (damageTypeCategory == 'Fall Damage'   || 
 					 damageTypeCategory == 'Vehicle Crash' ||
 					 damageTypeCategory == 'Vehicle Hit'   ||
-					 damageTypeCategory == 'Punch') {
+					 damageTypeCategory == 'Punch'		   ||
+					 damageTypeCategory == 'Melee'		   ||
+					 damageTypeCategory == 'Bluezone'	   ||
+					 damageTypeCategory == 'Blackzone'	   ||
+					 damageTypeCategory == 'Redzone') {
 				_damager = damageTypeCategory;
 			}
 			else if (damageTypeCategory == 'Grenade Explosion') {
-				_damager = damageCauserName;
+				_damager = 'Grenade';
 			}
-			else if (damageTypeCategory == 'Bluezone') {
-				_damager = damageTypeCategory;
-			}
-			else if (damageTypeCategory == 'Melee') {
-				_damager = damageCauserName;
+			else if (damageTypeCategory == 'C4 Explosion') {
+				_damager = 'C4';
 			}
 			else if (damageTypeCategory == 'Molotov') {
 				_damager = 'Molotov';
 			}
 			else {
 				console.log(strLine);
-				console.log('unaccounted damager...');
+				console.log('unaccounted damageTypeCategory...');
 				console.log('damageTypeCategory', damageTypeCategory + ' | damageCauserName', damageCauserName + ' + damageReason', damageReason);
 			}
 
