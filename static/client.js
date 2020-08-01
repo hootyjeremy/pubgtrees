@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.031'
+let   version 			= '0.032'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -99,6 +99,7 @@ let glTreeHeightPos = null;
 let glTreeHeightNeg = null;
 let glPlayerRectangle = null;
 
+let blClickedPlayer = false; // will use this for notifying svg click that a player was looked up or not.
 
 
 // ! Window load
@@ -171,9 +172,22 @@ window.addEventListener('load', (event) => {
 	})
 
 
-	// Show damage button
+
+	// clear name context and selected player if you click blank area
+	document.getElementById('div-d3-tree').addEventListener('click', (event) => {
+
+		if (blClickedPlayer) {
+			blClickedPlayer = false;	// turn this back off so that it is only set to true when a player is clicked.
+		}
+		else {
+			// if a player was not clicked, then clear context colors 
+			ClearTreeContext();
+		}
+	})
 
 
+
+	// "set as default" checkbox
 	chkDefault = document.getElementById('checkbox-setDefault');
 	chkDefault.addEventListener('change', (event) => {
 		if (chkDefault.checked) {
@@ -183,6 +197,7 @@ window.addEventListener('load', (event) => {
 			document.getElementById('lblDefault').textContent = 'Set as default player';
 		}
 	})
+
 
 
 	// filter for damage type -------------------------------->
@@ -261,7 +276,7 @@ window.addEventListener('load', (event) => {
 		}
 	}
 
-
+	// need to store the rectangle object so that it can be deleted and re-created if a new match is selected (sloppy but works, will figure out something later)
 	glPlayerRectangle = document.getElementById('selectedPlayerRectangle');
 
 
@@ -1239,16 +1254,52 @@ function CreateTreeFromD3() {
 
 
 
+function ClearTreeContext() {
+
+	console.log('ClearTreeContext()');
+
+
+	let allPlayers = document.getElementsByClassName('allPlayers');
+
+
+	// cycle through all players and then give them a context class based on the selected player...
+	for (let i = 0; i < allPlayers.length; i++) {
+
+		let playerClassList = allPlayers[i].classList;
+
+		// add/remove classes
+		// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
+
+		// prune all classes after the intial default classes that should not be removed (allPlayers, human/bot, 
+		// searched) if they have any left over from the last selected player's context.
+		for (let j = playerClassList.length - 1; j >= 0; j--) {
+			//console.log('    ' + allPlayers[i].classList.value);
+
+			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' && playerClassList[j] != 'searchedPlayer' &&
+				playerClassList[j] != 'winner') {
+				playerClassList.remove(playerClassList[j]);
+			}
+		}
+	}
+
+
+	// move the rectangle out of sight
+	document.getElementById('selectedPlayerRectangle').setAttribute('x', -200);
+
+}
+
 function UpdateTreeContext(selectedPlayer) {
 
 	// update data data for the selected player
 
 	//console.log('clicked name: ' + selectedPlayer);
+	//console.log('UpdateTreeContext() event ')
 	
 	// if (prevSelectedPlayer == selectedPlayer) {
 	// 	RunPlayerDamageReport(selectedPlayer);
 	// }
 	//prevSelectedPlayer = selectedPlayer; 
+
 
 	// ! filter: don't do any reporting on bots. just let them show up in relation to actual players.
 	if (!axios_telemetry_response.data.allHumanNames.includes(selectedPlayer)) {
@@ -1256,6 +1307,8 @@ function UpdateTreeContext(selectedPlayer) {
 		return;
 	}
 
+
+	blClickedPlayer = true;	// to notify svg click event 
 
 	RunPlayerDamageReport(selectedPlayer);
 
@@ -1410,6 +1463,21 @@ function UpdateTreeContext(selectedPlayer) {
 	playerRectangle.x.baseVal.value = playerCoorindates.e;
 	playerRectangle.y.baseVal.value = translatedY + 6;
 	
+
+	// create rectangle element
+	// <rect id='selectedPlayerRectangle' x="10" y="10" width="144" height="18" fill="#303032" rx='8' ry='8'/>
+	// https://stackoverflow.com/questions/20539196/creating-svg-elements-dynamically-with-javascript-inside-html
+	// let svgNS = document.documentElement.namespaceURI;
+	// let rect = document.createElementNS(svgNS, 'rect');
+	// rect.setAttribute('id', 'selectedPlayerRectangle');
+	// rect.setAttribute('x', playerCoorindates.e);
+	// rect.setAttribute('y', translatedY + 6);
+	// rect.setAttribute('height', 18);
+	// rect.setAttribute('width', 144);
+	// rect.setAttribute('rx', 8);
+	// rect.setAttribute('ry', 8);
+	// rect.setAttribute('fill', '#303032');
+
 
 	// this will get the top most 
 	let existingChild = document.getElementById('g-child');
