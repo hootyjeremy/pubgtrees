@@ -171,6 +171,13 @@ window.addEventListener('load', (event) => {
 		HideModal();
 	})
 
+	document.getElementById('div-modal').addEventListener('click', (event) => {
+		// ! this is already happening below with a window click event that catched "outside modal" clicks
+		// ! might take this out later but just want to close the whole thing quickly right now.
+
+		//HideModal();
+	})
+
 
 
 	// clear name context and selected player if you click blank area

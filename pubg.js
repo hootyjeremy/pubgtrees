@@ -97,15 +97,17 @@ async function UpdateDatabaseRows(playername, platform, ratelimitremaining, ip, 
     let dbTime = dbDate.getTime();
     let bypass = (bypassCache == 'y') ? 'true' : 'false';
 
+    // `INSERT INTO pubgapi (datetimems, datetimeen, datetimecst, ip, player, platform, remain, bypass) VALUES \n${rows};`
+
     if (dbRowsToInsert == '') {
         // currently blank
-        dbRowsToInsert = `(${dbTime}, '${dbDate.toString().substring(0,33)}', '${playername}', '${platform}', ${ratelimitremaining}, 'no', '${bypass}')`;
+        dbRowsToInsert = `(${dbTime}, '${dbDate.toString().substring(0,33)}', '${getDate()}', 'no', '${playername}', '${platform}', ${ratelimitremaining}, '${bypass}')`;
     }
     else {
-        dbRowsToInsert += `,\n(${dbTime}, '${dbDate.toString().substring(0,33)}', '${playername}', '${platform}', ${ratelimitremaining}, 'no', '${bypass}')`;
+        dbRowsToInsert += `,\n(${dbTime}, '${dbDate.toString().substring(0,33)}', '${getDate()}', 'no', '${playername}', '${platform}', ${ratelimitremaining}, '${bypass}')`;
     }
 
-    console.log(`inserting row: (${dbTime}, '${dbDate.toString().substring(0,33)}', '${playername}', '${platform}', ${ratelimitremaining}, 'no', '${bypass}')`);
+    console.log(`inserting row: (${dbTime}, '${dbDate.toString().substring(0,33)}', '${getDate()}', 'no', '${playername}', '${platform}', ${ratelimitremaining}, '${bypass}')`);
 }
 
 
@@ -2349,7 +2351,7 @@ function UpdateDatabase() {
             //dbRowsToInsert = ''; // clear all the rows to be inserted
     
             // dateTimeMS, dateTimeEN, searchedPlayer, searchedPlatform, rateLimitRemaining
-            let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, player, platform, remain, ip, bypass) VALUES \n${rows};`;
+            let queryString = `INSERT INTO pubgapi (datetimems, datetimeen, datetimecst, ip, player, platform, remain, bypass) VALUES \n${rows};`;
             console.log('queryString: ' + queryString);
     
             client.query(queryString, (err, res) => {
