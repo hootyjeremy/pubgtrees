@@ -131,11 +131,17 @@ let vueMatchInfo = new Vue({
 	methods: {
 		updateTreeMatchDetails: function (matchDetails, arrMatches) {
 	
-			arrMatches.forEach(match => {
-				if (match.matchId == matchDetails.id) {
-					this.participantCount = match.participantCount;
-				}
-			})
+			if (arrMatches == null) {
+				// if this is direct link to a match, there will be no matches so you can't get the participant count. 
+				this.participantCount = '-';
+			}
+			else {
+				arrMatches.forEach(match => {
+					if (match.matchId == matchDetails.id) {
+						this.participantCount = match.participantCount;
+					}
+				})
+			}
 
 			this.createdAt	= matchDetails.createdAt;
 			this.duration 	= matchDetails.duration;
@@ -681,7 +687,7 @@ let vuePlayerReport = new Vue({
 			else {
 				console.log(strLine);
 				console.log('unaccounted damageTypeCategory...');
-				console.log('damageTypeCategory', damageTypeCategory + ' | damageCauserName', damageCauserName + ' + damageReason', damageReason);
+				console.log('damageTypeCategory=', damageTypeCategory + ' | damageCauserName=', damageCauserName + ' | damageReason=', damageReason);
 			}
 
 			return _damager;

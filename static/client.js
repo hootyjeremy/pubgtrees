@@ -628,7 +628,13 @@ async function GetTelemetry(_matchID) {
 	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
 
 
-	vueMatchInfo.updateTreeMatchDetails(axios_telemetry_response.data.matchDetails, axios_matches_response.data.matches);
+	// $ if direct link to match, this will break because there is no (axios matches)
+	if (axios_matches_response == null) {
+		vueMatchInfo.updateTreeMatchDetails(axios_telemetry_response.data.matchDetails, null);
+	}
+	else {
+		vueMatchInfo.updateTreeMatchDetails(axios_telemetry_response.data.matchDetails, axios_matches_response.data.matches);
+	}
 
 
 	if (axios_telemetry_response.data.pubgApiMatchResponseInfo.status != 200 && axios_telemetry_response.data.pubgApiMatchResponseInfo.status != null) {
