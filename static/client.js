@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.032'
+let   version 			= '0.033'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -102,7 +102,9 @@ let glPlayerRectangle = null;
 let blClickedPlayer = false; // will use this for notifying svg click that a player was looked up or not.
 
 
-// ! Window load
+//#region  // ! [Region] Window load / Event Handlers
+//
+
 window.addEventListener('load', (event) => {
 	//console.log('page is fully loaded');
 
@@ -122,10 +124,6 @@ window.addEventListener('load', (event) => {
 		document.getElementById('slcPlatform').value = defaultPlatform;
 	}
 
-
-
-	// check if this is going to launch a tree from url parameters...
-	checkURLQuery();
 
 
 
@@ -287,6 +285,10 @@ window.addEventListener('load', (event) => {
 	glPlayerRectangle = document.getElementById('selectedPlayerRectangle');
 
 
+
+	// check if this is going to launch a tree from url parameters...
+	checkURLQuery();
+
 });	// window load
 
 
@@ -310,6 +312,9 @@ window.addEventListener('click', (event) => {
 	}
 })
 
+//#endregion -- Event Handlers
+
+
 
 function ShowModal() {
 	document.getElementById('div-modal').style.display = 'block';
@@ -323,34 +328,61 @@ function HideModal() {
 
 
 
-
+// ------------------------------------------------------------------>
 function checkURLQuery() {
 	// if there are search parameters, parse them and search the match
 	// ! ?steam&hooty__&51beee36-6df7-4903-8d16-f21a97141340
 
-	// console.log('location.search: [' + location.search + ']');
-	if (location.search != '') {
+	//console.log('location.href:   ' + location.href);
+	//console.log('location.search: ' + location.search);
 
-		// params should be: platform, player name, matchId
+	// ----------------------------------------------------------------------------------------
+	const tmpURL = new URL(location);		// https://dmitripavlutin.com/parse-url-javascript/
+	// console.log('tmpURL.search: ' + tmpURL.search);
+	// console.log('type:     ' + tmpURL.searchParams.get('type'));
+	// console.log('matchid:  ' + tmpURL.searchParams.get('matchid'));
+	// console.log('player:   ' + tmpURL.searchParams.get('player'));
+	// console.log('platform: ' + tmpURL.searchParams.get('platform'));
 
-		let params = location.search
-					.substring(1, location.search.length)
-					.split('&');
+	let paramType 		= tmpURL.searchParams.get('type')
+	let paramMatchId 	= tmpURL.searchParams.get('matchid')
+	let paramPlayer		= tmpURL.searchParams.get('player')
+	let paramPlatform 	= tmpURL.searchParams.get('platform')
 
+	// $ do some correction for a corrupted search param string
 
+	if (tmpURL.search != '') {
 
-		// don't want to see match details since it won't work when analyzing from url parameters. will need to figure something out.
-		//document.getElementById('tree-match-details').style.display = 'none';
+		document.getElementById('inputPlayerName').value 	= paramPlayer;
+		document.getElementById('slcPlatform').value 		= paramPlatform;
 
-		document.getElementById('inputPlayerName').value = params[1];
+		strPlayerName 	= paramPlayer;
+		strPlatform 	= paramPlatform;
 
-		strPlayerName = params[1];
-		GetTelemetry(params[0]);
+		if (paramType == 'player') {
+
+			// $ this will only need to be done if there is a "copy player url"
+
+			// get player and matches
+			btnSearchPlayer_Click();
+
+			// https://stackoverflow.com/questions/3338642/updating-address-bar-with-new-url-without-hash-or-reloading-the-page
+			history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
+		}
+		else if (paramType == 'match') {
+
+			// search for specific match telemetry
+			GetTelemetry(paramMatchId);	
+
+			history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
+		}
 	}
 	else {
-		//document.getElementById('tree-match-details').style.display = 'inline';
+		//console.log('no search query');
 	}
+	
 }
+
 
 function btnCopyMatchToClipboard_Click() {
 	// console.log('hooty_server_url: ' + hooty_server_url);
@@ -363,7 +395,8 @@ function btnCopyMatchToClipboard_Click() {
 		
 		if (result.state == "granted" || result.state == "prompt") {
 
-			let clip = hooty_server_url + '/?' + glMatchId + '&' + strPlayerName;
+			//let clip = hooty_server_url + '/?' + glMatchId + '&' + strPlayerName + '&' + strPlatform;
+			let clip = hooty_server_url + '/?type=match&matchid=' + glMatchId + '&player=' + strPlayerName + '&platform=' + strPlatform;
 			//console.log(clip);
 
 			navigator.clipboard.writeText(clip).then(function() {
@@ -377,13 +410,32 @@ function btnCopyMatchToClipboard_Click() {
 }
 
 
+function SearchNewPlayer(player) {
+	// console.log('selectedPlayer: ' + player);
+	// console.log('platform: ' + strPlatform);
+
+	// create search query string and then open window in new tab
+
+	// $ need to be able to run this function on any name in the damage log (except bots and self-selectedPlayer)
+
+	let tmpURL = hooty_server_url + '/?type=player&matchid=null&player=' + player + '&platform=' + strPlatform;
+
+	window.open(tmpURL, '_blank');
+
+	// document.getElementById('slcPlatform').value = strPlatform;
+	// document.getElementById("inputPlayerName").value = player;
+
+	// btnSearchPlayer_Click();
+}
+
+
+
 
 // ------------------------------------------------------------------------------------------------------>
 //#region // ! [Region] GetPlayerMatches()
 //
 
 async function GetPlayerMatches() {
-
 
 	let blCeilingHit 	= false;
 	let blFloorHit 		= false;
@@ -415,8 +467,10 @@ async function GetPlayerMatches() {
 		match_floors_index = 0;
 	}
 
+	// for detecting if the searched user changes
 	prevPlatform 	= strPlatform;
 	prevPlayerName 	= strPlayerName;
+
 
 	//console.log('client requesting: ' + hooty_server_url);
 	console.log('requesting player: ' + strPlatform + '/' + strPlayerName);
@@ -477,13 +531,13 @@ async function GetPlayerMatches() {
 
 		if (axios_matches_response.data.pubgResponse.status == 429) {
 			console.log('ERROR: pubg api rate limit hit: ' + axios_matches_response.data.pubgResponse.status + ', ' + axios_matches_response.data.pubgResponse.statusText);
-			console.log(axios_matches_response);
+			console.log(axios_matches_response.data.pubgResponse);
 	
 			alert('Rate limited exceeded. Please try again in 60 seconds.');
 		}
 		else {
 			console.log('ERROR: could not find player in pubg api: ' + axios_matches_response.data.status + ', ' + axios_matches_response.data.statusText);
-			console.log(axios_matches_response);
+			console.log(axios_matches_response.data.pubgResponse);
 	
 			alert('Could not find player in pubg api.');
 		}
@@ -503,7 +557,6 @@ async function GetPlayerMatches() {
 	}
 
 	console.log('hootyserver getMatches response -> ' + axios_matches_response.data.pubgResponse.hootyserver);
-
 
 
 	//#region // ! button stuff...
@@ -577,6 +630,17 @@ async function GetPlayerMatches() {
 	document.getElementById('btnNextMatches').style.display		= "block";
 	document.getElementById('vueapp').style.display 			= "block";
 	document.getElementById('fetching').style.display 			= "none";	// turn this back off
+
+
+	// if the player has no matches, then don't display the divs
+	if (axios_matches_response.data.totalMatches == 0) {
+		alert('The player was found but they have no recent matches.');
+
+		document.getElementById('vueapp').style.display = 'none';
+		document.getElementById('d3-tree01').style.display = 'none';
+	}
+
+
 }
 
 //#endregion
@@ -630,9 +694,21 @@ async function GetTelemetry(_matchID) {
 	// console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.hootyserver);
 	// console.log('pubgApiMatchResponseInfo.status:          ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.status);
 	// console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.statusText);
-	console.log('pubgApiTelemetryResponseInfo.hootyserver -> ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
+	//console.log('pubgApiTelemetryResponseInfo.hootyserver -> ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
 	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
 	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
+
+	// $ if the match doesn't exist, don't continue
+	if (axios_telemetry_response.data.pubgApiMatchResponseInfo.status != null && axios_telemetry_response.data.pubgApiMatchResponseInfo.status != 200) {
+		
+		alert('This match no longer exists.');
+
+		document.getElementById('div-analyzing').style.display 	= 'none';
+		document.getElementById('d3-tree01').style.display = 'none';
+
+		//console.log('Match not found');
+		return;
+	}
 
 
 	// $ if direct link to match, this will break because there is no (axios matches)

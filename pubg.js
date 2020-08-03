@@ -87,7 +87,8 @@ if (!blTestingVersion) {
     databaseURL = process.env.DATABASE_URL;
 }
 else {
-    databaseURL = 'postgres://tgovfrczazrsnm:6974fe69669f35826a71d1c0c1991a0f86f4ccc28544c66a596d69697f48aac8@ec2-18-215-99-63.compute-1.amazonaws.com:5432/d9srr2mjrsmilo';
+    //databaseURL = 'postgres://tgovfrczazrsnm:6974fe69669f35826a71d1c0c1991a0f86f4ccc28544c66a596d69697f48aac8@ec2-18-215-99-63.compute-1.amazonaws.com:5432/d9srr2mjrsmilo';
+    databaseURL = '';
 }
 
 
@@ -182,6 +183,9 @@ app.get('/getplayermatches', async (req, res) => {
 
     // -------------------------------------------------------------->
     // ! READ CACHE FILE -> if you can get the player cache from the file, then get it...
+
+    // $ if (req.query.bypassCache == 'y') then you need to check if the existing cache file is older than one minute in age
+    // $ if the cache file is less than one minute old, do not allow bypassing cache
 
     if (fs.existsSync(player_cache_file) && req.query.bypassCache == 'n') {
         // if bypassCache is 'y' then don't get player from cache.
@@ -2313,13 +2317,14 @@ function clearCache() {
     }
 
     
-    if (purge_count > 0) {
-        console.log(getDate() + ' -> Purge Interval: ' + purge_count + ' of ' + file_count + ' cache files purged');
-    }
-    else {
-        console.log(getDate() + ' -> Purge interval: No files to purge.');
-    }
+    // if (purge_count > 0) {
+    //     console.log(getDate() + ' -> Cache purge Interval: ' + purge_count + ' of ' + file_count + ' cache files purged');
+    // }
+    // else {
+    //     console.log(getDate() + ' -> Cache purge interval: No files to purge.');
+    // }
 
+    console.log(getDate() + ' -> Cache purge interval.');
 
     //
     //#endregion ----------------------------------------------------------------------

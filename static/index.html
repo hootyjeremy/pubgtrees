@@ -60,7 +60,7 @@
 				<div style='font-size: 14px; font-weight: normal;'>
 					built by hooty__
 					<br>
-					version 0.032
+					version 0.033
 				</div>
 				<br>
 			</div>
@@ -164,9 +164,9 @@
 				<th>Map</th>
 				<th>Mode</th>
 				<th>Place</th>
-				<th style="padding: 4px;">Dmg</th>
 				<th style="padding: 4px;">Kills</th>
 				<th style="padding: 4px;">Knocks</th>
+				<th style="padding: 4px;">Dmg</th>
 				<th>Team</th>
 				<!-- <th>Inspect</th> -->
 			</tr>
@@ -183,9 +183,9 @@
 				<td style="text-align:center; width: 80px">{{match.gameMode.toUpperCase()}}</td> 
 
 				<td style="text-align:center; width: 50px">#{{match.winPlace}}</td> 
-				<td style="text-align:center; width: 50px">{{match.damageDealt}}</td> 
 				<td style="text-align:center; width: 50px">{{match.kills}}</td> 
 				<td style="text-align:center; width: 50px">{{resolveKnocks(match.gameMode, match.DBNOs)}}</td> 
+				<td style="text-align:center; width: 50px">{{match.damageDealt}}</td> 
 
 				<td style="text-align:left; border-radius: 0px 6px 6px 0px; text-align:left; padding-right: 14px;">{{printRoster(match.teamRoster, match.strPlayerName)}}</td>
 				<!-- <td style="border-radius: 0px 6px 6px 0px; text-align:left;"> 
@@ -198,7 +198,7 @@
 
 	<br>
 
-	<p>* Match data is not available until a few minutes after it finishes. *</p>
+	<p>* Match data is not available until a few minutes after a game has completed. *</p>
 	
 
 	<table>
@@ -319,7 +319,8 @@
 				<tr>
 					<td>
 						<div style="display: inline;">
-							<span class='spanBoxy spanBoxyName' :class='{ winner : isWinner }'style="height: 48px; text-align: center; font-size: 38px;  ">{{selectedPlayer}}</span>
+							<span class='spanBoxy spanBoxyName' :class='{ winner : isWinner }'style="height: 48px; text-align: center; font-size: 38px;"
+								  v-on:click='SearchNewPlayer(selectedPlayer)'>{{selectedPlayer}} <img src='static/images/new_window-20.png'></span>
 						</div>
 					</td>
 

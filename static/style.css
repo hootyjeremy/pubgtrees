@@ -79,8 +79,9 @@ th, td {
 	display: none;
 }
 
-/* rows for damage report (attackerClass, victimClass) */
 
+
+/* rows for damage report (attackerClass, victimClass) */
 td.selectedPlayer {
 	color: #60b6f0;
 }
@@ -183,6 +184,7 @@ span.spanBoxyShots {
 
 span.spanBoxyName {
 	color: #60b6f0;
+	cursor: pointer;
 }
 
 
