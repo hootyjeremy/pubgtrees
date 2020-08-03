@@ -34,7 +34,7 @@ let vm = new Vue({
 			if (match_type == 'competitive') {
 				return 'Ranked'
 			} else {
-				return 'Unranked'
+				return 'No'
 			}
         },
         resolveKnocks: function (mode, knocks) {
@@ -212,11 +212,11 @@ let vuePlayerReport = new Vue({
 
 
 			if (allBotNames.includes(name)) {
-				document.getElementById('botReportDisclaimer').style.display = 'block';
+				//document.getElementById('botReportDisclaimer').style.display = 'block';
 				document.getElementById('div-reportStats').style.display = 'none';
 			}
 			else {
-				document.getElementById('botReportDisclaimer').style.display = 'none';
+				//document.getElementById('botReportDisclaimer').style.display = 'none';
 				document.getElementById('div-reportStats').style.display = 'block';
 			}
 
@@ -274,14 +274,19 @@ let vuePlayerReport = new Vue({
 					let attackerName = record.attacker.name;
 					let victimName = record.victim.name;
 
-					let attackerHealth = '';
-					let victimHealth = '';
+					let attackerHealth 	= '';
+					let victimHealth 	= '';
 
 					let armor = '';
 
-					let attackerClass = '';
-					let victimClass = '';
-					let rowClass = '';
+					let attackerClass 	= '';
+					let victimClass 	= '';
+					let rowClass 		= '';
+
+					// let attackerClickable 	= false;
+					// let victimClickable 	= false;
+					// let attackerOnClick 	= '';
+					// let victimOnClick 		= '';
 
 					let zone = '';
 
@@ -433,15 +438,17 @@ let vuePlayerReport = new Vue({
 
 
 
-					//let _botAttacker = (allBotNames.includes(record.attacker.name)) ? 'bot--' : '';
-					//let _botVictim   = (allBotNames.includes(record.victim.name))   ? 'bot--' : '';
+					//let _botAttacker = (allBotNames.includes(record.attacker.name)) ? 'bot-' : '';
+					//let _botVictim   = (allBotNames.includes(record.victim.name))   ? 'bot-' : '';
 
 
-					// ! set classes for the table data
+					//#region // ! [Region] set classes for the table data
+					//
+
 					// selected player : attacker ---------------------------->
 					if (record.attacker.name == this.selectedPlayer) {
 						attackerClass = 'selectedPlayer'
-					}					
+					}
 
 					// selected player : victim ---------------------------->
 					if (record.victim.name == this.selectedPlayer) {
@@ -480,7 +487,6 @@ let vuePlayerReport = new Vue({
 							blVictimIsBot = true;
 						}
 					}
-
 
 
 					// killer teammate: attacker
@@ -579,6 +585,22 @@ let vuePlayerReport = new Vue({
 					}
 
 
+					// set vue bindings for clickable cells that open the player's profile
+					// if (attackerName != this.selectedPlayer && allHumanNames.includes(attackerName)) {
+					// 	attackerClickable = true;
+					// 	attackerOnClick = 'SearchNewPlayer(\'' + attackerName + '\')';
+					// }
+
+					// if (victimName != this.selectedPlayer && allHumanNames.includes(victimName)) {
+					// 	victimClickable = true;
+					// 	victimOnClick = 'SearchNewPlayer(\'' + victimName + '\')';
+					// }
+
+					//
+					//#endregion - set classes for table cells
+
+
+
 
 					// don't show distance for grenades or molotov damage
 					if (_damager == 'Grenade' || _damager == 'Molotov') {
@@ -591,20 +613,20 @@ let vuePlayerReport = new Vue({
 					}
 
 
-					// add 'bot--' to name if they are a killer or killer teammate
+					// add 'bot-' to name if they are a killer or killer teammate
 					if (blAttackerIsBot) { 
-						attackerName = 'bot--' + attackerName;
+						attackerName = 'bot-' + attackerName;
 					}
 					else if (!allHumanNames.includes(attackerName) && !attackerName.includes('<')) {
-						attackerName = 'bot--' + attackerName;
+						attackerName = 'bot-' + attackerName;
 					}
 
-					// add 'bot--' to name if they are a regular attacker or victim
+					// add 'bot-' to name if they are a regular attacker or victim
 					if (blVictimIsBot){
-						victimName = 'bot--' + victimName;
+						victimName = 'bot-' + victimName;
 					}
 					else if (!allHumanNames.includes(victimName) && !victimName.includes('<')) {
-						victimName = 'bot--' + victimName;
+						victimName = 'bot-' + victimName;
 					}
 
 
@@ -626,6 +648,10 @@ let vuePlayerReport = new Vue({
 						'zone': zone,
 						'rowClass': rowClass,
 						'armor': armor,
+						// 'attackerClickable': attackerClickable,
+						// 'victimClickable': victimClickable,
+						// 'attackerOnClick': attackerOnClick,
+						// 'victimOnClick': victimOnClick,
 						// 'head': head,
 						// 'vest': vest,
 						
@@ -666,8 +692,6 @@ let vuePlayerReport = new Vue({
 				_damager = damageCauserName;
 			}
 			else if (damageTypeCategory == 'Fall Damage'   || 
-					 damageTypeCategory == 'Vehicle Crash' ||
-					 damageTypeCategory == 'Vehicle Hit'   ||
 					 damageTypeCategory == 'Punch'		   ||
 					 damageTypeCategory == 'Melee'		   ||
 					 damageTypeCategory == 'Bluezone'	   ||
@@ -683,6 +707,10 @@ let vuePlayerReport = new Vue({
 			}
 			else if (damageTypeCategory == 'Molotov') {
 				_damager = 'Molotov';
+			}
+			else if (damageTypeCategory == 'Vehicle Crash' || 
+					 damageTypeCategory == 'Vehicle Hit') {
+				_damager = 'Vehicle';
 			}
 			else {
 				console.log(strLine);

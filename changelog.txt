@@ -4,3 +4,6 @@
 2020.07.01
 -svg tree width is figured out but need to get height.
 
+[2020.08.03 -- 0.034]
+-can now click a player in the damage report to open their profile.
+-no longer showing winner colors while a player is clicked but they will show when clicking off a player.

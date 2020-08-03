@@ -60,21 +60,23 @@
 				<div style='font-size: 14px; font-weight: normal;'>
 					built by hooty__
 					<br>
-					version 0.033
+					version 0.034
 				</div>
 				<br>
 			</div>
-			</a>
+		</a>
 
-		<div class="cube" style='width: 320px; height: 130px; float:right'>
-			<br>
-			<img src='static/images/twitter-icon-purple-40x40.png' style='cursor: pointer; margin-top: 10px;' onclick='openTwitter();'>
-			<br>
-			<br>
-			pubgtrees@outlook.com
-			<br>
-			<br>
-		</div>
+
+		<a href="javascript:openTwitter()">
+			<div class="cube" style='width: 320px; height: 130px; float:right'>
+				<br>
+				<img src='static/images/twitter-icon-purple-40x40.png' style='cursor: pointer; margin-top: 10px;'>
+				<br>
+				@pubgtrees
+				<br>
+				<br>
+			</div>
+		</a>
 
 		<br>
 
@@ -144,7 +146,7 @@
 
 <div id="fetching" style="display:none;">
 	<br>
-	fetching...
+	<span style='font-size: 24px;''>fetching from server...</span>
 </div>
 
 
@@ -160,7 +162,7 @@
 			<tr>
 				<th>Age</th>
 				<th>Humans</th>
-				<th>Type</th>
+				<th>Ranked</th>
 				<th>Map</th>
 				<th>Mode</th>
 				<th>Place</th>
@@ -215,7 +217,7 @@
 
 <div id='div-analyzing' style='display: none'>
 	<br>
-	analyzing...
+	<span style='font-size: 24px;''>analyzing match...</span>
 </div>
 
 
@@ -232,7 +234,7 @@
 		<tr class='matchRow' style="cursor: auto;"> 
 			<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{createdAt}}</td>
 			<td>Humans: {{participantCount}}</td>
-			<td>{{matchType}}</td> 
+			<td>Ranked: {{matchType}}</td> 
 			<td>{{mapName}}</td>
 			<td>{{gameMode}} </td>
 			<td style="border-radius: 0px 6px 6px 0px; padding-right: 14px;">Duration: {{duration}}</td>
@@ -295,13 +297,11 @@
 <div id='div-modal'>
 	<div id='player-report' style='margin-top: 80px; margin-bottom: 80px; width:960px; display:inline-block;'>
 		<span id='btnCloseModal'>&times;</span>
-
 		<center>
-
 		<br>
 		<br>
 		
-		<div id='botReportDisclaimer' style="width: 580px; border: 1px solid #60b6f0; border-radius: 4px; padding: 4px;">
+		<!-- <div id='botReportDisclaimer' style="width: 580px; border: 1px solid #60b6f0; border-radius: 4px; padding: 4px;">
 			<span style="font-style: italic; font-size: 16px; color: #60b6f0;">
 				Hey read this! 
 				<br>
@@ -310,17 +310,22 @@
 				<br>
 				I'd rather not show any bot information but here it is anyway as a best effort. 
 			</span>			
-		</div>
+		</div> -->
 
+
+		<!-- Report header with name and game stats -->
 		<div id='div-reportStats' style='background-color: #67676b; width: 760px; border: 1px solid #60b6f0; border-radius: 6px;'>
-
 			<center>
 			<table>
 				<tr>
 					<td>
 						<div style="display: inline;">
-							<span class='spanBoxy spanBoxyName' :class='{ winner : isWinner }'style="height: 48px; text-align: center; font-size: 38px;"
-								  v-on:click='SearchNewPlayer(selectedPlayer)'>{{selectedPlayer}} <img src='static/images/new_window-20.png'></span>
+							<span class='spanBoxy spanBoxyName'
+								  style="height: 48px; text-align: center; font-size: 38px;"
+								  :class='{ winner : isWinner }'
+								  v-on:click='SearchNewPlayer(selectedPlayer)'
+							>{{selectedPlayer}} <img src='static/images/new_window-20.png'>
+							</span>
 						</div>
 					</td>
 
@@ -339,7 +344,6 @@
 							<br>
 							<span class='spanBoxyShots' style='width: 88px;'>Arm: {{armPercentage}}%</span>
 							<span class='spanBoxyShots' style='width: 88px;'>Leg: {{legPercentage}}%</span>
-
 						</div>
 					</td>
 				</tr>
@@ -348,7 +352,10 @@
 		</div>
 
 		<br>
+		<br>
 
+
+		<!-- Reporting rows -->
 		<center>
 			<table>
 				<thead>
@@ -373,11 +380,17 @@
 						v-for='(reportRow, index) in arrPlayerReport' :key='reportRow.id'
 					>
 						<td style='border-radius: 6px 0px 0px 6px; text-align: center;'>{{reportRow.matchTime}}</td>
-						<td :class='reportRow.attackerClass' style='text-align: right; font-weight: bold;'>{{reportRow.attacker}}</td>
+						<td :class='reportRow.attackerClass'							
+							v-on:click='SearchNewPlayer(reportRow.attacker)'
+							style='text-align: right; font-weight: bold; cursor: pointer;'
+						>{{reportRow.attacker}}</td>
 						<td style='text-align: center;' :class="{ tdHidden: isHidden}">{{reportRow.attackerHealth}}</td>
 						<td style='text-align: center; font-weight: bold;'>{{reportRow.event}}</td>
 						<td style='text-align: center;' :class="{ tdHidden: isHidden}">{{reportRow.victimHealth}}</td>
-						<td :class='reportRow.victimClass' style='font-weight: bold;'>{{reportRow.victim}}</td>
+						<td :class='reportRow.victimClass'
+							v-on:click='SearchNewPlayer(reportRow.victim)'
+							style='font-weight: bold; cursor: pointer;'
+						>{{reportRow.victim}}</td>
 						<td>{{reportRow.damagerInfo}}</td>
 						<td style='text-align: right;' :class="{ tdHidden: isHidden}">{{reportRow.distance}}</td>
 						<td style='text-align: center;' :class="{ tdHidden: isHidden}"><img :src='reportRow.armor'></td>

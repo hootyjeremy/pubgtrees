@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.033'
+let   version 			= '0.034'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -352,6 +352,14 @@ function checkURLQuery() {
 	// $ do some correction for a corrupted search param string
 
 	if (tmpURL.search != '') {
+
+		// if (paramType != 'type' || paramMatchId != 'matchid' || paramPlayer != 'player' || paramPlatform != 'platform') {
+		// 	alert('The link has invalid search parameters.')
+
+		// 	history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
+
+		// 	return;
+		// }
 
 		document.getElementById('inputPlayerName').value 	= paramPlayer;
 		document.getElementById('slcPlatform').value 		= paramPlatform;
@@ -1318,10 +1326,10 @@ function CreateTreeFromD3() {
 		else if (!response.allHumanNames.includes(d.data.name) && !d.data.name.includes('<')) {
 			// this is a bot
 			if (d.data.name.length > 10) {
-				return 'bot--' + d.data.name.substring(0, 10) + '~';
+				return 'bot-' + d.data.name.substring(0, 10) + '~';
 			}
 			else {
-				return 'bot--' + d.data.name;
+				return 'bot-' + d.data.name;
 			}
 		}
 		else {
@@ -1351,6 +1359,7 @@ function ClearTreeContext() {
 	let allPlayers = document.getElementsByClassName('allPlayers');
 
 
+
 	// cycle through all players and then give them a context class based on the selected player...
 	for (let i = 0; i < allPlayers.length; i++) {
 
@@ -1358,6 +1367,18 @@ function ClearTreeContext() {
 
 		// add/remove classes
 		// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
+
+
+		// add "winner" class back if player is #1
+		axios_telemetry_response.data.arrPlayerCards.forEach(element => {
+			if (element.name == allPlayers[i].textContent) {
+				if (element.winPlace == 1) {
+					playerClassList.add('winner');
+				}
+			}
+		})
+
+
 
 		// prune all classes after the intial default classes that should not be removed (allPlayers, human/bot, 
 		// searched) if they have any left over from the last selected player's context.
@@ -1376,6 +1397,7 @@ function ClearTreeContext() {
 	document.getElementById('selectedPlayerRectangle').setAttribute('x', -200);
 
 }
+
 
 function UpdateTreeContext(selectedPlayer) {
 
@@ -1470,8 +1492,9 @@ function UpdateTreeContext(selectedPlayer) {
 		for (let j = playerClassList.length - 1; j >= 0; j--) {
 			//console.log('    ' + allPlayers[i].classList.value);
 
-			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' && playerClassList[j] != 'searchedPlayer' &&
-				playerClassList[j] != 'winner') {
+			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' && playerClassList[j] != 'searchedPlayer'
+				//  &&	playerClassList[j] != 'winner'
+				 ) {
 				playerClassList.remove(playerClassList[j]);
 			}
 		}
@@ -1578,7 +1601,7 @@ function UpdateTreeContext(selectedPlayer) {
 
 
 function stripBotText(name) {
-	if (name.includes('bot--')) {
+	if (name.includes('bot-')) {
 		name = name.substring(6, name.length);
 	}
 
