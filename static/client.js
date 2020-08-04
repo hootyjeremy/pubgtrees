@@ -544,10 +544,10 @@ async function GetPlayerMatches() {
 			alert('Rate limited exceeded. Please try again in 60 seconds.');
 		}
 		else {
-			console.log('ERROR: could not find player in pubg api: ' + axios_matches_response.data.status + ', ' + axios_matches_response.data.statusText);
+			console.log('ERROR: could not find player in pubg api. Check spelling and uppercase/lowercase. It must match their in game name exactly. ' + axios_matches_response.data.status + ', ' + axios_matches_response.data.statusText);
 			console.log(axios_matches_response.data.pubgResponse);
 	
-			alert('Could not find player in pubg api.');
+			alert('Could not find player in pubg api. Check spelling and uppercase/lowercase. It must match their in game name exactly.');
 		}
 
 		btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
