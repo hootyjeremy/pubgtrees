@@ -87,7 +87,7 @@ if (!blTestingVersion) {
     databaseURL = process.env.DATABASE_URL;
 }
 else {
-    //databaseURL = 'postgres://tgovfrczazrsnm:6974fe69669f35826a71d1c0c1991a0f86f4ccc28544c66a596d69697f48aac8@ec2-18-215-99-63.compute-1.amazonaws.com:5432/d9srr2mjrsmilo';
+    // when testing, there will be no connecting to the database.
     databaseURL = '';
 }
 
@@ -1927,8 +1927,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 arrKillLog[j].killer = '(' + arrKillLog[j].killer + ')';
 
                 // add these two (killers) to the end of arrKillLog 
-                arrKillLog.push( { 'killer': 'Cycled kills', 'victim': arrKillLog[i].killer });
-                arrKillLog.push( { 'killer': 'Cycled kills', 'victim': arrKillLog[j].killer });
+                arrKillLog.push( { 'killer': 'Circular kills', 'victim': arrKillLog[i].killer });
+                arrKillLog.push( { 'killer': 'Circular kills', 'victim': arrKillLog[j].killer });
 
                 blCycleKillsFound = true;
             }
@@ -1936,7 +1936,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }
 
     if (blCycleKillsFound) {
-        csvDataForD3 += 'Cycled kills,Match\n';
+        csvDataForD3 += 'Circular kills,Match\n';
     }
 
 

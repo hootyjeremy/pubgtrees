@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.034'
+let   version 			= '0.035'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -353,13 +353,14 @@ function checkURLQuery() {
 
 	if (tmpURL.search != '') {
 
-		// if (paramType != 'type' || paramMatchId != 'matchid' || paramPlayer != 'player' || paramPlatform != 'platform') {
-		// 	alert('The link has invalid search parameters.')
+		if (paramType == null || paramMatchId == null || paramPlayer == null || paramPlatform == null) {
+			alert('The link has invalid search parameters. See console log.');
+			console.log('URL search parameter error: Check that all 4 parameters are present and spelled correctly: type, matchid, player, and platform.');
 
-		// 	history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
+			history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
 
-		// 	return;
-		// }
+			return;
+		}
 
 		document.getElementById('inputPlayerName').value 	= paramPlayer;
 		document.getElementById('slcPlatform').value 		= paramPlatform;
@@ -1256,7 +1257,7 @@ function CreateTreeFromD3() {
 			//return 'categories winner'
 		}
 		else if (d.data.name == 'Match' || d.data.name == 'Environment' || 
-				 d.data.name == 'Self kills' || d.data.name == 'Cycled kills') {
+				 d.data.name == 'Self kills' || d.data.name == 'Circular kills') {
 			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
 			return 'categories';
 		}
@@ -1288,7 +1289,7 @@ function CreateTreeFromD3() {
 	})
 	.attr('cursor', d => {
 		if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || 
-			d.data.name == 'Self kills' || d.data.name == 'Cycled kills' || d.data.name.includes('<') || d.data.name.includes('(') || 
+			d.data.name == 'Self kills' || d.data.name == 'Circular kills' || d.data.name.includes('<') || d.data.name.includes('(') || 
 			!response.allHumanNames.includes(d.data.name)) {
 			// if it's not a player, then it's a category or a bot. (or an untracked late spawn bot?)
 			return 'normal';
@@ -1303,28 +1304,29 @@ function CreateTreeFromD3() {
 	//.text(d => d.data.name)
 	.attr("x", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') ? -6 : 6;
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills') ? -6 : 6;
 	}) 
 	.attr("text-anchor", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') ? "end" : "start";
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills') ? "end" : "start";
 	}) 
 	.text(d => {
 		// add '<>' to the category names
 		if (d.data.name == 'Match') {
 			return '';
 		}
-		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Cycled kills') {
+		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills') {
 			
-			if (d.data.name == 'Cycled kills') {
+			if (d.data.name == 'Circular kills') {
 				// need to know if the footnote should be displayed.
 				blCycledKillsFound = true;
 			}
 
 			return '<' + d.data.name + '>';
 		}
-		else if (!response.allHumanNames.includes(d.data.name) && !d.data.name.includes('<')) {
+		else if (!response.allHumanNames.includes(d.data.name) && !d.data.name.includes('<') && !d.data.name.includes('(')) {
 			// this is a bot
+
 			if (d.data.name.length > 10) {
 				return 'bot-' + d.data.name.substring(0, 10) + '~';
 			}
