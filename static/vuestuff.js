@@ -250,8 +250,21 @@ let vuePlayerReport = new Vue({
 					this.teamKills 		= element.teamKills;
 
 					// color some text green in the report.
-					this.isWinner = (this.winPlace == 1) ? true : false;
+					// this.isWinner = (this.winPlace == 1) ? true : false;
+
+					if (this.winPlace == 1) {
+						this.isWinner = true;
+						document.getElementById('div-winBanner').style.display = 'block';
+						document.getElementById('div-loseBanner').style.display = 'none';
+					}
+					else {
+						this.isWinner = false;
+						document.getElementById('div-winBanner').style.display = 'none';
+						document.getElementById('div-loseBanner').style.display = 'block';
+					}
+
 				}
+
 			});
 
 			

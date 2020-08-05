@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.035'
+let   version 			= '0.036'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -700,14 +700,15 @@ async function GetTelemetry(_matchID) {
 	}
 
 	//console.log('hootyserver.response:                     ' + axios_telemetry_response.status + ', ' + axios_telemetry_response.statusText);
-	// console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.hootyserver);
-	// console.log('pubgApiMatchResponseInfo.status:          ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.status);
-	// console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.statusText);
+	//console.log('pubgApiMatchResponseInfo.hootyserver:     ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.hootyserver);
+	//console.log('pubgApiMatchResponseInfo.status:          ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.status);
+	//console.log('pubgApiMatchResponseInfo.statusText:      ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.statusText);
 	//console.log('pubgApiTelemetryResponseInfo.hootyserver -> ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.hootyserver);
-	// console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
-	// console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
+	//console.log('pubgApiTelemetryResponseInfo.status:      ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.status);
+	//console.log('pubgApiTelemetryResponseInfo.statusText:  ' + axios_telemetry_response.data.pubgApiTelemetryResponseInfo.statusText);
 
-	// $ if the match doesn't exist, don't continue
+
+	// if the match doesn't exist, don't continue
 	if (axios_telemetry_response.data.pubgApiMatchResponseInfo.status != null && axios_telemetry_response.data.pubgApiMatchResponseInfo.status != 200) {
 		
 		alert('This match no longer exists.');
@@ -720,7 +721,7 @@ async function GetTelemetry(_matchID) {
 	}
 
 
-	// $ if direct link to match, this will break because there is no (axios matches)
+	// if direct link to match, this will break because there is no (axios matches). so circumventing this error...
 	if (axios_matches_response == null) {
 		vueMatchInfo.updateTreeMatchDetails(axios_telemetry_response.data.matchDetails, null);
 	}
@@ -876,9 +877,6 @@ function RunPlayerDamageReport(selectedPlayer) {
 										axios_telemetry_response.data.arrPlayersDamageLog,
 										axios_telemetry_response.data.allBotNames,
 										axios_telemetry_response.data.allHumanNames);
-
-
-
 
 	ShowModal();
 }

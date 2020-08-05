@@ -2324,7 +2324,7 @@ function clearCache() {
     //     console.log(getDate() + ' -> Cache purge interval: No files to purge.');
     // }
 
-    console.log(getDate() + ' -> Cache purge interval.');
+    //console.log(getDate() + ' -> Cache purge interval.');
 
     //
     //#endregion ----------------------------------------------------------------------
