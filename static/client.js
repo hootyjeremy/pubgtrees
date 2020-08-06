@@ -1375,8 +1375,14 @@ function ClearTreeContext() {
 				if (element.winPlace == 1) {
 					playerClassList.add('winner');
 				}
+
+				if (element.name == strPlayerName) {
+					playerClassList.add('searchedPlayer');
+				}
 			}
 		})
+
+
 
 
 
@@ -1492,8 +1498,9 @@ function UpdateTreeContext(selectedPlayer) {
 		for (let j = playerClassList.length - 1; j >= 0; j--) {
 			//console.log('    ' + allPlayers[i].classList.value);
 
-			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' && playerClassList[j] != 'searchedPlayer'
-				//  &&	playerClassList[j] != 'winner'
+			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' 
+				// && playerClassList[j] != 'searchedPlayer'
+				// &&	playerClassList[j] != 'winner'
 				 ) {
 				playerClassList.remove(playerClassList[j]);
 			}

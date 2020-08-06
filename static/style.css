@@ -91,7 +91,7 @@ td.botPlayer {
 }
 
 td.killer {
-	color: #ffc588;
+	color: #f9d692;
 }
 
 td.killerTeammate {
@@ -124,8 +124,8 @@ text.botPlayers {
 }
 
 text.searchedPlayer {
-	fill: #1b1b1b;
-	/* fill: #0e0d0e; */
+	/* fill: #1b1b1b; */
+	fill: #60b6f0;
 }
 
 text.winner {
@@ -146,7 +146,7 @@ text.playerTeammate {
 }
 
 text.killer {
-	fill: #ffc588;
+	fill: #f9d692;
 }
 
 text.killerTeammate {
@@ -197,7 +197,7 @@ span.winner {
 
 span.searchedPlayer {
 	/* color: #7dde98; */
-	color: #1b1b1b;
+	color: #60b6f0;
 }
 
 span.botPlayers {
@@ -214,7 +214,7 @@ span.playerTeammate {
 }
 
 span.killer {
-	color: #ffc588;
+	color: #f9d692;
 }
 
 span.killerTeammate {
