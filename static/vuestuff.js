@@ -32,7 +32,7 @@ let vm = new Vue({
         },
         resolveMatchType: function (match_type) {
 			if (match_type == 'competitive') {
-				return 'Ranked'
+				return 'Yes'
 			} else {
 				return 'No'
 			}

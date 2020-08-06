@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.036'
+let   version 			= '0.037'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -753,6 +753,7 @@ async function GetTelemetry(_matchID) {
 
 		// create D3 tree...
 		CreateTreeFromD3();
+		SetRectangleLocation(strPlayerName);	// on the initial drawing of the table, set the rectangle to highlight the searched player
 
 		document.getElementById('div-cycle-footnote').style.display = (blCycledKillsFound) ? 'block' : 'none';
 
@@ -881,16 +882,8 @@ function RunPlayerDamageReport(selectedPlayer) {
 	ShowModal();
 }
 
-
-function explodePie(e) {
-	for(var i = 0; i < e.dataSeries.dataPoints.length; i++) {
-		if(i !== e.dataPointIndex)
-			e.dataSeries.dataPoints[i].exploded = false;
-	}
-}
-
-
 //#endregion 
+
 
 
 // ! ------------------------------------------------------------------------------------------------------>
@@ -1400,7 +1393,9 @@ function ClearTreeContext() {
 
 
 	// move the rectangle out of sight
-	document.getElementById('selectedPlayerRectangle').setAttribute('x', -200);
+	//document.getElementById('selectedPlayerRectangle').setAttribute('x', -200);
+	SetRectangleLocation(strPlayerName);
+
 
 }
 
@@ -1556,8 +1551,16 @@ function UpdateTreeContext(selectedPlayer) {
 	//#region // ! [Region] Add the rectangle behind the selected player's name
 	//
 
+	SetRectangleLocation(selectedPlayer);
+
+	//#endregion -- add rectangle to tree
+
+}
+
+
+function SetRectangleLocation(player) {
 	// get coordinates for the selected player and the player's killer so that you can put rectangles behind them
-	let playerCoorindates = document.getElementById(selectedPlayer).parentElement.transform.baseVal[0].matrix;
+	let playerCoorindates = document.getElementById(player).parentElement.transform.baseVal[0].matrix;
 	// console.log('x=' + playerCoorindates.e + ' y=' + playerCoorindates.f);
 	// console.log('glTreeHeightNeg: ' + glTreeHeightNeg + ', ' + 'glTreeHeighPos: ' + glTreeHeightPos)
 
@@ -1601,10 +1604,9 @@ function UpdateTreeContext(selectedPlayer) {
 	// this will get the top most 
 	let existingChild = document.getElementById('g-child');
 	document.getElementById('d3-svg01').insertBefore(playerRectangle, existingChild);
-
-	//#endregion -- add rectangle to tree
-
 }
+
+
 
 
 function stripBotText(name) {
