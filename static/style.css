@@ -60,6 +60,11 @@ tr.reportRow {
 	cursor: normal;
 }
 
+tr.blankRow {
+	background-color: #414144;
+	cursor: normal;
+}
+
 
 tr.activeMatchRow {
 	background-color: #448fc0;
@@ -77,6 +82,10 @@ th, td {
 
 .tdHidden {
 	display: none;
+}
+
+td.clickable {
+	cursor: pointer;
 }
 
 

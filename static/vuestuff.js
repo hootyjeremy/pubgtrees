@@ -296,10 +296,10 @@ let vuePlayerReport = new Vue({
 					let victimClass 	= '';
 					let rowClass 		= '';
 
-					// let attackerClickable 	= false;
-					// let victimClickable 	= false;
-					// let attackerOnClick 	= '';
-					// let victimOnClick 		= '';
+					let attackerClickable 	= '';
+					let victimClickable 	= '';
+					let attackerOnClick 	= 'javascript:void(0)';
+					let victimOnClick 		= 'javascript:void(0)';
 
 					let zone = '';
 
@@ -599,15 +599,15 @@ let vuePlayerReport = new Vue({
 
 
 					// set vue bindings for clickable cells that open the player's profile
-					// if (attackerName != this.selectedPlayer && allHumanNames.includes(attackerName)) {
-					// 	attackerClickable = true;
-					// 	attackerOnClick = 'SearchNewPlayer(\'' + attackerName + '\')';
-					// }
+					if (allHumanNames.includes(attackerName)) {
+						attackerClickable = 'clickable';
+						attackerOnClick = 'SearchNewPlayer(\'' + attackerName + '\')';
+					}
 
-					// if (victimName != this.selectedPlayer && allHumanNames.includes(victimName)) {
-					// 	victimClickable = true;
-					// 	victimOnClick = 'SearchNewPlayer(\'' + victimName + '\')';
-					// }
+					if (allHumanNames.includes(victimName)) {
+						victimClickable = 'clickable';
+						victimOnClick = 'SearchNewPlayer(\'' + victimName + '\')';
+					}
 
 					//
 					//#endregion - set classes for table cells
@@ -645,6 +645,57 @@ let vuePlayerReport = new Vue({
 
 
 
+					//#region // ! [Region] Break up fights with a blank line
+					//
+
+					// $ if this record's matchTime is > 30 seconds after the last record's match time, push a blank row...
+					if (this.arrPlayerReport.length > 1) {
+
+						let prevMatchTime = this.arrPlayerReport[this.arrPlayerReport.length - 2].matchTime.substring(0,2) + 
+											this.arrPlayerReport[this.arrPlayerReport.length - 2].matchTime.substring(3,5);
+						
+						let currMatchTime = this.arrPlayerReport[this.arrPlayerReport.length - 1].matchTime.substring(0,2) + 
+											this.arrPlayerReport[this.arrPlayerReport.length - 1].matchTime.substring(3,5);
+
+						//console.log('prevMatchTime=' + prevMatchTime);
+						//console.log('currMatchTime=' + currMatchTime);
+
+						if (currMatchTime - prevMatchTime > 30) {
+
+							// push out a blank row if conditions are right
+							//console.log('---------------------- break in the fight');
+
+							
+							// this.arrPlayerReport.push({
+							// 	'rowId': '',
+							// 	'matchTime': record.matchTime,
+							// 	'attacker': '',
+							// 	'victim': '',
+							// 	'event': '',
+							// 	'damagerInfo': '',
+							// 	'distance': '',
+							// 	'info': '',
+							// 	'attackerClass': '',
+							// 	'victimClass': '',
+							// 	'attackerHealth': '',
+							// 	'victimHealth': '',
+							// 	'zone': '',
+							// 	'rowClass': 'blankRow',
+							// 	'armor': '',
+							// });
+
+							// rowId++;
+						}
+
+
+						//debugger;
+
+					}
+
+					//#endregion
+
+
+
 					this.arrPlayerReport.push({
 						'rowId': rowId,
 						'matchTime': record.matchTime,
@@ -658,15 +709,13 @@ let vuePlayerReport = new Vue({
 						'victimClass': victimClass,
 						'attackerHealth': attackerHealth,
 						'victimHealth': victimHealth,
+						'attackerClickable': attackerClickable,
+						'victimClickable': victimClickable,
+						'attackerOnClick': attackerOnClick,
+						'victimOnClick': victimOnClick,
 						'zone': zone,
 						'rowClass': rowClass,
 						'armor': armor,
-						// 'attackerClickable': attackerClickable,
-						// 'victimClickable': victimClickable,
-						// 'attackerOnClick': attackerOnClick,
-						// 'victimOnClick': victimOnClick,
-						// 'head': head,
-						// 'vest': vest,
 						
 
 					});

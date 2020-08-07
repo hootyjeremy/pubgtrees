@@ -11,9 +11,9 @@
 	<!-- font-family: 'Roboto', sans-serif; -->
 
 	<!-- VUE Dev Version -->
-	<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" type="text/javascript"></script>  -->
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" type="text/javascript"></script> 
 	<!-- VUE Production Version -->
-	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" type="text/javascript"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" type="text/javascript"></script> -->
 	
 	
 	<script src="https://unpkg.com/axios/dist/axios.min.js" type="text/javascript"></script>
@@ -60,7 +60,7 @@
 				<div style='font-size: 14px; font-weight: normal;'>
 					built by hooty__
 					<br>
-					version 0.037
+					version 0.038
 				</div>
 				<br>
 			</div>
@@ -380,16 +380,16 @@
 						v-for='(reportRow, index) in arrPlayerReport' :key='reportRow.id'
 					>
 						<td style='border-radius: 6px 0px 0px 6px; text-align: center;'>{{reportRow.matchTime}}</td>
-						<td :class='reportRow.attackerClass'							
-							v-on:click='SearchNewPlayer(reportRow.attacker)'
-							style='text-align: right; font-weight: bold; cursor: pointer;'
+						<td :class='[reportRow.attackerClass, reportRow.attackerClickable]'
+							:onclick='reportRow.attackerOnClick'
+							style='text-align: right; font-weight: bold;'
 						>{{reportRow.attacker}}</td>
-						<td style='text-align: center;' :class="{ tdHidden: isHidden}">{{reportRow.attackerHealth}}</td>
+						<td style='text-align: center;' :class="{ tdHidden: isHidden }">{{reportRow.attackerHealth}}</td>
 						<td style='text-align: center; font-weight: bold;'>{{reportRow.event}}</td>
-						<td style='text-align: center;' :class="{ tdHidden: isHidden}">{{reportRow.victimHealth}}</td>
-						<td :class='reportRow.victimClass'
-							v-on:click='SearchNewPlayer(reportRow.victim)'
-							style='font-weight: bold; cursor: pointer;'
+						<td style='text-align: center;' :class="{ tdHidden: isHidden }">{{reportRow.victimHealth}}</td>
+						<td :class='[reportRow.victimClass, reportRow.victimClickable]'
+							:onclick='reportRow.victimOnClick'
+							style='font-weight: bold;'
 						>{{reportRow.victim}}</td>
 						<td>{{reportRow.damagerInfo}}</td>
 						<td style='text-align: right;' :class="{ tdHidden: isHidden}">{{reportRow.distance}}</td>
@@ -453,8 +453,8 @@
 <!-- HOOTY MINIFY STUFF -->
 <!-- HOOTY MINIFY STUFF -->
 <!-- HOOTY MINIFY STUFF -->
-<script src="static/vuestuff.min.js" type="text/javascript"></script>
 <!-- <script src="static/vuestuff.js" type="text/javascript"></script> -->
+<script src="static/vuestuff.min.js" type="text/javascript"></script>
 
 
 </body>
