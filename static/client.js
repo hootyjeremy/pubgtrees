@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
 let   version 			= '0.038'
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 if (!blTestingVersion) {
 	//hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -1407,11 +1407,6 @@ function UpdateTreeContext(selectedPlayer) {
 	//console.log('clicked name: ' + selectedPlayer);
 	//console.log('UpdateTreeContext() event ')
 	
-	// if (prevSelectedPlayer == selectedPlayer) {
-	// 	RunPlayerDamageReport(selectedPlayer);
-	// }
-	//prevSelectedPlayer = selectedPlayer; 
-
 
 	// ! filter: don't do any reporting on bots. just let them show up in relation to actual players.
 	if (!axios_telemetry_response.data.allHumanNames.includes(selectedPlayer)) {
@@ -1421,6 +1416,13 @@ function UpdateTreeContext(selectedPlayer) {
 
 
 	blClickedPlayer = true;	// to notify svg click event 
+
+
+	// make them select the player first before showing the report
+	// if (prevSelectedPlayer == selectedPlayer) {
+	// 	RunPlayerDamageReport(selectedPlayer);
+	// }
+	// prevSelectedPlayer = selectedPlayer; 
 
 	RunPlayerDamageReport(selectedPlayer);
 

@@ -240,6 +240,9 @@ let vuePlayerReport = new Vue({
 			this.winPlace 		= '(invalid, bot)';
 			this.teamKills 		= '(invalid, bot)';
 
+			let prevMatchTime = '';
+			
+
 			arrPlayerCards.forEach(element => {
 				if (element.name == name) {
 					this.kills 			= element.kills;
@@ -648,43 +651,44 @@ let vuePlayerReport = new Vue({
 					//#region // ! [Region] Break up fights with a blank line
 					//
 
-					// $ if this record's matchTime is > 30 seconds after the last record's match time, push a blank row...
+					// if this record's matchTime is > 30 seconds after the last record's match time, push a blank row...
 					if (this.arrPlayerReport.length > 1) {
 
-						let prevMatchTime = this.arrPlayerReport[this.arrPlayerReport.length - 2].matchTime.substring(0,2) + 
-											this.arrPlayerReport[this.arrPlayerReport.length - 2].matchTime.substring(3,5);
+						prevMatchTime = this.arrPlayerReport[this.arrPlayerReport.length - 2].matchTime.substring(0,2) + 
+										this.arrPlayerReport[this.arrPlayerReport.length - 2].matchTime.substring(3,5);
 						
-						let currMatchTime = this.arrPlayerReport[this.arrPlayerReport.length - 1].matchTime.substring(0,2) + 
-											this.arrPlayerReport[this.arrPlayerReport.length - 1].matchTime.substring(3,5);
+						let currMatchTime = record.matchTime.substring(0,2) + record.matchTime.substring(3,5);
 
 						//console.log('prevMatchTime=' + prevMatchTime);
 						//console.log('currMatchTime=' + currMatchTime);
 
-						if (currMatchTime - prevMatchTime > 30) {
+						if (Number(currMatchTime) - Number(prevMatchTime) > 30) {
 
 							// push out a blank row if conditions are right
 							//console.log('---------------------- break in the fight');
 
 							
-							// this.arrPlayerReport.push({
-							// 	'rowId': '',
-							// 	'matchTime': record.matchTime,
-							// 	'attacker': '',
-							// 	'victim': '',
-							// 	'event': '',
-							// 	'damagerInfo': '',
-							// 	'distance': '',
-							// 	'info': '',
-							// 	'attackerClass': '',
-							// 	'victimClass': '',
-							// 	'attackerHealth': '',
-							// 	'victimHealth': '',
-							// 	'zone': '',
-							// 	'rowClass': 'blankRow',
-							// 	'armor': '',
-							// });
+							// $ this is working somewhat but definitely needs more work. figure out how to clean it up
+							// $ and then how to make it more accurate. 
+							this.arrPlayerReport.push({
+								'rowId': rowId,
+								'matchTime': '...',
+								'attacker': '',
+								'victim': '',
+								'event': '...',
+								'damagerInfo': '',
+								'distance': '',
+								'info': '',
+								'attackerClass': '',
+								'victimClass': '',
+								'attackerHealth': '',
+								'victimHealth': '',
+								'zone': '',
+								'rowClass': 'blankRow',
+								'armor': '',
+							});
 
-							// rowId++;
+							rowId++;
 						}
 
 
