@@ -823,7 +823,8 @@ let vuePlayerReport = new Vue({
 				_damager = 'Molotov';
 			}
 			else if (damageTypeCategory == 'Vehicle Crash' || 
-					 damageTypeCategory == 'Vehicle Hit') {
+					 damageTypeCategory == 'Vehicle Hit'   || 
+					 damageTypeCategory == 'Vehicle Explosion') {
 				_damager = 'Vehicle';
 			}
 			else {
