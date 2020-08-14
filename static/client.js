@@ -273,8 +273,18 @@ window.addEventListener('load', (event) => {
 			chkIncoming.style.display = 'inline';
 			lblIncoming.style.display = 'inline';
 
+
 			chkTeamId.style.display = 'inline';
 			document.getElementById('lblTeamId').style.display = 'inline';
+			// vuePlayerReport.isHideTeamId should be whatever is in the local storage
+			if (localStorage.getItem('chkTeamId') != null) {
+				if (localStorage.getItem('chkTeamId') == 'true') {
+					vuePlayerReport.isHideTeamId = false;
+				}
+				else {
+					vuePlayerReport.isHideTeamId = true;
+				}
+			}
 
 
 			localStorage.setItem('isHidden', 'false');
@@ -287,13 +297,15 @@ window.addEventListener('load', (event) => {
 
 			chkTeamId.style.display = 'none';
 			document.getElementById('lblTeamId').style.display = 'none';
+			vuePlayerReport.isHideTeamId = true;
 
 
 			localStorage.setItem('isHidden', 'true');
 			vuePlayerReport.isHidden = true;	
 		}
 
-		
+
+
 		// re-draw the report
 		RunPlayerDamageReport(glSelectedPlayer);
 	});
@@ -311,7 +323,7 @@ window.addEventListener('load', (event) => {
 			chkTeamId.style.display = 'none'
 			document.getElementById('lblTeamId').style.display = 'none';
 
-			vuePlayerReport.isHidden = true;	
+			vuePlayerReport.isHidden = true;
 		}
 		else {
 			document.getElementById('btnShowDamage').textContent = 'Hide details';
