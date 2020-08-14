@@ -210,7 +210,7 @@ let vuePlayerReport = new Vue({
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
 			//console.log('vuePlayerReport.isHidden: ' + this.isHidden);
-			console.log('vuePlayerReport.isHideTeamId: ' + this.isHideTeamId);
+			//console.log('vuePlayerReport.isHideTeamId: ' + this.isHideTeamId);
 
 
 			if (allBotNames.includes(name)) {
