@@ -357,7 +357,13 @@
 
 		<!-- Reporting rows -->
 		<center>
-			<table>
+
+			<!-- Show alternate if there was no damage incoming or outgoing... -->
+			<div id='alt-reportTable' style='display: none;'> 
+				* Player had no damage or kill activity in the round. *
+			</div>
+
+			<table id='reportTable'>
 				<thead>
 					<tr>
 						<th style="width: 40px;">Time</th>

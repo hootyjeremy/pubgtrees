@@ -694,6 +694,7 @@ let vuePlayerReport = new Vue({
 			//#endregion -- arrPlayersDamage loop
 
 
+			// insert spaces between rows to separate fighting engagements
 			this.insertSpacerRows();
 
 
@@ -707,6 +708,16 @@ let vuePlayerReport = new Vue({
 				this.armPercentage = ((this.hitLocations.arm * 100) / totalHits).toFixed(1);
 				this.legPercentage = ((this.hitLocations.leg * 100) / totalHits).toFixed(1);
 			}
+			else {
+				this.headPercentage = 0;
+				this.bodyPercentage = 0;
+				this.pelvisPercentage = 0;
+				this.armPercentage = 0;
+				this.legPercentage = 0;
+			}
+
+
+
 		},
 		clearPlayerReport: function () {
 			this.arrPlayerReport = [];
