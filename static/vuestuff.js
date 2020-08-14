@@ -172,7 +172,7 @@ let vuePlayerReport = new Vue({
 		teamKills: null,
 
 
-		rowId: null,					// id for rows
+		rowId: null,			// id for rows
 		arrPlayerReport: [], 	// (report rows) use this array for dumping the arrPlayersLog into with the player's context 
 
 		// rowTime: null,
@@ -180,8 +180,9 @@ let vuePlayerReport = new Vue({
 		// rowVictimName: null, 
 		// rowAction: null,
 
-		isHidden: true,			// hide damage/health
+		isHidden: true,			// hide damage/health columns
 		isWinner: false,		// show as winner green in damage report
+		isHideTeamId: true,		// show or hide the teamId columns
 
 
 
@@ -209,6 +210,7 @@ let vuePlayerReport = new Vue({
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
 			//console.log('vuePlayerReport.isHidden: ' + this.isHidden);
+			console.log('vuePlayerReport.isHideTeamId: ' + this.isHideTeamId);
 
 
 			if (allBotNames.includes(name)) {
@@ -240,7 +242,7 @@ let vuePlayerReport = new Vue({
 			this.winPlace 		= '(invalid, bot)';
 			this.teamKills 		= '(invalid, bot)';
 
-			let prevMatchTime = '';
+			//let prevMatchTime = '';
 			
 
 			arrPlayerCards.forEach(element => {
@@ -647,57 +649,14 @@ let vuePlayerReport = new Vue({
 
 
 
-
-					//#region // ! [Region] Break up fights with a blank line
-					//
-
-					// if this record's matchTime is > 30 seconds after the last record's match time, push a blank row...
-					if (this.arrPlayerReport.length > 1) {
-
-						prevMatchTime = this.arrPlayerReport[this.arrPlayerReport.length - 2].matchTime.substring(0,2) + 
-										this.arrPlayerReport[this.arrPlayerReport.length - 2].matchTime.substring(3,5);
-						
-						let currMatchTime = record.matchTime.substring(0,2) + record.matchTime.substring(3,5);
-
-						//console.log('prevMatchTime=' + prevMatchTime);
-						//console.log('currMatchTime=' + currMatchTime);
-
-						if (Number(currMatchTime) - Number(prevMatchTime) > 30) {
-
-							// push out a blank row if conditions are right
-							//console.log('---------------------- break in the fight');
-
-							
-							// $ this is working somewhat but definitely needs more work. figure out how to clean it up
-							// $ and then how to make it more accurate. 
-							this.arrPlayerReport.push({
-								'rowId': rowId,
-								'matchTime': '...',
-								'attacker': '',
-								'victim': '',
-								'event': '...',
-								'damagerInfo': '',
-								'distance': '',
-								'info': '',
-								'attackerClass': '',
-								'victimClass': '',
-								'attackerHealth': '',
-								'victimHealth': '',
-								'zone': '',
-								'rowClass': 'blankRow',
-								'armor': '',
-							});
-
-							rowId++;
-						}
-
-
-						//debugger;
-
+					// teamId stuff
+					if (record.attacker.teamId > 99999) {
+						record.attacker.teamId -= 100000;
 					}
 
-					//#endregion
-
+					if (record.victim.teamId > 99999) {
+						record.victim.teamId -= 100000;
+					}
 
 
 					this.arrPlayerReport.push({
@@ -717,10 +676,11 @@ let vuePlayerReport = new Vue({
 						'victimClickable': victimClickable,
 						'attackerOnClick': attackerOnClick,
 						'victimOnClick': victimOnClick,
+						'attackerTeamId': record.attacker.teamId,
+						'victimTeamId': record.victim.teamId,
 						'zone': zone,
 						'rowClass': rowClass,
-						'armor': armor,
-						
+						'armor': armor,						
 
 					});
 
@@ -733,6 +693,8 @@ let vuePlayerReport = new Vue({
 
 			//#endregion -- arrPlayersDamage loop
 
+
+			this.insertSpacerRows();
 
 
 			// get percentages of shots
@@ -748,6 +710,81 @@ let vuePlayerReport = new Vue({
 		},
 		clearPlayerReport: function () {
 			this.arrPlayerReport = [];
+		},
+		insertSpacerRows: function () {
+
+			//#region // ! [Region] Break up fights with a blank line
+			//
+
+			// if this record's matchTime is > 30 seconds after the last record's match time, push a blank row...
+			if (this.arrPlayerReport.length > 1) {
+
+				let prevMatchTime = new Date('2000-01-01T00:' + this.arrPlayerReport[0].matchTime); // this init will stop a false positive on the first round
+
+				for (let i = 0; i < this.arrPlayerReport.length; i++) {
+
+
+					// $ don't skip a line if the last event was a knock and this event is a kill/thirst of that knock
+
+
+					//console.log(row.matchTime);
+
+					let currMatchTime = new Date('2000-01-01T00:' + this.arrPlayerReport[i].matchTime).getTime();;
+
+
+
+					// console.log(i + '. ' + new Date('2000-01-01T00:' + this.arrPlayerReport[i].matchTime));
+					// console.log('currMatchTime: ' + currMatchTime);
+					// console.log('prevMatchTime: ' + prevMatchTime);
+
+
+					if (currMatchTime - prevMatchTime > 30000) {
+
+						// push out a blank row if conditions are right
+						//console.log('---------------------- break in the fight');
+						
+						this.arrPlayerReport.splice(i, 0, {
+							'rowId': '-',
+							'matchTime': '...',
+							'attacker': '',
+							'victim': '',
+							'event': '',
+							'damagerInfo': '',
+							'distance': '',
+							'info': '',
+							'attackerClass': '',
+							'victimClass': '',
+							'attackerHealth': '',
+							'victimHealth': '',
+							'zone': '',
+							'rowClass': 'blankRow',
+							'armor': '',
+						});
+	
+						//rowId++;
+					}
+
+
+					prevMatchTime = new Date('2000-01-01T00:' + this.arrPlayerReport[i].matchTime).getTime();
+
+
+					// correct for the rowIds in case any were added after the fact. 
+					this.arrPlayerReport[i].rowId = i;
+
+
+				};		// this.arrPlayerReport.forEach()
+
+
+				// correct for the rowIds in case any were added after the fact. 
+				// for (let i = 0; i < this.arrPlayerReport.length; i++) {
+				// 	this.arrPlayerReport[i].rowId = i;
+				// }
+
+			}
+
+			//#endregion
+
+			
 		},
 		resolveDamager: function (damageCauserName, damageReason, damageTypeCategory) {
 

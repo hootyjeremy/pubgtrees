@@ -14,8 +14,8 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.038'
-const blTestingVersion 	= true;
+let   version 			= '0.039'
+const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
 	//hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
@@ -205,7 +205,7 @@ window.addEventListener('load', (event) => {
 
 
 
-	// filter for damage type -------------------------------->
+	// ! filter for damage type -------------------------------->
 	chkIncoming = document.getElementById('checkbox-incoming');
 
 	// console.log("localStorage.defaultPlayer: " + localStorage.defaultPlayer);
@@ -223,23 +223,59 @@ window.addEventListener('load', (event) => {
 	}
 
 	chkIncoming.addEventListener('change', (event) => {
-		localStorage.setItem('chkIncomingChecked', chkIncoming.checked)
+		// update local storage
+
+		localStorage.setItem('chkIncomingChecked', chkIncoming.checked);
 		
 		RunPlayerDamageReport(glSelectedPlayer);
 	});
 
 
-	// show damage button
+
+	// ! filter for teamId columns --------------------------->
+	chkTeamId = document.getElementById('checkbox-teamId');
+
+	if (localStorage.getItem('chkTeamId') != null) {
+		if (localStorage.getItem('chkTeamId') == 'true') {
+			chkTeamId.checked = true;
+		}
+		else {
+			chkTeamId.checked = false;
+		}
+
+		vuePlayerReport.isHideTeamId = !chkTeamId.checked;
+	}
+
+
+	chkTeamId.addEventListener('change', (event) => {
+		// update local storage
+
+		localStorage.setItem('chkTeamId', chkTeamId.checked);
+
+		vuePlayerReport.isHideTeamId = !chkTeamId.checked;
+
+		RunPlayerDamageReport(glSelectedPlayer);
+	})
+
+
+
+
+	// ! "show damage" button
 	document.getElementById('btnShowDamage').addEventListener('click', (event) => {
 
 		//console.log(glSelectedPlayer);
 		
+		// show or hid the "Show incoming damage" checkbox
 		if (vuePlayerReport.isHidden) {
 			// if currently hiding columns, 
 			document.getElementById('btnShowDamage').textContent = 'Hide details';
 			
 			chkIncoming.style.display = 'inline';
 			lblIncoming.style.display = 'inline';
+
+			chkTeamId.style.display = 'inline';
+			document.getElementById('lblTeamId').style.display = 'inline';
+
 
 			localStorage.setItem('isHidden', 'false');
 			vuePlayerReport.isHidden = false;
@@ -249,18 +285,21 @@ window.addEventListener('load', (event) => {
 			chkIncoming.style.display = 'none';
 			lblIncoming.style.display = 'none';
 
+			chkTeamId.style.display = 'none';
+			document.getElementById('lblTeamId').style.display = 'none';
+
+
 			localStorage.setItem('isHidden', 'true');
 			vuePlayerReport.isHidden = true;	
 		}
 
-		//vuePlayerReport.isHidden = !vuePlayerReport.isHidden;
-
+		
 		// re-draw the report
 		RunPlayerDamageReport(glSelectedPlayer);
 	});
 
 
-	// set up report based on hidden or not
+	// ! on load, set up report based on hidden or not
 	if (localStorage.getItem('isHidden') != null) {
 
 		if (localStorage.getItem('isHidden') == 'true') {
@@ -268,6 +307,9 @@ window.addEventListener('load', (event) => {
 
 			chkIncoming.style.display = 'none';
 			lblIncoming.style.display = 'none';
+
+			chkTeamId.style.display = 'none'
+			document.getElementById('lblTeamId').style.display = 'none';
 
 			vuePlayerReport.isHidden = true;	
 		}
@@ -277,9 +319,13 @@ window.addEventListener('load', (event) => {
 			chkIncoming.style.display = 'inline';
 			lblIncoming.style.display = 'inline';
 
+			chkTeamId.style.display = 'inline'
+			document.getElementById('lblTeamId').style.display = 'inline';
+
 			vuePlayerReport.isHidden = false;
 		}
 	}
+
 
 	// need to store the rectangle object so that it can be deleted and re-created if a new match is selected (sloppy but works, will figure out something later)
 	glPlayerRectangle = document.getElementById('selectedPlayerRectangle');

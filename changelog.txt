@@ -1,3 +1,7 @@
+[2020.08.13 -- 0.039]
+-added spacing between engagements (engagement closes after 30 seconds)
+-added "show team id" button so that you can tell if you are fighting multiple teams or one team in an engagement
+
 [2020.08.03 -- 0.034]
 -can now click a player in the damage report to open their profile.
 -no longer showing winner colors while a player is clicked but they will show when clicking off a player.
