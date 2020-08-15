@@ -885,6 +885,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 player.isBot                = hf.isBot(record.character.accountId);
                 player.accountId            = record.character.accountId;
                 player.isKnockedOrKilled    = false;    // need to be able to know the state of the other team members when a player is reduced to 0. if all down, it's a wipe.
+                player.isCurrentlyAlive     = true;     // this is for the client side to check and update when running the player's report log
                 
                 team.teammates.push(player);
 

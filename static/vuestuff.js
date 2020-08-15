@@ -1,4 +1,4 @@
-// ! VUE STUFF ------------------------------------------------------------------->
+// VUE STUFF ------------------------------------------------------------------->
 
 
 // Vue.component('custom_row', {
@@ -9,6 +9,8 @@
 // })
 
 
+//#region // ! [Region] #vueapp -> match list
+//
 
 let vm = new Vue({
 	el: "#vueapp",
@@ -77,6 +79,11 @@ let vm = new Vue({
 			return strRoster;
 		},
 		analyzeMatch: function (_matchId, index) {
+			
+			
+			// ? is this deprecated??
+
+
 			//console.log('analyzeMatch() -> ' + _matchID);
 
 			// console.log(this.match_data);
@@ -115,6 +122,12 @@ let vm = new Vue({
     
 })
 
+//#endregion (match list)
+
+
+
+//#region // ! [Region] #d3-tree01 (tree details)
+//
 
 let vueMatchInfo = new Vue({
 	el: '#d3-tree01',
@@ -154,8 +167,15 @@ let vueMatchInfo = new Vue({
 	}
 })
 
+//#endregion - tree details
+
+
+
+//#region // ! [Region] #div-modal (vuePlayerReport)
+//
 
 let vuePlayerReport = new Vue({
+
 	el: "#div-modal",
 	data: {
 
@@ -206,11 +226,17 @@ let vuePlayerReport = new Vue({
 	},
 	methods: {
 
-		updatePlayerReport: function (name, killer, playerTeam, killerTeam, arrPlayerCards, arrPlayersDamageLog, allBotNames, allHumanNames) {
+		updatePlayerReport: function (name, killer, playerTeam, killerTeam) {
 
 			//console.log('vuePlayerReport.updatePlayerReport()');
 			//console.log('vuePlayerReport.isHidden: ' + this.isHidden);
 			//console.log('vuePlayerReport.isHideTeamId: ' + this.isHideTeamId);
+
+			let arrPlayerCards 		= axios_telemetry_response.data.arrPlayerCards;
+			let arrPlayersDamageLog = axios_telemetry_response.data.arrPlayersDamageLog;
+			let allBotNames 		= axios_telemetry_response.data.allBotNames;
+			let allHumanNames 		= axios_telemetry_response.data.allHumanNames;
+			let arrTeams 			= axios_telemetry_response.data.arrTeams;
 
 
 			if (allBotNames.includes(name)) {
@@ -226,11 +252,11 @@ let vuePlayerReport = new Vue({
 			this.selectedPlayer = name;
 
 			//let hitLocations 	= new Object();
-			this.hitLocations.head 	= 0;
-			this.hitLocations.body 	= 0;
-			this.hitLocations.pelvis = 0;
-			this.hitLocations.arm  	= 0;
-			this.hitLocations.leg 	= 0;
+			this.hitLocations.head 		= 0;
+			this.hitLocations.body 		= 0;
+			this.hitLocations.pelvis 	= 0;
+			this.hitLocations.arm  		= 0;
+			this.hitLocations.leg 		= 0;
 
 
 			// ! get playercard info...
@@ -282,15 +308,35 @@ let vuePlayerReport = new Vue({
 			this.arrPlayerReport = [];
 			arrPlayersDamageLog.forEach(record => {
 
+				// need to figure out the .isCurrentlyAlive of each player here, before diving into the filter
+				if (record._T == 'LogPlayerKill') {
+					arrTeams.forEach(team => {
+						if (team.teamId == record.victim.teamId) {
+							team.teammates.forEach(teammate => {
+								if (teammate.name == record.victim.name) {
+									//console.log('victim: ' + record.victim.name);
+
+									// set this player's flag to dead
+									teammate.isCurrentlyAlive = false;
+								}
+
+
+							})
+						}
+					})
+				}
+
+
+				// filter for selected player's context
 				if (record.attacker.name == this.selectedPlayer || record.victim.name == this.selectedPlayer) {
 
 					let _event 	= '';
 					//let _damage = '';
 					let _info 	= '';		// this should be a combo string of random stuff like "self-kill, thirst, bleedout/no-revive/team-wipe"
-					let _distance = '';		// $ BUG: bots have distance problems on kills
+					let _distance = '';		// BUG: bots have distance problems on kills
 
-					let attackerName = record.attacker.name;
-					let victimName = record.victim.name;
+					let attackerName 	= record.attacker.name;
+					let victimName 		= record.victim.name;
 
 					let attackerHealth 	= '';
 					let victimHealth 	= '';
@@ -311,10 +357,16 @@ let vuePlayerReport = new Vue({
 					let blAttackerIsBot = false;	// add '[BOT]' to name if it's a bot, but do it just before sending variables back
 					let blVictimIsBot	= false;	// otherwise, it pollutes attackerName and victimName.
 
+					
 					// ! unicode characters
 					// https://en.wikipedia.org/wiki/List_of_Unicode_characters
 
+
+
 					if (record._T == 'LogPlayerTakeDamage') {
+
+						//#region // ! [LogPlayerTakeDamage]
+						//
 
 						// hit locations
 						//if (victimName != attackerName) {
@@ -385,8 +437,14 @@ let vuePlayerReport = new Vue({
 							//_info += ' (kill/knock)'
 						}
 
+						//#endregion LogPlayerTakeDamage
+
 					}
 					else if (record._T == 'LogPlayerMakeGroggy') {
+
+						//#region // ! [LogPlayerMakeGroggy]
+						//
+						
 						_event = '\u25BC'; // '\u2228'; //'\u25BD'; //'v';
 
 						rowClass = 'rowKill';
@@ -400,8 +458,14 @@ let vuePlayerReport = new Vue({
 						else {
 							//_info = '(knock)'
 						}
+
+						//#endregion
+
 					}
 					else if (record._T == 'LogPlayerRevive') {
+
+						//#region // ! [LogPlayerRevive]
+						//
 
 						// don't bother showing the player reviving teammates. just show when the player is revived.
 						if (record.attacker.name == this.selectedPlayer) {
@@ -411,13 +475,39 @@ let vuePlayerReport = new Vue({
 						_event = '\u2227'; //'\u25B2';  //'^';
 
 						//_info = '(revive)'
+
+						//#endregion LogPlayerRevive
+
 					}
 					else if (record._T == 'LogPlayerKill') {
+
+						//#region // ! [LogPlayerKill]
+						//
+
 						_event = '\u2573'; // '╳'; // 'x';
 
 						//_info = '(kill)';
 
 						rowClass = 'rowKill';
+
+
+						// show how many team members are left. if none, show team wiped. 
+						// at this point, you already know if this victim is dead
+						let teammatesAlive = 0;
+						arrTeams.forEach(team => {
+							if (team.teamId == record.victim.teamId) {
+								team.teammates.forEach(teammate => {
+
+									// how many teammates are alive?
+									if (teammate.isCurrentlyAlive) {
+										teammatesAlive++;
+									}
+
+									//console.log(record.victim.name + ' teammates alive: ' + teammatesAlive);
+								})
+							}
+						})
+
 
 						if (record.isThirst) {
 							_info += ' (Thirsted)';
@@ -428,12 +518,29 @@ let vuePlayerReport = new Vue({
 						}
 
 						if (record.isNoRevive) {
-							_info += ' (Bleedout/No-revive)';
+							_info += ' (Bleedout: No-revive)';
 						}
 						else if (record.isTeamWipe) {
-							_info += ' (Bleedout/Team-wiped)';
+							_info += ' (Bleedout: Team-wipe)';
 						}
+						else {
+							// if it's not a bleedout, then there are teammates alive so so that...
+
+							// don't show this for solo games
+							if (!axios_telemetry_response.data.matchDetails.gameMode.includes('solo')) {
+								if (teammatesAlive == 0) {
+									_info += '(Team flush)';
+								}
+								else {
+									_info += ' (Teammates left: ' + teammatesAlive + ')';
+								}
+							}
+						}
+
+						//#endregion LogPlayerKill
+
 					}
+
 
 
 					// correct for distance errors ----->
@@ -659,6 +766,7 @@ let vuePlayerReport = new Vue({
 					}
 
 
+
 					this.arrPlayerReport.push({
 						'rowId': rowId,
 						'matchTime': record.matchTime,
@@ -685,9 +793,15 @@ let vuePlayerReport = new Vue({
 					});
 
 					rowId++;
-					//debugger;
-				}
 
+				}
+				else {
+					// neither the killer nor victim are the selected player (check for teammates here)
+
+					// $ check if the victim is on the selected player's team (only for non-solo games)
+					
+
+				}
 
 			})
 
@@ -702,18 +816,18 @@ let vuePlayerReport = new Vue({
 			totalHits = this.hitLocations.head + this.hitLocations.body + this.hitLocations.pelvis + this.hitLocations.arm + this.hitLocations.leg;
 
 			if (totalHits > 0) {
-				this.headPercentage = ((this.hitLocations.head * 100) / totalHits).toFixed(1);
-				this.bodyPercentage = ((this.hitLocations.body * 100) / totalHits).toFixed(1);
-				this.pelvisPercentage = ((this.hitLocations.pelvis * 100) / totalHits).toFixed(1);
-				this.armPercentage = ((this.hitLocations.arm * 100) / totalHits).toFixed(1);
-				this.legPercentage = ((this.hitLocations.leg * 100) / totalHits).toFixed(1);
+				this.headPercentage 	= ((this.hitLocations.head   * 100) / totalHits).toFixed(1);
+				this.bodyPercentage 	= ((this.hitLocations.body   * 100) / totalHits).toFixed(1);
+				this.pelvisPercentage 	= ((this.hitLocations.pelvis * 100) / totalHits).toFixed(1);
+				this.armPercentage 		= ((this.hitLocations.arm    * 100) / totalHits).toFixed(1);
+				this.legPercentage 		= ((this.hitLocations.leg    * 100) / totalHits).toFixed(1);
 			}
 			else {
-				this.headPercentage = 0;
-				this.bodyPercentage = 0;
-				this.pelvisPercentage = 0;
-				this.armPercentage = 0;
-				this.legPercentage = 0;
+				this.headPercentage 	= 0;
+				this.bodyPercentage 	= 0;
+				this.pelvisPercentage 	= 0;
+				this.armPercentage 		= 0;
+				this.legPercentage 		= 0;
 			}
 
 
@@ -756,7 +870,7 @@ let vuePlayerReport = new Vue({
 						
 						this.arrPlayerReport.splice(i, 0, {
 							'rowId': '-',
-							'matchTime': '...',
+							'matchTime': String.fromCharCode(160),	// blank non-breakable space
 							'attacker': '',
 							'victim': '',
 							'event': '',
@@ -821,6 +935,9 @@ let vuePlayerReport = new Vue({
 			}
 			else if (damageTypeCategory == 'Molotov') {
 				_damager = 'Molotov';
+			}
+			else if (damageTypeCategory == 'Sticky Bomb Explosion') {
+				_damager = 'Sticky Bomb';
 			}
 			else if (damageTypeCategory == 'Vehicle Crash' || 
 					 damageTypeCategory == 'Vehicle Hit'   || 
@@ -908,3 +1025,5 @@ let vuePlayerReport = new Vue({
 
 	}
 });
+
+//#endregion - '#div-modal'  -> vuePlayerReport

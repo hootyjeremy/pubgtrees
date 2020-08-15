@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.039'
+let   version 			= '0.040'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -932,13 +932,15 @@ function RunPlayerDamageReport(selectedPlayer) {
 	}
 
 
-	vuePlayerReport.updatePlayerReport(selectedPlayer, tmpKiller, playerTeam, killerTeam,
-										axios_telemetry_response.data.arrPlayerCards, 
-										axios_telemetry_response.data.arrPlayersDamageLog,
-										axios_telemetry_response.data.allBotNames,
-										axios_telemetry_response.data.allHumanNames);
+	// vuePlayerReport.updatePlayerReport(selectedPlayer, tmpKiller, playerTeam, killerTeam,
+	// 									axios_telemetry_response.data.arrPlayerCards, 
+	// 									axios_telemetry_response.data.arrPlayersDamageLog,
+	// 									axios_telemetry_response.data.allBotNames,
+	// 									axios_telemetry_response.data.allHumanNames);
 
-	
+	vuePlayerReport.updatePlayerReport(selectedPlayer, tmpKiller, playerTeam, killerTeam);
+
+											
 	// don't show player report table if they did no damage at all and the report is empty (rare)
 	if (vuePlayerReport.arrPlayerReport.length > 0) {
 		document.getElementById('reportTable').style.display 		= 'table';
