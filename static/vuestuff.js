@@ -203,7 +203,7 @@ let vuePlayerReport = new Vue({
 		isHidden: true,				// hide damage/health columns
 		isWinner: false,			// show as winner green in damage report
 		isHideTeamId: true,			// show or hide the teamId columns
-		blShowTeamDeaths: true,	// for showing when teammates are killed/knocked/revived
+		blShowTeamDeaths: false,	// for showing when teammates are killed/knocked/revived
 
 
 
