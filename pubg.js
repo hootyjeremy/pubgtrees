@@ -2381,7 +2381,7 @@ function UpdateDatabase() {
 function getDate() {
     // https://momentjs.com/timezone/docs/
 
-    return moment().tz("America/Chicago").format('YYYY.MM.DD__hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
+    return moment().tz("America/Chicago").format('YYYY.MM.DD _ hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
     // return moment().tz("America/Chicago").format('YYYY.MM.DD__hh:mm:ss.SSS A'); //moment().toISOString().substring(11,23);
 }   
 

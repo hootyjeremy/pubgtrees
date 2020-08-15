@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.040'
+let   version 			= '0.041'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -246,13 +246,37 @@ window.addEventListener('load', (event) => {
 		vuePlayerReport.isHideTeamId = !chkTeamId.checked;
 	}
 
-
 	chkTeamId.addEventListener('change', (event) => {
 		// update local storage
 
 		localStorage.setItem('chkTeamId', chkTeamId.checked);
 
 		vuePlayerReport.isHideTeamId = !chkTeamId.checked;
+
+		RunPlayerDamageReport(glSelectedPlayer);
+	})
+
+
+
+	// ! filter for teammate deaths --------------------------->
+	chkShowTeamDeaths = document.getElementById('checkbox-teamDeaths');
+
+	if (localStorage.getItem('chkShowTeamDeaths') != null) {
+		if (localStorage.getItem('chkShowTeamDeaths') == 'true') {
+			chkShowTeamDeaths.checked = true;
+		}
+		else {
+			chkShowTeamDeaths.checked = false;
+		}
+
+		vuePlayerReport.blShowTeamDeaths = chkShowTeamDeaths.checked;
+	}
+
+	chkShowTeamDeaths.addEventListener('change', (event) => {
+
+		localStorage.setItem('chkShowTeamDeaths', chkShowTeamDeaths.checked);
+
+		vuePlayerReport.blShowTeamDeaths = chkShowTeamDeaths.checked;
 
 		RunPlayerDamageReport(glSelectedPlayer);
 	})
@@ -287,6 +311,9 @@ window.addEventListener('load', (event) => {
 			}
 
 
+			chkShowTeamDeaths.style.display = 'inline';
+			document.getElementById('lblTeamDeaths').style.display = 'inline';
+
 			localStorage.setItem('isHidden', 'false');
 			vuePlayerReport.isHidden = false;
 		}
@@ -299,6 +326,8 @@ window.addEventListener('load', (event) => {
 			document.getElementById('lblTeamId').style.display = 'none';
 			vuePlayerReport.isHideTeamId = true;
 
+			chkShowTeamDeaths.style.display = 'none';
+			document.getElementById('lblTeamDeaths').style.display = 'none';
 
 			localStorage.setItem('isHidden', 'true');
 			vuePlayerReport.isHidden = true;	
@@ -323,6 +352,10 @@ window.addEventListener('load', (event) => {
 			chkTeamId.style.display = 'none'
 			document.getElementById('lblTeamId').style.display = 'none';
 
+			chkShowTeamDeaths.style.display = 'none';
+			document.getElementById('lblTeamDeaths').style.display = 'none';
+
+
 			vuePlayerReport.isHidden = true;
 		}
 		else {
@@ -333,6 +366,10 @@ window.addEventListener('load', (event) => {
 
 			chkTeamId.style.display = 'inline'
 			document.getElementById('lblTeamId').style.display = 'inline';
+
+			chkShowTeamDeaths.style.display = 'inline';
+			document.getElementById('lblTeamDeaths').style.display = 'inline';
+
 
 			vuePlayerReport.isHidden = false;
 		}

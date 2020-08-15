@@ -200,9 +200,10 @@ let vuePlayerReport = new Vue({
 		// rowVictimName: null, 
 		// rowAction: null,
 
-		isHidden: true,			// hide damage/health columns
-		isWinner: false,		// show as winner green in damage report
-		isHideTeamId: true,		// show or hide the teamId columns
+		isHidden: true,				// hide damage/health columns
+		isWinner: false,			// show as winner green in damage report
+		isHideTeamId: true,			// show or hide the teamId columns
+		blShowTeamDeaths: true,	// for showing when teammates are killed/knocked/revived
 
 
 
@@ -298,17 +299,24 @@ let vuePlayerReport = new Vue({
 
 			});
 
-			
 
-			// get damage log activity
-			//#region // ! [region] arrPlayersDamageLog loop...
+			// need to reset each teammate's "alive" status to show that they are alive.
+			arrTeams.forEach(team => {
+				team.teammates.forEach(teammate => {
+					teammate.isCurrentlyAlive = true;
+				})
+			})
+
+
+
+			//#region // ! [region] arrPlayersDamageLog loop -------------------------------------------------->
 			//
 
 			rowId = 0;
 			this.arrPlayerReport = [];
 			arrPlayersDamageLog.forEach(record => {
 
-				// need to figure out the .isCurrentlyAlive of each player here, before diving into the filter
+				// need to figure out the .isCurrentlyAlive of each player at every event before diving into the filter
 				if (record._T == 'LogPlayerKill') {
 					arrTeams.forEach(team => {
 						if (team.teamId == record.victim.teamId) {
@@ -319,16 +327,43 @@ let vuePlayerReport = new Vue({
 									// set this player's flag to dead
 									teammate.isCurrentlyAlive = false;
 								}
-
-
 							})
 						}
 					})
 				}
 
 
+
 				// filter for selected player's context
-				if (record.attacker.name == this.selectedPlayer || record.victim.name == this.selectedPlayer) {
+				if (record.attacker.name == this.selectedPlayer || record.victim.name == this.selectedPlayer || 
+					record.victim.teamId == playerTeam.teamId) {
+					
+					// ! filter for teammate deaths
+					if (this.blShowTeamDeaths) {
+							
+						// if you are not printing the teammate's stuff, then skip this record
+						if (!axios_telemetry_response.data.matchDetails.gameMode.includes('solo')) {
+							// as long as this isn't a solo game, check for teammate activity...
+		
+							// if this is a team member that is not the selected player
+							if (record.victim.name != name && record.victim.teamId == playerTeam.teamId) {
+								// this is a teammate who is a victim
+
+								if (record._T != 'LogPlayerMakeGroggy' && record._T != 'LogPlayerRevive' && record._T != 'LogPlayerKill') {
+									return;
+								}
+							}
+						}
+					}
+					else {
+						// if not showing teammate deaths, then skip record if this isn't the player...
+
+						if (record.attacker.name != this.selectedPlayer && record.victim.name != this.selectedPlayer) {
+							return;
+						}
+					}
+				
+
 
 					let _event 	= '';
 					//let _damage = '';
@@ -459,6 +494,7 @@ let vuePlayerReport = new Vue({
 							//_info = '(knock)'
 						}
 
+
 						//#endregion
 
 					}
@@ -468,13 +504,37 @@ let vuePlayerReport = new Vue({
 						//
 
 						// don't bother showing the player reviving teammates. just show when the player is revived.
-						if (record.attacker.name == this.selectedPlayer) {
-							return;
+
+						// don't show teammate revives, but do show your own revives
+						if (!this.blShowTeamDeaths) {
+
+							if (record.attacker.name == this.selectedPlayer) {
+								return;
+							}
 						}
+
 
 						_event = '\u2227'; //'\u25B2';  //'^';
 
-						//_info = '(revive)'
+
+						// show how many team members are left. if none, show team wiped. 
+						// at this point, you already know if this victim is dead
+						// let teammatesAlive = 0;
+						// arrTeams.forEach(team => {
+						// 	if (team.teamId == record.victim.teamId) {
+						// 		team.teammates.forEach(teammate => {
+
+						// 			// how many teammates are alive?
+						// 			if (teammate.isCurrentlyAlive) {
+						// 				teammatesAlive++;
+						// 			}
+						// 		})
+						// 	}
+						// })
+
+						// _info += ' (Teammates alive: ' + teammatesAlive + ')';
+
+													
 
 						//#endregion LogPlayerRevive
 
@@ -510,7 +570,7 @@ let vuePlayerReport = new Vue({
 
 
 						if (record.isThirst) {
-							_info += ' (Thirsted)';
+							_info += ' (Thirst)';
 						}
 
 						if (record.isSelfKill) {
@@ -523,19 +583,21 @@ let vuePlayerReport = new Vue({
 						else if (record.isTeamWipe) {
 							_info += ' (Bleedout: Team-wipe)';
 						}
-						else {
-							// if it's not a bleedout, then there are teammates alive so so that...
+
+
+						if (!record.isTeamWipe) {
 
 							// don't show this for solo games
 							if (!axios_telemetry_response.data.matchDetails.gameMode.includes('solo')) {
 								if (teammatesAlive == 0) {
-									_info += '(Team flush)';
+									_info += '(Team-wipe)';
 								}
 								else {
-									_info += ' (Teammates left: ' + teammatesAlive + ')';
+									_info += ' (Teammates alive: ' + teammatesAlive + ')';
 								}
 							}
 						}
+						
 
 						//#endregion LogPlayerKill
 
@@ -560,7 +622,6 @@ let vuePlayerReport = new Vue({
 
 					// get a summed up weapon/damager word
 					let _damager = this.resolveDamager(record.damageCauserName, record.damageReason, record.damageTypeCategory);
-
 
 
 					//let _botAttacker = (allBotNames.includes(record.attacker.name)) ? 'bot-' : '';
@@ -726,7 +787,6 @@ let vuePlayerReport = new Vue({
 
 
 
-
 					// don't show distance for grenades or molotov damage
 					if (_damager == 'Grenade' || _damager == 'Molotov') {
 						_distance = '';
@@ -788,18 +848,11 @@ let vuePlayerReport = new Vue({
 						'victimTeamId': record.victim.teamId,
 						'zone': zone,
 						'rowClass': rowClass,
-						'armor': armor,						
+						'armor': armor,	
 
 					});
 
 					rowId++;
-
-				}
-				else {
-					// neither the killer nor victim are the selected player (check for teammates here)
-
-					// $ check if the victim is on the selected player's team (only for non-solo games)
-					
 
 				}
 
@@ -809,7 +862,9 @@ let vuePlayerReport = new Vue({
 
 
 			// insert spaces between rows to separate fighting engagements
-			this.insertSpacerRows();
+			if (!this.isHidden) {
+				this.insertSpacerRows();
+			}
 
 
 			// get percentages of shots
@@ -849,7 +904,7 @@ let vuePlayerReport = new Vue({
 				for (let i = 0; i < this.arrPlayerReport.length; i++) {
 
 
-					// $ don't skip a line if the last event was a knock and this event is a kill/thirst of that knock
+					// $ don't skip a line if the previous event was a knock and this event is a kill/thirst of that knock
 
 
 					//console.log(row.matchTime);
