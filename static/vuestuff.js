@@ -477,8 +477,7 @@ let vuePlayerReport = new Vue({
 
 							// 0.043 : going to try to not show the last damage event if it is a knock or kill. 
 							// will suppress the row and the next row will necessarily be the associated LogPlayerKill.
-
-							return;
+							//return;
 						}
 
 						//#endregion LogPlayerTakeDamage
@@ -939,7 +938,7 @@ let vuePlayerReport = new Vue({
 						this.arrPlayerReport.splice(i, 0, {
 							// ! KEEP THIS IN SYNC WITH SOURCE ABOVE
 							'rowId': '-',
-							'matchTime': '...', // String.fromCharCode(160),	// blank non-breakable space
+							'matchTime': String.fromCharCode(160), //'...', // String.fromCharCode(160),	// blank non-breakable space
 							'attacker': '',
 							'victim': '',
 							'event': '',
@@ -964,8 +963,7 @@ let vuePlayerReport = new Vue({
 
 					if (this.arrPlayerReport[i].pubgEvent == 'LogPlayerKill' && i < this.arrPlayerReport.length - 1) {
 
-						 currMatchTime - prevMatchTime > 30000
-
+						
 						// insert AFTER kill
 						this.arrPlayerReport.splice(i+1, 0, {
 							// ! KEEP THIS IN SYNC WITH SOURCE ABOVE
