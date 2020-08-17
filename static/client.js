@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.041'
+let   version 			= '0.042'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -108,12 +108,10 @@ let blClickedPlayer = false; // will use this for notifying svg click that a pla
 window.addEventListener('load', (event) => {
 	//console.log('page is fully loaded');
 
-	if (blTestingVersion) {
-		document.getElementById('test-version-indicator').style.display = 'block';
-	}
-	else {
-		document.getElementById('test-version-indicator').style.display = 'none';
-	}
+
+	// use vue to turn on/off stuff with blTestingVersion
+	vueSearchDiv.blTestingVersion = blTestingVersion;
+
 
 	// load default player from local storage
 	let defaultPlayer 	= localStorage.getItem('defaultPlayer');
@@ -181,6 +179,8 @@ window.addEventListener('load', (event) => {
 	// clear name context and selected player if you click blank area
 	document.getElementById('div-d3-tree').addEventListener('click', (event) => {
 
+		console.log('start: div-d3-tree.click() -> ' + blClickedPlayer);
+	
 		if (blClickedPlayer) {
 			blClickedPlayer = false;	// turn this back off so that it is only set to true when a player is clicked.
 		}
@@ -188,6 +188,7 @@ window.addEventListener('load', (event) => {
 			// if a player was not clicked, then clear context colors 
 			ClearTreeContext();
 		}
+
 	})
 
 
@@ -519,8 +520,6 @@ function SearchNewPlayer(player) {
 	// console.log('platform: ' + strPlatform);
 
 	// create search query string and then open window in new tab
-
-	// $ need to be able to run this function on any name in the damage log (except bots and self-selectedPlayer)
 
 	let tmpURL = hooty_server_url + '/?type=player&matchid=null&player=' + player + '&platform=' + strPlatform;
 
@@ -1459,6 +1458,8 @@ function ClearTreeContext() {
 
 	//console.log('ClearTreeContext()');
 
+	glSelectedPlayer 	= '';  // clear the selected player
+	prevSelectedPlayer 	= '';
 
 	let allPlayers = document.getElementsByClassName('allPlayers');
 
@@ -1507,7 +1508,6 @@ function ClearTreeContext() {
 	//document.getElementById('selectedPlayerRectangle').setAttribute('x', -200);
 	SetRectangleLocation(strPlayerName);
 
-
 }
 
 
@@ -1516,8 +1516,9 @@ function UpdateTreeContext(selectedPlayer) {
 	// update data data for the selected player
 
 	//console.log('clicked name: ' + selectedPlayer);
-	//console.log('UpdateTreeContext() event ')
-	
+	//console.log('UpdateTreeContext() event ');
+
+	HideModal();	// hides the window originally
 
 	// ! filter: don't do any reporting on bots. just let them show up in relation to actual players.
 	if (!axios_telemetry_response.data.allHumanNames.includes(selectedPlayer)) {
@@ -1526,16 +1527,18 @@ function UpdateTreeContext(selectedPlayer) {
 	}
 
 
-	blClickedPlayer = true;	// to notify svg click event 
+	blClickedPlayer = true;	// to notify svg click event
 
 
 	// make them select the player first before showing the report
-	// if (prevSelectedPlayer == selectedPlayer) {
-	// 	RunPlayerDamageReport(selectedPlayer);
-	// }
-	// prevSelectedPlayer = selectedPlayer; 
+	if (prevSelectedPlayer == selectedPlayer && glSelectedPlayer != '') {
+		RunPlayerDamageReport(selectedPlayer);
+	}
+	
+	glSelectedPlayer 	= selectedPlayer;
+	prevSelectedPlayer 	= selectedPlayer; 
 
-	RunPlayerDamageReport(selectedPlayer);
+	//RunPlayerDamageReport(selectedPlayer);
 
 
 	// ! human and bot players should always have at least one root class "humanPlayer" or "botPlayer" and then stack and relational classes on top of them. 

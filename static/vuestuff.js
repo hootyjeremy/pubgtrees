@@ -9,6 +9,10 @@
 // })
 
 
+
+
+
+
 //#region // ! [Region] #vueapp -> match list
 //
 
@@ -469,7 +473,7 @@ let vuePlayerReport = new Vue({
 						}
 
 						if (record.killingStroke){
-							//_info += ' (kill/knock)'
+							_info += ' (Kill/Knock)'
 						}
 
 						//#endregion LogPlayerTakeDamage
@@ -772,14 +776,16 @@ let vuePlayerReport = new Vue({
 
 
 					// set vue bindings for clickable cells that open the player's profile
-					if (allHumanNames.includes(attackerName)) {
+					if (allHumanNames.includes(attackerName) && attackerName != name) {
 						attackerClickable = 'clickable';
-						attackerOnClick = 'SearchNewPlayer(\'' + attackerName + '\')';
+						//attackerOnClick = 'SearchNewPlayer(\'' + attackerName + '\')';
+						attackerOnClick = 'UpdateTreeContext(\'' + attackerName + '\')';
 					}
 
-					if (allHumanNames.includes(victimName)) {
+					if (allHumanNames.includes(victimName) && victimName != name) {
 						victimClickable = 'clickable';
-						victimOnClick = 'SearchNewPlayer(\'' + victimName + '\')';
+						//victimOnClick = 'SearchNewPlayer(\'' + victimName + '\')';
+						victimOnClick = 'UpdateTreeContext(\'' + victimName + '\')';
 					}
 
 					//
@@ -1075,10 +1081,31 @@ let vuePlayerReport = new Vue({
 			}
 
 			return r;
+		},
+		SearchNewPlayer(player) {
+
+			// ! for some reason, vue is complaining about "SearchNewPlayer()" not being defined on the instance (because it's not a vue instance method) so i'm just
+			// ! going to encapsulate it here and then send out to the originally created SearchNewPlayer() function.
+
+			SearchNewPlayer(player);
 		}
 
 
 	}
 });
 
+
+
 //#endregion - '#div-modal'  -> vuePlayerReport
+
+
+
+let vueSearchDiv = new Vue({
+	 el: '#test-version-indicator',
+	data: {
+		blTestingVersion: true,
+	},
+	created: function() {
+		this.blTestingVersion = blTestingVersion;
+	},
+});

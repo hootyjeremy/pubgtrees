@@ -93,7 +93,7 @@ let zoneDictionary = {
     "severny": "Severny",
     "stalber": "Stalber",
     "kameshki": "Kameshki",
-    "yasnayapolyana": "Yasnaya Polyana",
+    "yasnayapolyana": "Yasnaya",
     "lipovka": "Lipovka",
     "mansion": "Mansion",
     "shelter": "Shelter",
