@@ -961,47 +961,45 @@ let vuePlayerReport = new Vue({
 
 
 
-					if (this.arrPlayerReport[i].pubgEvent == 'LogPlayerKill' && i < this.arrPlayerReport.length - 1) {
-
-						
-						// insert AFTER kill
-						this.arrPlayerReport.splice(i+1, 0, {
-							// ! KEEP THIS IN SYNC WITH SOURCE ABOVE
-							'rowId': '-',
-							'matchTime': String.fromCharCode(160),	// blank non-breakable space
-							'attacker': '',
-							'victim': '',
-							'event': '',
-							'damagerInfo': '',
-							'distance': '',
-							'info': '',
-							'attackerClass': '',
-							'victimClass': '',
-							'attackerHealth': '',
-							'victimHealth': '',
-							'zone': '',
-							'rowClass': 'blankRow',
-							'armor': '',
-							'pubgEvent': '',
-						});
-					}
+					// if (this.arrPlayerReport[i].pubgEvent == 'LogPlayerKill' && i < this.arrPlayerReport.length - 1) {
+					// 	// insert AFTER kill
+					// 	this.arrPlayerReport.splice(i+1, 0, {
+					// 		// ! KEEP THIS IN SYNC WITH SOURCE ABOVE
+					// 		'rowId': '-',
+					// 		'matchTime': String.fromCharCode(160),	// blank non-breakable space
+					// 		'attacker': '',
+					// 		'victim': '',
+					// 		'event': '',
+					// 		'damagerInfo': '',
+					// 		'distance': '',
+					// 		'info': '',
+					// 		'attackerClass': '',
+					// 		'victimClass': '',
+					// 		'attackerHealth': '',
+					// 		'victimHealth': '',
+					// 		'zone': '',
+					// 		'rowClass': 'blankRow',
+					// 		'armor': '',
+					// 		'pubgEvent': '',
+					// 	});
+					// }
 
 
 					// $ this was going to be for skipping a line if the last record was a kill of the same team member but idk
-					if (i > 0) {
+					// if (i > 0) {
 						
-						if (this.arrPlayerReport[i-1].pubgEvent == 'LogPlayerKill' && i < this.arrPlayerReport.length - 1) {
+					// 	if (this.arrPlayerReport[i-1].pubgEvent == 'LogPlayerKill' && i < this.arrPlayerReport.length - 1) {
 
-							//console.log(i + ' of ' + this.arrPlayerReport.length + ' : ' + this.arrPlayerReport[i].pubgEvent);
-							//console.log(this.arrPlayerReport[i].pubgEvent);
+					// 		//console.log(i + ' of ' + this.arrPlayerReport.length + ' : ' + this.arrPlayerReport[i].pubgEvent);
+					// 		//console.log(this.arrPlayerReport[i].pubgEvent);
 		
-							// $ if next record exists and 
-							//'attackerTeamId': record.attacker.teamId,
-							//'victimTeamId': record.victim.teamId,
+					// 		// $ if next record exists and 
+					// 		//'attackerTeamId': record.attacker.teamId,
+					// 		//'victimTeamId': record.victim.teamId,
 
-						}
+					// 	}
 
-					}
+					// }
 
 
 					prevMatchTime = new Date('2000-01-01T00:' + this.arrPlayerReport[i].matchTime).getTime();
