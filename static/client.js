@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.043'
+let   version 			= '0.044'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -1385,7 +1385,7 @@ function CreateTreeFromD3() {
 
 			//  || response.allBotNames.includes(d.data.name)
 
-			return 'UpdateTreeContext(\'' + d.data.name + '\')';
+			return 'UpdateTreeContext(\'' + d.data.name + '\', true)';
 		}
 	})
 	.attr('cursor', d => {
@@ -1429,10 +1429,10 @@ function CreateTreeFromD3() {
 			// this is a bot
 
 			if (d.data.name.length > 10) {
-				return 'bot-' + d.data.name.substring(0, 10) + '~';
+				return 'bot.' + d.data.name.substring(0, 10) + '~';
 			}
 			else {
-				return 'bot-' + d.data.name;
+				return 'bot.' + d.data.name;
 			}
 		}
 		else {
@@ -1511,14 +1511,21 @@ function ClearTreeContext() {
 }
 
 
-function UpdateTreeContext(selectedPlayer) {
+function UpdateTreeContext(selectedPlayer, _playerClicked) {
 
 	// update data data for the selected player
 
 	//console.log('clicked name: ' + selectedPlayer);
 	//console.log('UpdateTreeContext() event ');
 
-	HideModal();	// hides the window originally
+	// to notify svg click event (if true, this will indicate that a player in the tree was clicked. if false, 
+	// a player from the report was clicked and you can clear context easier)
+	blClickedPlayer = _playerClicked; 
+
+	if (!blClickedPlayer) {
+		HideModal();	// hides the modal report window if a player was clicked from there
+	}
+
 
 	// ! filter: don't do any reporting on bots. just let them show up in relation to actual players.
 	if (!axios_telemetry_response.data.allHumanNames.includes(selectedPlayer)) {
@@ -1526,9 +1533,7 @@ function UpdateTreeContext(selectedPlayer) {
 		return;
 	}
 
-
-	blClickedPlayer = true;	// to notify svg click event
-
+	
 
 	// make them select the player first before showing the report
 	if (prevSelectedPlayer == selectedPlayer && glSelectedPlayer != '') {
@@ -1726,7 +1731,7 @@ function SetRectangleLocation(player) {
 
 
 function stripBotText(name) {
-	if (name.includes('bot-')) {
+	if (name.includes('bot.')) {
 		name = name.substring(6, name.length);
 	}
 

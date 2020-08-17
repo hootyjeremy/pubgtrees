@@ -9,9 +9,27 @@
 // })
 
 
+// let vueHeader = new Vue({
+// 	el: '#vue-header',
+// 	data: {
+// 		style_css: 'static/style.css',
+// 		hf_js: 'static/hf.js',
+// 		client_js: 'static/client.js',
+// 	},
+// 	created: function () {
+
+// 		if (!blTestingVersion) {
+// 			// if this is not the testing version, update these values to minified files
+// 			style_css = 'static/style.min.js';
+// 			hf_js = 'static/hf.min.js';
+// 			client_js = 'static/client.min.js';
+// 		}
+
+// 	}
+// })
 
 
- 
+
 
 //#region // ! [Region] #vueapp -> match list
 //
@@ -782,13 +800,13 @@ let vuePlayerReport = new Vue({
 					if (allHumanNames.includes(attackerName) && attackerName != name) {
 						attackerClickable = 'clickable';
 						//attackerOnClick = 'SearchNewPlayer(\'' + attackerName + '\')';
-						attackerOnClick = 'UpdateTreeContext(\'' + attackerName + '\')';
+						attackerOnClick = 'UpdateTreeContext(\'' + attackerName + '\', false)';
 					}
 
 					if (allHumanNames.includes(victimName) && victimName != name) {
 						victimClickable = 'clickable';
 						//victimOnClick = 'SearchNewPlayer(\'' + victimName + '\')';
-						victimOnClick = 'UpdateTreeContext(\'' + victimName + '\')';
+						victimOnClick = 'UpdateTreeContext(\'' + victimName + '\', false)';
 					}
 
 					//
@@ -809,18 +827,18 @@ let vuePlayerReport = new Vue({
 
 					// add 'bot-' to name if they are a killer or killer teammate
 					if (blAttackerIsBot) { 
-						attackerName = 'bot-' + attackerName;
+						attackerName = 'bot.' + attackerName;
 					}
 					else if (!allHumanNames.includes(attackerName) && !attackerName.includes('<')) {
-						attackerName = 'bot-' + attackerName;
+						attackerName = 'bot.' + attackerName;
 					}
 
 					// add 'bot-' to name if they are a regular attacker or victim
 					if (blVictimIsBot){
-						victimName = 'bot-' + victimName;
+						victimName = 'bot.' + victimName;
 					}
 					else if (!allHumanNames.includes(victimName) && !victimName.includes('<')) {
-						victimName = 'bot-' + victimName;
+						victimName = 'bot.' + victimName;
 					}
 
 
