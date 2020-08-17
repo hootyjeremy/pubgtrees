@@ -11,7 +11,7 @@
 
 
 
-
+ 
 
 //#region // ! [Region] #vueapp -> match list
 //
@@ -474,6 +474,11 @@ let vuePlayerReport = new Vue({
 
 						if (record.killingStroke){
 							_info += ' (Kill/Knock)'
+
+							// 0.043 : going to try to not show the last damage event if it is a knock or kill. 
+							// will suppress the row and the next row will necessarily be the associated LogPlayerKill.
+
+							return;
 						}
 
 						//#endregion LogPlayerTakeDamage
@@ -601,7 +606,6 @@ let vuePlayerReport = new Vue({
 								}
 							}
 						}
-						
 
 						//#endregion LogPlayerKill
 
@@ -834,6 +838,7 @@ let vuePlayerReport = new Vue({
 
 
 					this.arrPlayerReport.push({
+						// ! KEEP THIS IN SYNC WITH BELOW
 						'rowId': rowId,
 						'matchTime': record.matchTime,
 						'attacker': attackerName,
@@ -855,6 +860,7 @@ let vuePlayerReport = new Vue({
 						'zone': zone,
 						'rowClass': rowClass,
 						'armor': armor,	
+						'pubgEvent': record._T,
 
 					});
 
@@ -929,7 +935,38 @@ let vuePlayerReport = new Vue({
 						// push out a blank row if conditions are right
 						//console.log('---------------------- break in the fight');
 						
+
+						// insert a row BEFORE this row
 						this.arrPlayerReport.splice(i, 0, {
+							// ! KEEP THIS IN SYNC WITH SOURCE ABOVE
+							'rowId': '-',
+							'matchTime': '...', // String.fromCharCode(160),	// blank non-breakable space
+							'attacker': '',
+							'victim': '',
+							'event': '',
+							'damagerInfo': '',
+							'distance': '',
+							'info': '',
+							'attackerClass': '',
+							'victimClass': '',
+							'attackerHealth': '',
+							'victimHealth': '',
+							'zone': '',
+							'rowClass': 'blankRow',
+							'armor': '',
+							'pubgEvent': '',
+						});
+
+						//rowId++;
+					}
+
+
+
+					if (this.arrPlayerReport[i].pubgEvent == 'LogPlayerKill' && i < this.arrPlayerReport.length - 1) {
+
+						// insert AFTER kill
+						this.arrPlayerReport.splice(i+1, 0, {
+							// ! KEEP THIS IN SYNC WITH SOURCE ABOVE
 							'rowId': '-',
 							'matchTime': String.fromCharCode(160),	// blank non-breakable space
 							'attacker': '',
@@ -945,9 +982,25 @@ let vuePlayerReport = new Vue({
 							'zone': '',
 							'rowClass': 'blankRow',
 							'armor': '',
+							'pubgEvent': '',
 						});
-	
-						//rowId++;
+					}
+
+
+					// $ this was going to be for skipping a line if the last record was a kill of the same team member but idk
+					if (i > 0) {
+						
+						if (this.arrPlayerReport[i-1].pubgEvent == 'LogPlayerKill' && i < this.arrPlayerReport.length - 1) {
+
+							//console.log(i + ' of ' + this.arrPlayerReport.length + ' : ' + this.arrPlayerReport[i].pubgEvent);
+							//console.log(this.arrPlayerReport[i].pubgEvent);
+		
+							// $ if next record exists and 
+							//'attackerTeamId': record.attacker.teamId,
+							//'victimTeamId': record.victim.teamId,
+
+						}
+
 					}
 
 

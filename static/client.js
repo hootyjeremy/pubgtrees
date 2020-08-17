@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.042'
+let   version 			= '0.043'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -179,7 +179,7 @@ window.addEventListener('load', (event) => {
 	// clear name context and selected player if you click blank area
 	document.getElementById('div-d3-tree').addEventListener('click', (event) => {
 
-		console.log('start: div-d3-tree.click() -> ' + blClickedPlayer);
+		//console.log('start: div-d3-tree.click() -> ' + blClickedPlayer);
 	
 		if (blClickedPlayer) {
 			blClickedPlayer = false;	// turn this back off so that it is only set to true when a player is clicked.

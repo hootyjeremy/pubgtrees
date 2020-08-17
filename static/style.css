@@ -1,6 +1,6 @@
 body {
 	font-family: 'Roboto Condensed', sans-serif;
-	font-size: 14px;
+	font-size: 16px;
     /* color: rgb(240, 234, 232); */
 	color: #dcddde;
 	background-color: #1b1b1b;
@@ -13,7 +13,7 @@ div {
 
 button {
 	font-family: 'Roboto Condensed', sans-serif;
-	font-size: 14px;
+	font-size: 16px;
     /* color: rgb(240, 234, 232); */
 	color: #dcddde;
     background-color: #82759c;
@@ -28,7 +28,7 @@ button.disabledButton {
 
 input {
 	font-family: 'Roboto Condensed', sans-serif;
-	font-size: 14px;
+	font-size: 16px;
 	border-radius: 4px;
 	margin-left: 6px;
 	margin-right: 6px;
@@ -36,7 +36,7 @@ input {
 
 select {
 	font-family: 'Roboto Condensed', sans-serif;
-	font-size: 14px;
+	font-size: 16px;
 	border-radius: 4px;
 }
 
