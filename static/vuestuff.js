@@ -923,7 +923,7 @@ let vuePlayerReport = new Vue({
 
 					let currMatchTime = new Date('2000-01-01T00:' + this.arrPlayerReport[i].matchTime).getTime();;
 
-
+					let greaterThan30Seconds = '';
 
 					// console.log(i + '. ' + new Date('2000-01-01T00:' + this.arrPlayerReport[i].matchTime));
 					// console.log('currMatchTime: ' + currMatchTime);
@@ -957,6 +957,8 @@ let vuePlayerReport = new Vue({
 							'pubgEvent': '',
 						});
 
+
+						greaterThan30Seconds = '...';
 						//rowId++;
 					}
 
@@ -964,11 +966,13 @@ let vuePlayerReport = new Vue({
 
 					if (this.arrPlayerReport[i].pubgEvent == 'LogPlayerKill' && i < this.arrPlayerReport.length - 1) {
 
+						 currMatchTime - prevMatchTime > 30000
+
 						// insert AFTER kill
 						this.arrPlayerReport.splice(i+1, 0, {
 							// ! KEEP THIS IN SYNC WITH SOURCE ABOVE
 							'rowId': '-',
-							'matchTime': String.fromCharCode(160),	// blank non-breakable space
+							'matchTime': greaterThan30Seconds, // String.fromCharCode(160),	// blank non-breakable space
 							'attacker': '',
 							'victim': '',
 							'event': '',
