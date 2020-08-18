@@ -183,7 +183,7 @@ span.spanBoxy {
 
 span.spanBoxyLight {
 	font-size: 14px;
-	font-weight: bold;
+	/* font-weight: bold; */
 	background-color: #c5c5c5;
 	color: #343436;
 	padding: 4px 10px;
