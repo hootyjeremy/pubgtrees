@@ -116,55 +116,72 @@ td.playerTeammate {
 
 
 /* text for svg tree */
-text.categories {
+circle.transparent {
+	fill: #414144;
+}
+
+text.categories, circle.categories {
 	/* fill: #dea7d4; */
 	fill: #98a0a6;
 }
 
-text.allPlayers {
+text.allPlayers, circle.allPlayers {
 	fill: #dcddde;
 }
 
-text.humanPlayers {
+text.humanPlayers, circle.humanPlayers {
 	fill: #dcddde;
 }
 
-text.botPlayers {
+text.botPlayers, circle.botPlayers {
 	fill: #98a0a6;
 }
 
-text.searchedPlayer {
+text.searchedPlayer, circle.searchedPlayer {
 	/* fill: #1b1b1b; */
 	fill: #60b6f0;
 }
 
-text.winner {
+text.winner, circle.winner {
 	fill: #7ada9e;
 }
 
 
 /* what should the order be for team kills? */
-
-text.selectedPlayer {
+text.selectedPlayer, circle.selectedPlayer {
 	fill: #60b6f0;
 }
 
-text.playerTeammate {
+text.playerTeammate, circle.playerTeammate {
 	/* fill: #60b6f0; */
 	fill: #ab97e0;
 	/* fill: #60b6f0; */
 }
 
-text.killer {
+text.killer, circle.killer {
 	fill: #f9d692;
 }
 
-text.killerTeammate {
+text.killerTeammate, circle.killerTeammate {
 	fill: #ef8b65;
 }
 
-text.tradedPaint {
-	fill: #efb8df;
+
+/* paths */
+path.pathHidden {
+	stroke: #414144;
+}
+
+path.pathDefault {
+	stroke: #8f91a1;
+}
+
+path.selectedPlayer {
+	stroke: #60b6f0;
+}
+
+path.killer {
+	stroke: #f9d692;
 }
 
 

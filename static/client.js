@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.044'
+let   version 			= '0.045'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -877,15 +877,15 @@ async function GetTelemetry(_matchID) {
 		// once tree is generically created, update color for context and get data
 
 		if (strPlayerName != '') {
-			
 			// need to remember who the looked up player is so that they will stay 'hightlighted'
 
 			document.getElementById(strPlayerName).classList.add('searchedPlayer');
-
 		}
 
 		// don't update tree context on the first look
 		//UpdateTreeContext(strPlayerName);
+		ClearTreeContext();	// draw colors
+
 
 		document.getElementById('d3-tree01').scrollIntoView({behavior: "smooth"});
 
@@ -1181,7 +1181,6 @@ function CreateTreeFromD3() {
 	// https://codesandbox.io/s/xwm4k88wp?file=/src/index.js
 
 
-
 	blCycledKillsFound = false;
 
 	const response = axios_telemetry_response.data;
@@ -1278,7 +1277,22 @@ function CreateTreeFromD3() {
 		.linkHorizontal()
 		.x(d => d.y)      // width of line
 		.y(d => d.x)      // height of line
-	);
+	)
+	.attr('id', d => {
+		return 'path-' + d.source.id + '-' + d.target.id;
+	})
+	.attr('class', d => {
+
+		if (d.source.id == 'Match')
+		{
+			return 'd3-path pathHidden';
+		}
+		else {
+			return 'd3-path pathDefault';
+		}
+	});
+	
+
 	// path:  https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/path
 	// d:     https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
 	// .linkHorizontal: https://github.com/d3/d3-shape/blob/v1.3.7/README.md#linkHorizontal
@@ -1297,9 +1311,13 @@ function CreateTreeFromD3() {
 	//.attr("fill", d => (d.children ? "#8f91a1" : "#8f91a1"))    // the dot (nodes/leaves)
 	.attr("fill", d => {
 		// don't show the first dot for "Match" on the top level
-		return (d.id == 'Match') ? "#414144" : "#8f91a1";	// background-color : line color
+		//return (d.id == 'Match') ? "#414144" : "#8f91a1";	// background-color : line color
 	})
-	.attr("r", 2.5);
+	.attr("r", 2.5)
+	.attr('id', d => {
+		return 'circle-' + d.data.name;
+	})
+	.attr('class', 'd3-circle');
 
 	node
 	.append("text")           	// https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
@@ -1463,12 +1481,22 @@ function ClearTreeContext() {
 
 	let allPlayers = document.getElementsByClassName('allPlayers');
 
+	let allCircles = document.getElementsByClassName('d3-circle');
+	let allPaths = document.getElementsByClassName('d3-path');
 
+
+	//#region // ! [Region] allPlayers
+	//
 
 	// cycle through all players and then give them a context class based on the selected player...
 	for (let i = 0; i < allPlayers.length; i++) {
 
+		if (allPlayers[i].id == 'fake-invalid-id') {
+			continue;	// skip the duplicate names for name "stroke"
+		}
+
 		let playerClassList = allPlayers[i].classList;
+		let circleClassList = document.getElementById('circle-' + allPlayers[i].id).classList;
 
 		// add/remove classes
 		// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
@@ -1479,16 +1507,19 @@ function ClearTreeContext() {
 			if (element.name == allPlayers[i].textContent) {
 				if (element.winPlace == 1) {
 					playerClassList.add('winner');
+
+					circleClassList.add('winner');
+					//document.getElementById('circle-' + element.name).classList.add('winner');
 				}
 
 				if (element.name == strPlayerName) {
 					playerClassList.add('searchedPlayer');
+
+					circleClassList.add('searchedPlayer');
+					//document.getElementById('circle-' + element.name).classList.add('searchedPlayer');
 				}
 			}
 		})
-
-
-
 
 
 		// prune all classes after the intial default classes that should not be removed (allPlayers, human/bot, 
@@ -1496,12 +1527,68 @@ function ClearTreeContext() {
 		for (let j = playerClassList.length - 1; j >= 0; j--) {
 			//console.log('    ' + allPlayers[i].classList.value);
 
-			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' && playerClassList[j] != 'searchedPlayer' &&
+			if (playerClassList[j] != 'allPlayers' 		&& 
+				playerClassList[j] != 'humanPlayers' 	&& 
+				playerClassList[j] != 'botPlayers' 		&& 
+				playerClassList[j] != 'searchedPlayer' 	&&
 				playerClassList[j] != 'winner') {
 				playerClassList.remove(playerClassList[j]);
 			}
 		}
+
+		// prune circles...
+		for (let j = circleClassList.length - 1; j >= 0; j--) {
+			//console.log('    ' + allPlayers[i].classList.value);
+
+
+			if (circleClassList[j] != 'd3-circle'		&& 
+				circleClassList[j] != 'allPlayers' 		&& 
+				circleClassList[j] != 'humanPlayers' 	&& 
+				circleClassList[j] != 'botPlayers' 		&& 
+				circleClassList[j] != 'searchedPlayer' 	&&
+				circleClassList[j] != 'winner'  		  ) {
+				
+				circleClassList.remove(circleClassList[j]);
+
+			}
+		}
+
 	}
+
+	//#endregion -- allPlayers
+
+
+
+	//#region // ! [Region] allCircles
+	//
+
+	for (let i = 0; i < allCircles.length; i++) {
+		// need to color all circle dots the same ass their associated player color
+
+		// strip off "circle-" to see the name associated
+		let who = allCircles[i].id.substring(7, allCircles[i].id.length);
+
+		if (axios_telemetry_response.data.allHumanNames.includes(who)) {
+			allCircles[i].classList.add('humanPlayers');
+		}
+		else if (who == 'Winners' || who == 'Winner' || who == 'Self kills' || who == 'Environment' || who == 'Circular kills' ||
+				 who.includes('<')) {
+			allCircles[i].classList.add('categories');
+		}
+		else if (who == 'Match') {
+			allCircles[i].classList.add('transparent');
+		}
+		else {
+			// anything else should be a bot?
+			allCircles[i].classList.add('botPlayers');
+		}
+	}
+
+	//#endregion -- allCircles
+
+
+	// clear out path/line colors except for defaults
+	PrunePathClasses(document.getElementsByClassName('d3-path'));
 
 
 	// move the rectangle out of sight
@@ -1514,6 +1601,8 @@ function ClearTreeContext() {
 function UpdateTreeContext(selectedPlayer, _playerClicked) {
 
 	// update data data for the selected player
+
+	//ClearTreeContext();
 
 	//console.log('clicked name: ' + selectedPlayer);
 	//console.log('UpdateTreeContext() event ');
@@ -1600,20 +1689,28 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 	
 
 
+	//#region // ! [Region] add classes to players and circles
+	//
+
 	// cycle through all players and then give them a context class based on the selected player...
 	for (let i = 0; i < allPlayers.length; i++) {
 
+		if (allPlayers[i].id == 'fake-invalid-id') {
+			continue;
+		}
+
 		let playerClassList = allPlayers[i].classList;
 		let currentPlayer 	= stripBotText(allPlayers[i].textContent);
+		
+		let circleClassList = document.getElementById('circle-' + allPlayers[i].id).classList;
 
 		// add/remove classes
 		// https://developer.mozilla.org/en-US/docs/Web/API/Element/classList
 
 		// prune all classes after the intial default classes that should not be removed (allPlayers, human/bot, 
 		// searched) if they have any left over from the last selected player's context.
-		for (let j = playerClassList.length - 1; j >= 0; j--) {
+		for (let j = playerClassList.length - 1; j >= 0; j--) { 
 			//console.log('    ' + allPlayers[i].classList.value);
-
 			if (playerClassList[j] != 'allPlayers' && playerClassList[j] != 'humanPlayers' && playerClassList[j] != 'botPlayers' 
 				// && playerClassList[j] != 'searchedPlayer'
 				// &&	playerClassList[j] != 'winner'
@@ -1621,6 +1718,19 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 				playerClassList.remove(playerClassList[j]);
 			}
 		}
+
+		
+		// clear out the classes for the circles
+
+		for (let j = circleClassList.length - 1; j > 0; j--) {
+
+			// prune all but default classes
+			if (circleClassList[j] != 'allPlayers' && circleClassList[j] != 'humanPlayers' && circleClassList[j] != 'botPlayers') {
+				circleClassList.remove(circleClassList[j]);
+			}
+		}
+
+
 
 		// at this point, add the relational classes...
 		// what is the context of this player to the selected player?
@@ -1632,6 +1742,7 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 		// selected player
 		if (selectedPlayer == currentPlayer) {
 			playerClassList.add('selectedPlayer');
+			circleClassList.add('selectedPlayer');
 		}
 		else {
 			// if not the selected player, what is currentPlayer's teamId? is it not the selected player?
@@ -1649,16 +1760,19 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 							//console.log('currentPlayer teammate found: ' + teammate.name + ' -> ' + currentPlayer);
 							// #7dde98 green
 							playerClassList.add('playerTeammate');
+							circleClassList.add('playerTeammate');
 						}
 						else if (team.teamId == selectedPlayerKillerTeamId) {
 							// this player is on the killer's team. is it the killer or just a teammate?
 							if (currentPlayer == selectedPlayerKiller) {
 								// this is the killer
 								playerClassList.add('killer')
+								circleClassList.add('killer');
 							}
 							else {
 								// this is a killer teammate
 								playerClassList.add('killerTeammate')
+								circleClassList.add('killerTeammate');
 							}
 						}
 					}
@@ -1667,14 +1781,66 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 		}
 	}
 
+	//#endregion - player and circle classes
 
 
-	//#region // ! [Region] Add the rectangle behind the selected player's name
+
+	//#region // ! [Region] Path/Lines
 	//
 
+	let allPaths = document.getElementsByClassName('d3-path');
+
+	// clear out path/line colors except for defaults
+	PrunePathClasses(allPaths);
+
+
+	// give class context to paths/lines
+	for (let i = 0; i < allPaths.length; i++) {
+
+		// what is this path in relation to? 
+		if (allPaths[i].id.includes(selectedPlayer)) {
+
+			// is it the path for the killer to the player or the player to their victims?
+
+			//console.log(allPaths[i].id);
+			//console.log(allPaths[i].id.substring(5, selectedPlayer.length));
+
+			if (allPaths[i].id.substring(5, 5 + selectedPlayer.length) == selectedPlayer) {
+				//console.log('player is killer');
+				allPaths[i].classList.add('selectedPlayer')
+			}
+			else {
+				//console.log('player is victim');
+				allPaths[i].classList.add('killer')
+			}
+		}
+	}
+
+	//#endregion - path/lines
+
+
+
+	// set the rectangle at the selected player
 	SetRectangleLocation(selectedPlayer);
 
-	//#endregion -- add rectangle to tree
+}
+
+
+function PrunePathClasses(paths) {
+	// clear out path/line colors except for defaults
+	//let paths = document.getElementsByClassName('d3-path');
+	for (let i = 0; i < paths.length; i++) {
+		
+		for (let j = paths[i].classList.length - 1; j >= 0; j--) {
+			if (paths[i].classList[j] != 'd3-path' 		&& 
+				paths[i].classList[j] != 'pathHidden' 	&& 
+				paths[i].classList[j] != 'pathDefault'	  ) {
+
+				//console.log('removing class ' + allPaths[i].classList[j] + ' for ' + allPaths[i].id);
+				paths[i].classList.remove(paths[i].classList[j]);
+			}
+		}
+	}
 
 }
 
