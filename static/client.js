@@ -1811,7 +1811,16 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 			}
 			else {
 				//console.log('player is victim');
-				allPaths[i].classList.add('killer')
+
+				// this should be the killer. only show when it isn't a category...
+				if (!allPaths[i].id.includes('Winner') 			&& 
+					!allPaths[i].id.includes('Winners') 		&& 
+					!allPaths[i].id.includes('Self kills')	 	&& 
+					!allPaths[i].id.includes('Circular kills') 	&& 
+					!allPaths[i].id.includes('Environment') 	  ) {
+
+					allPaths[i].classList.add('killer');
+				}
 			}
 		}
 	}
