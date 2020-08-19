@@ -31,18 +31,13 @@ let dbRowsToInsert  = '';
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-let blTestingVersion = null; // !true;
+let blTestingVersion = true;
 
 if (process.env.TESTING_VERSION != undefined) {
     // if running from production server, "testing" is false
     blTestingVersion = process.env.TESTING_VERSION;    
 
     //console.log('process.env.TESTING_VERSION: ' + process.env.TESTING_VERSION);
-}
-else {
-    // if undefinded, it's the dev testing version for now..
-
-    blTestingVersion = true;
 }
 
 
