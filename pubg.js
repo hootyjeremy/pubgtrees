@@ -35,7 +35,7 @@ let blTestingVersion = true;
 
 if (process.env.TESTING_VERSION != undefined) {
     // if running from production server, "testing" is false
-    blTestingVersion = process.env.TESTING_VERSION;    
+    blTestingVersion = false; // process.env.TESTING_VERSION;
 
     //console.log('process.env.TESTING_VERSION: ' + process.env.TESTING_VERSION);
 }
