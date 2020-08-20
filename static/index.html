@@ -258,12 +258,12 @@
 		</div>
 
 
-		<div id='div-cycle-footnote' style='font-style: italic; color:#98a0a6'>
+		<!-- <div id='div-cycle-footnote' style='font-style: italic; color:#98a0a6'>
 			<br>
 			<span>** Circular kills occur if two players kill each other. If they kill each other, they are removed 
 				from the normal flow of kills since they derive from each other and that is a loop, not a branch.</span>
 			<br>
-		</div>
+		</div> -->
 
 
 		<div style='background-color: #343436; width: 460px; border-radius: 6px; cursor: pointer;' onclick="ShowTreeHintModal()">
@@ -287,26 +287,53 @@
 <div id='div-treehint-modal' style='display: none;'>
 	<!-- show this display when they click on "what is this tree?" -->
 
-	<div id='tree-hints' style='margin-top: 40px; margin-bottom: 40px; width:560px; display:inline-block; overflow: auto;'>
+	<div id='tree-hints' style='margin-top: 40px; margin-bottom: 40px; width:600px; display:inline-block; overflow: auto;'>
 		<span id='btnCloseTreeHintModal'>&times;</span>
 
 		<center>
 
 
-		<div style="width: 500px; text-align: left; padding: 10px; margin-top: 14px;">
-			<p>A player's kills are connected by a line to their right. You can see each victim.</p>
-			<p>A player connected to their killer, if they were killed, by the line to their left. You can click on any player to see their match details.</p>
-			<br>
+		<div style="width: 540px; text-align: left; padding: 10px; margin-top: 14px;">
+			<p> 
+				A player's kills are connected by the line to their right. You can see each victim, if there are any. It is a heirarchical view of
+				kills that show, from left to right, the surviving winners, the players they killed, and so on and so forth. 
+			</p>
+
+			<p>
+				A player is connected to their killer, if they were killed, by the line to their left. 
+			</p>
+
+			<p>
+				You can click on any player to see their match details.
+			</p>
+
+			<p>
+				The trees are categorized as follows: 
+				<ul>
+					<li><b>Winners:</b> These are the last living survivors followed by their victims and their victims' victims.</li>
+					<li><b>Self kills:</b> These are the people who ultimately died to themselves such as accidental grenade kills. </li>
+					<li><b>Circular kills:</b> If two players kill each other, they are cancelled out as far as the hierarchy is concerned
+						since no surviving player killed them, they are stuck in a "circular" kill. If any of those occur, they are 
+						displayed as such. </li>
+					<li><b>Environment:</b> for kills by the bluezone, redzone, etc.</li>
+				</ul>
+			</p>
+
+			<p>
+				<b>Context colors:</b> When you click a player, the colors will show that player, their teammates, their killer, and their killer's teammates.
+				Once they are selected, if you click them again, their activity log will be opened so that you can see the damage and kill details down to 
+				every very bullet of damage.
+			</p>
+
+			<!-- <br>
 			1) Click a player to see their context colors in relation to teammates and killers.
 			<br>
 			2) Once selected, click the player again to see their damage/kill log.
-			<!-- <ul>
+			<ul>
 				<li>Click a player to highlight their context in relation to teammates and killers.</li>
 				<li>Once selected, click the player again to see their damage/kill log.</li>
 			</ul> -->
 		</div>
-
-		<br>
 
 		<span style='font-style: italic; color:#98a0a6'>Here's what the colors mean... </span>
 		<div style='text-align: left;

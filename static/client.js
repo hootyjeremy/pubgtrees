@@ -67,7 +67,7 @@ let prevSelectedPlayer = null;
 let glMatchId = '';				// used for url
 
 let bypassCache = null;
-let blCycledKillsFound = false;
+//let blCycledKillsFound = false;
 
 var url, player_url, match_url, telemetry_url = ""; // store the match ID's of the player
 var player_response_json; // parsed json responses
@@ -871,7 +871,7 @@ async function GetTelemetry(_matchID) {
 		CreateTreeFromD3();
 		SetRectangleLocation(strPlayerName);	// on the initial drawing of the table, set the rectangle to highlight the searched player
 
-		document.getElementById('div-cycle-footnote').style.display = (blCycledKillsFound) ? 'block' : 'none';
+		//document.getElementById('div-cycle-footnote').style.display = (blCycledKillsFound) ? 'block' : 'none';
 
 
 		div_analyze.style.display 	= 'none';
@@ -1203,7 +1203,7 @@ function CreateTreeFromD3() {
 	// https://codesandbox.io/s/xwm4k88wp?file=/src/index.js
 
 
-	blCycledKillsFound = false;
+	//blCycledKillsFound = false;
 
 	const response = axios_telemetry_response.data;
 
@@ -1458,10 +1458,10 @@ function CreateTreeFromD3() {
 		}
 		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills') {
 			
-			if (d.data.name == 'Circular kills') {
-				// need to know if the footnote should be displayed.
-				blCycledKillsFound = true;
-			}
+			// if (d.data.name == 'Circular kills') {
+			// 	// need to know if the footnote should be displayed.
+			// 	blCycledKillsFound = true;
+			// }
 
 			return '<' + d.data.name + '>';
 		}
