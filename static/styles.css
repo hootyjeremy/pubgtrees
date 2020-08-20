@@ -177,11 +177,13 @@ path.pathDefault {
 }
 
 path.selectedPlayer {
-	stroke: #60b6f0;
+	/* stroke: #60b6f0; */
+	stroke: #000000;
 }
 
 path.killer {
-	stroke: #f9d692;
+	/* stroke: #f9d692; */
+	stroke: #000000;
 }
 
 
