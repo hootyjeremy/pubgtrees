@@ -9,26 +9,6 @@
 // })
 
 
-// let vueHeader = new Vue({
-// 	el: '#vue-header',
-// 	data: {
-// 		style_css: 'static/style.css',
-// 		hf_js: 'static/hf.js',
-// 		client_js: 'static/client.js',
-// 	},
-// 	created: function () {
-
-// 		if (!blTestingVersion) {
-// 			// if this is not the testing version, update these values to minified files
-// 			style_css = 'static/style.min.js';
-// 			hf_js = 'static/hf.min.js';
-// 			client_js = 'static/client.min.js';
-// 		}
-
-// 	}
-// })
-
-
 
 
 //#region // ! [Region] #vueapp -> match list

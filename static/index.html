@@ -1,25 +1,13 @@
 <html>
 
-<head id='vue-header'>
+<head id='h-head'>
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-	<style type="text/css"></style>
-
 
 
 	<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 	<!-- font-family: 'Roboto', sans-serif; -->
 
-	<!-- VUE Dev Version -->
-	<!-- VUE Dev Version -->
-	<!-- VUE Dev Version -->
-	<!-- VUE Dev Version -->
-	<!-- VUE Dev Version -->
-	<!-- VUE Dev Version -->
-	<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" type="text/javascript"></script>  -->
-	<!-- VUE Production Version -->
-	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" type="text/javascript"></script>
-	
 	
 	<script src="https://unpkg.com/axios/dist/axios.min.js" type="text/javascript"></script>
 	<script src="https://momentjs.com/downloads/moment.min.js" type="text/javascript"></script>
@@ -30,6 +18,15 @@
 	<!-- <script src="d3/d3.js"></script> -->
 
 
+	<!-- VUE Dev Version -->
+	<!-- VUE Dev Version -->
+	<!-- VUE Dev Version -->
+	<!-- VUE Dev Version -->
+	<!-- VUE Dev Version -->
+	<!-- VUE Dev Version -->
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" type="text/javascript"></script>  -->
+	<!-- VUE Production Version -->
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" type="text/javascript"></script>
 
 	<!-- HOOTY MINIFY STUFF -->
 	<!-- HOOTY MINIFY STUFF -->
@@ -38,11 +35,33 @@
 	<!-- HOOTY MINIFY STUFF -->
 	<!-- <link rel="stylesheet" type="text/css" href="static/styles.css"/>
 	<script src="static/hf.js" type="text/javascript"></script>
-	<script src="static/client.js" type="text/javascript">	</script> -->
+	<script src="static/client.js" type="text/javascript"></script> -->
 
 	<link rel="stylesheet" type="text/css" href="static/styles.min.css" />
 	<script src="static/hf.min.js" type="text/javascript"></script>
 	<script src="static/client.min.js" type="text/javascript">	</script>
+
+
+	<!-- <script type='text/javascript'>
+
+		let styles = document.createElement('link');
+		styles.rel = 'stylesheet';
+		styles.type = 'text/css';
+		styles.href = 'static/styles.css';
+
+		let hf_js = document.createElement('script');
+		hf_js.type = 'text/javascript';
+		hf_js.src = 'static/hf.js';
+
+		let client_js = document.createElement('script');
+		client_js.type = 'text/javascript';
+		client_js.src = 'static/client.js';
+
+		document.getElementById('h-head').appendChild(styles);
+		document.getElementById('h-head').appendChild(hf_js);
+		document.getElementById('h-head').appendChild(client_js);
+
+	</script> -->
 
 
 
@@ -66,7 +85,7 @@
 				<div style='font-weight: normal; font-size: 14px;'>
 					built by hooty__
 					<br>
-					version 0.046
+					version 0.047
 				</div>
 				<br>
 			</div>
@@ -254,7 +273,6 @@
 				<rect id='selectedPlayerRectangle' x="10" y="10" width="144" height="18" fill="#303032" rx='3' ry='3'/>
 				<!-- <rect id='killerRectangle' x="10" y="30" width="140" height="18" fill="#1b1b1b" rx='4' ry='4'/> -->
 			</svg>
-
 		</div>
 
 
@@ -295,33 +313,34 @@
 
 		<div style="width: 540px; text-align: left; padding: 10px; margin-top: 14px;">
 			<p> 
-				A player's kills are connected by the line to their right. You can see each victim, if there are any. It is a heirarchical view of
-				kills that show, from left to right, the surviving winners, the players they killed, and so on and so forth. 
+				This is a basic heirarchical view of kills for each player starting with the surviving winners on the left.
+				To the immediate right, the winners' kills are connected by the lines. To the right of those victims are their
+				own kills, and so on and so forth. 				
 			</p>
 
 			<p>
-				A player is connected to their killer, if they were killed, by the line to their left. 
-			</p>
-
-			<p>
-				You can click on any player to see their match details.
+				There are several categories of kill types since not every player will always be killed by somebody who ultimately
+				gets killed by a surviving winner. For example, a player might accidentally kill themselves or get killed by the 
+				redzone. Those types of kills have their own branches below the winners.
 			</p>
 
 			<p>
 				The trees are categorized as follows: 
 				<ul>
 					<li><b>Winners:</b> These are the last living survivors followed by their victims and their victims' victims.</li>
-					<li><b>Self kills:</b> These are the people who ultimately died to themselves such as accidental grenade kills. </li>
-					<li><b>Circular kills:</b> If two players kill each other, they are cancelled out as far as the hierarchy is concerned
-						since no surviving player killed them, they are stuck in a "circular" kill. If any of those occur, they are 
-						displayed as such. </li>
+					<li><b>Self kills:</b> These are the people who died to themselves by, for example, an accidental grenade kill or fall damage. </li>
+					<li><b>Circular kills:</b> If two players kill each other, they will cancel out of the hierarchy since it requires each player
+						to flow into another player. If they killed each other, they only flow into themselves and the killer will have a victim who
+						is also their own killer. I have over explained this. If you see "circular kills" listed, then there was an occurrance of 
+						this. Otherwise, you won't see this category.</li>
 					<li><b>Environment:</b> for kills by the bluezone, redzone, etc.</li>
 				</ul>
 			</p>
 
+			<br>
 			<p>
-				<b>Context colors:</b> When you click a player, the colors will show that player, their teammates, their killer, and their killer's teammates.
-				Once they are selected, if you click them again, their activity log will be opened so that you can see the damage and kill details down to 
+				<b>Context colors:</b> When you click a player, the colors will show the context of that player, their teammates, their killer, and their killer's teammates.
+				Once they are selected, you can click them again and their activity log will be opened so that you can see the damage and kill details down to 
 				every very bullet of damage.
 			</p>
 

@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.046'
+let   version 			= '0.047'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -912,7 +912,7 @@ async function GetTelemetry(_matchID) {
 		document.getElementById('d3-tree01').scrollIntoView({behavior: "smooth"});
 
 	} catch (error) {
-		console.log('error in UpdateTreeContext() for player ' + strPlayerName + ' -> ' + error);
+		console.log('error in ClearTreeContext() for player ' + strPlayerName + ' -> ' + error);
 		alert('An error occurred while updating player colors. The player you searched for has possibly changed their name after this game was played.');
 
 		return;
@@ -1903,6 +1903,8 @@ function SetRectangleLocation(player) {
 	playerRectangle.x.baseVal.value = playerCoorindates.e;
 	playerRectangle.y.baseVal.value = translatedY + 6;
 	
+	playerRectangle.width.baseVal.value = document.getElementById(player).getComputedTextLength() + 26;
+	
 
 	// create rectangle element
 	// <rect id='selectedPlayerRectangle' x="10" y="10" width="144" height="18" fill="#303032" rx='8' ry='8'/>
@@ -1922,6 +1924,7 @@ function SetRectangleLocation(player) {
 	// this will get the top most 
 	let existingChild = document.getElementById('g-child');
 	document.getElementById('d3-svg01').insertBefore(playerRectangle, existingChild);
+
 }
 
 
