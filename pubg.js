@@ -13,14 +13,13 @@ const compression   = require('compression');       // http://expressjs.com/en/r
 const hf            = require('./hooty_modules/hf_server'); // helper functions
 
 const port          = process.env.PORT || 3000;    // https://stackoverflow.com/questions/18864677/what-is-process-env-port-in-node-js
-// const databaseUrl   = process.env.DATABASE_URL;
 const apiKey        = process.env.PUBG_API_KEY;
 const zlib          = require('zlib');
 
 
 // database stuff
 const { Client }    = require('pg');
-const { O_NOATIME } = require('constants');
+// const { O_NOATIME } = require('constants');
 let databaseURL     = '';
 let dbRowsToInsert  = '';
 
@@ -36,6 +35,7 @@ let blTestingVersion = true;
 if (process.env.TESTING_VERSION != undefined) {
     // if running from production server, "testing" is false
     blTestingVersion = false; // process.env.TESTING_VERSION;
+    console.log('typeof process.env.TESTING_VERSION: ' + typeof process.env.TESTING_VERSION);
 
     //console.log('process.env.TESTING_VERSION: ' + process.env.TESTING_VERSION);
 }
@@ -58,10 +58,37 @@ app.use(compression());
 
 
 // ------------------------------------------------------------->
+app.use('/static', express.static(__dirname + '/static'));
+//app.use('/match',  express.static(__dirname + '/static/match'));    // so that root/pubg.js and root/index.html can be found
+
+
+// app.use(function (req, res, next) {
+//     console.log('app.use(2) -> ' + req.url);
+//     next()
+//     //res.send();
+// })
+
+// app.use(function (req, res, next) {
+//     console.log('app.use(1) -> ' + req.url);
+//     next()
+//     //res.send();
+// })
+
+
+// app.use('/', function (req, res, next)  {
+
+//     console.log('app.use(root) middleware');
+
+//     next();
+
+// })
+
+
+// ------------------------------------------------------------->
 app.listen(port, () => {
     console.log(strLine);
     console.log('test version: ' + blTestingVersion);
-    console.log(getDate() + ' -> hooty-pubg server listening on port ' + port);
+    console.log(getDate() + ' -> server app.listen() on port ' + port);
     //console.log('process.env.DATABASE_URL: ' + process.env.DATABASE_URL);
     //console.log('process.env.PUBG_API_KEY: ' + apiKey);
     console.log('__dirname: ' + __dirname + '\\');
@@ -69,13 +96,11 @@ app.listen(port, () => {
 
 
 
-// ------------------------------------------------------------->
-app.use('/static', express.static(__dirname + '/static'));
-//app.use('/match',  express.static(__dirname + '/static/match'));    // so that root/pubg.js and root/index.html can be found
-
 
 // this doesn't seem to do anything once you apply app.use('/')
 app.get('/', (req, res) => {
+
+    //console.log('app.get(root)');
     //console.log('request:  ' + req);
     //console.log('response: ' + res);
 
@@ -127,6 +152,7 @@ async function UpdateDatabaseRows(playername, platform, ratelimitremaining, ip, 
 app.get('/getplayermatches', async (req, res) => {
 
     //console.log('bypassCache: ' + req.query.bypassCache);
+    //console.log('/getplayermatches: ' + req.url);
 
     var pubgApiResponseInfo = null;   // will include this in response to the client
 

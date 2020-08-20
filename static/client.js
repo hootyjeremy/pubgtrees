@@ -14,7 +14,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
-let   version 			= '0.045'
+let   version 			= '0.046'
 const blTestingVersion 	= !true;
 
 if (!blTestingVersion) {
@@ -166,6 +166,17 @@ window.addEventListener('load', (event) => {
 		//document.getElementById('div-modal').style.display = 'none';
 		HideModal();
 	})
+
+
+	// tree hint modal close
+	document.getElementById('btnCloseTreeHintModal').addEventListener('click', (event) => {
+		HideTreeHintModal();
+	})
+
+	document.getElementById('btnCloseTreeHintModal2').addEventListener('click', (event) => {
+		HideTreeHintModal();
+	})
+
 
 	document.getElementById('div-modal').addEventListener('click', (event) => {
 		// ! this is already happening below with a window click event that catched "outside modal" clicks
@@ -394,6 +405,11 @@ window.addEventListener('keydown', (event) => {
 		if (document.getElementById('div-modal').style.display != 'none') {
 			HideModal();
 		}
+
+		if (document.getElementById('div-treehint-modal').style.display != 'none') {
+			HideTreeHintModal();
+		}
+
 	}
 });
 
@@ -406,6 +422,12 @@ window.addEventListener('click', (event) => {
 		//console.log('modal clicked');
 		HideModal();
 	}
+
+	if (event.target.id == 'div-treehint-modal') {
+		//console.log('modal clicked');
+		HideTreeHintModal();
+	}
+
 })
 
 //#endregion -- Event Handlers
@@ -2013,3 +2035,11 @@ function drawRectangle() {
 
 }
 
+
+function ShowTreeHintModal() {
+	document.getElementById('div-treehint-modal').style.display = 'block';
+}
+
+function HideTreeHintModal() {
+	document.getElementById('div-treehint-modal').style.display = 'none';
+}

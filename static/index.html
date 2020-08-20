@@ -66,7 +66,7 @@
 				<div style='font-weight: normal; font-size: 14px;'>
 					built by hooty__
 					<br>
-					version 0.045
+					version 0.046
 				</div>
 				<br>
 			</div>
@@ -124,7 +124,7 @@
 	<span style='font-weight: bold; font-size: 20px; color:#60b6f0'>TESTING VERSION</span>
 	</div>
 
-	<select id="slcPlatform" style='width: 100; height: 26px; margin-top: 10px;'>
+	<select id="slcPlatform" style='width: 100; height: 32px; margin-top: 10px;'>
 		<option value="psn">PS4</option>>
 		<option value="stadia">Stadia</option>>
 		<option value="steam" selected="selected">Steam (PC)</option>
@@ -132,7 +132,7 @@
 		<option value="xbox">Xbox</option>>
 	</select>
 	
-	<input  id="inputPlayerName" placeholder="Enter a player's name and click search..." style='width: 320; height: 26px';>
+	<input  id="inputPlayerName" placeholder="Enter a player's name and click search..." style='width: 320; height: 32px;'>
 	<button id="btnSearchPlayer" style='width: 100;'>Search</button>
 
 	<br>
@@ -232,7 +232,6 @@
 <div id='d3-tree01' style='display: none; width: auto; overflow: auto;'>
 	<center>
 
-
 		<br>
 		<table>
 		<tr class='matchRow' style="cursor: auto;"> 
@@ -244,18 +243,6 @@
 			<td style="border-radius: 0px 6px 6px 0px; padding-right: 14px;">Duration: {{duration}}</td>
 		</tr>
 		</table>
-
-
-		<div style="width: 490px; display: block; text-align: left; margin-top: 14px; font-style: italic; color:#98a0a6">
-			<br>
-			1) Click a player to highlight their context in relation to teammates and killers.
-			<br>
-			2) Once selected, click the player again to see their damage/kill log.
-			<!-- <ul>
-				<li>Click a player to highlight their context in relation to teammates and killers.</li>
-				<li>Once selected, click the player again to see their damage/kill log.</li>
-			</ul> -->
-		</div>
 
 
 		<div id='div-d3-tree' style="overflow: auto;">
@@ -270,8 +257,6 @@
 
 		</div>
 
-		<button id="btnCopyMatchURL" style='width: 120; margin-bottom: 10px;'>Copy match URL</button>
-		<br>
 
 		<div id='div-cycle-footnote' style='font-style: italic; color:#98a0a6'>
 			<br>
@@ -280,9 +265,49 @@
 			<br>
 		</div>
 
+
+		<div style='background-color: #343436; width: 320px; border-radius: 6px; cursor: pointer;' onclick="ShowTreeHintModal()">
+			<span style='margin: 10px; font-style: italic; color: #98a0a6;'>What is this tree and how does it work?</span>
+			<button id='btn-tree-help' style='font-size: 22px; margin: 10px; cursor: pointer;'>?</button>
+		</div>
+
 		<br>
 		<br>
+			
+		<button id="btnCopyMatchURL" style='width: 120; margin-bottom: 10px;'>Copy match URL</button>
 		<br>
+		<br>
+
+	</center>
+</div>
+
+<br>
+
+
+<div id='div-treehint-modal' style='display: none;'>
+	<!-- show this display when they click on "what is this tree?" -->
+
+	<div id='tree-hints' style='margin-top: 40px; margin-bottom: 40px; width:560px; display:inline-block; overflow: auto;'>
+		<span id='btnCloseTreeHintModal'>&times;</span>
+
+		<center>
+
+
+		<div style="width: 500px; text-align: left; padding: 10px; margin-top: 14px;">
+			<p>A player's kills are connected by a line to their right. You can see each victim.</p>
+			<p>A player connected to their killer, if they were killed, by the line to their left. You can click on any player to see their match details.</p>
+			<br>
+			1) Click a player to see their context colors in relation to teammates and killers.
+			<br>
+			2) Once selected, click the player again to see their damage/kill log.
+			<!-- <ul>
+				<li>Click a player to highlight their context in relation to teammates and killers.</li>
+				<li>Once selected, click the player again to see their damage/kill log.</li>
+			</ul> -->
+		</div>
+
+		<br>
+
 		<span style='font-style: italic; color:#98a0a6'>Here's what the colors mean... </span>
 		<div style='text-align: left;
 					width: 300px; 
@@ -292,7 +317,7 @@
 					border: 1px solid #60b6f0'>
 			<table style='padding-left: 10px; padding-right: 10px; padding-top: 8px; padding-bottom: 8px;
 							font-family:Roboto Condensed;
-    						font-weight: bold;'>
+							font-weight: bold;'>
 				<tr> <td style='background-color: #303032; border-radius: 6px;'><span class="selectedPlayer">Selected player</span></td> 		<td><span class="killer">Player's killer</span></td>  </tr>
 				<tr> <td style="width: 120px;"><span class="playerTeammate">Player's teammates</span></td> 	<td style="width: 120px;"><span class="killerTeammate">Killer's teammates</span></td>  </tr>
 				<tr> <td><span class="humanPlayers">Human players</span></td> 			<td><span class="botPlayers">Bot players</span></td>  </tr>
@@ -301,12 +326,20 @@
 		</div>
 
 		<br>
+		<br>
+
+		<button id='btnCloseTreeHintModal2'>Close</button>
+		<br>
+		<br>
 
 
-	</center>
+		</center>
+	</div>
+
 </div>
 
-<br>
+
+
 
 <div id='div-modal'>
 	<div id='player-report' style='margin-top: 40px; margin-bottom: 40px; width:980px; display:inline-block;  overflow: auto;'>

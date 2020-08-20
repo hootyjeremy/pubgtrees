@@ -19,7 +19,7 @@ button {
     background-color: #82759c;
 	border: 1px solid #dcddde;
 	border-radius: 4px;
-	height: 26px;
+	height: 32px;
 }
 
 button.disabledButton {
@@ -260,7 +260,7 @@ svg#d3-svg01 {
 
 
 div#div-d3-tree {
-	margin-top: 10px;
+	/* margin-top: 10px; */
 	margin-left: 20px;
 	margin-right: 20px;
 	margin-bottom: 20px;
@@ -284,7 +284,7 @@ a:link, a:visited {
 	font-weight: bold;
 }
 
-div#search-div, div#vueapp, div#d3-tree01, div#player-report, div.cube {
+div#search-div, div#vueapp, div#d3-tree01, div#player-report, div#tree-hints, div.cube {
 	border-radius: 10px;
 	background-color: #414144;
 	margin-left: 14px;
@@ -293,12 +293,12 @@ div#search-div, div#vueapp, div#d3-tree01, div#player-report, div.cube {
 }
 
 
-div#player-report {
+div#player-report, div#tree-hints {
 	border: 2px solid #efb8df;
 }
 
 
-div#div-modal {
+div#div-modal, div#div-treehint-modal {
 	background-color: rgba(0,0,0,0.6);	
 
 	display: none;
@@ -311,7 +311,7 @@ div#div-modal {
 	overflow: auto;
 }
 
-span#btnCloseModal {
+span#btnCloseModal, span#btnCloseTreeHintModal {
 	float:right;
 	font-size: 30px;
 	margin-right: 16px;
