@@ -13,9 +13,10 @@ let hooty_server_url 	= 'http://localhost:3000';
 //let defaultPlayer		= 'hooty__';
 
 // --------------------------------------------------------->
-// ! Deploy/Testing Version...
+
+// Deploy/Testing Version...
 let   version 			= '0.047'
-const blTestingVersion 	= blTesting; // ! "inherited" from html file's script tag. 
+const blTestingVersion 	= !true;
 
 
 if (!blTestingVersion) {
