@@ -18,6 +18,48 @@
 	<!-- <script src="d3/d3.js"></script> -->
 
 
+
+	<script type='text/javascript'>
+
+		// i have grown sick and tired of having to 
+
+		let blTesting 	= !true;
+
+		let styles 		= document.createElement('link');
+		let hf_js 		= document.createElement('script');
+		let client_js 	= document.createElement('script');
+
+		let vuejs 		= document.createElement('script');
+
+		styles.rel 		= 'stylesheet';
+		styles.type 	= 'text/css';
+		hf_js.type 		= 'text/javascript';
+		client_js.type 	= 'text/javascript';
+
+		vuejs.type		= 'text/javascript';
+
+		if (blTesting) {
+			styles.href 	= 'static/styles.css';
+			hf_js.src 		= 'static/hf.js';
+			client_js.src 	= 'static/client.js';
+			vuejs.src		= 'https://cdn.jsdelivr.net/npm/vue/dist/vue.js';
+		}
+		else {
+			styles.href		= 'static/styles.min.css';
+			hf_js.src 		= 'static/hf.min.js';
+			client_js.src 	= 'static/client.min.js';
+			vuejs.src		= 'https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js';
+		}
+
+		document.getElementById('h-head').appendChild(styles);
+		document.getElementById('h-head').appendChild(hf_js);
+		document.getElementById('h-head').appendChild(client_js);
+		document.getElementById('h-head').appendChild(vuejs);
+
+	</script>
+
+
+
 	<!-- VUE Dev Version -->
 	<!-- VUE Dev Version -->
 	<!-- VUE Dev Version -->
@@ -26,7 +68,7 @@
 	<!-- VUE Dev Version -->
 	<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" type="text/javascript"></script>  -->
 	<!-- VUE Production Version -->
-	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" type="text/javascript"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js" type="text/javascript"></script> -->
 
 	<!-- HOOTY MINIFY STUFF -->
 	<!-- HOOTY MINIFY STUFF -->
@@ -37,31 +79,9 @@
 	<script src="static/hf.js" type="text/javascript"></script>
 	<script src="static/client.js" type="text/javascript"></script> -->
 
-	<link rel="stylesheet" type="text/css" href="static/styles.min.css" />
+	<!-- <link rel="stylesheet" type="text/css" href="static/styles.min.css" />
 	<script src="static/hf.min.js" type="text/javascript"></script>
-	<script src="static/client.min.js" type="text/javascript">	</script>
-
-
-	<!-- <script type='text/javascript'>
-
-		let styles = document.createElement('link');
-		styles.rel = 'stylesheet';
-		styles.type = 'text/css';
-		styles.href = 'static/styles.css';
-
-		let hf_js = document.createElement('script');
-		hf_js.type = 'text/javascript';
-		hf_js.src = 'static/hf.js';
-
-		let client_js = document.createElement('script');
-		client_js.type = 'text/javascript';
-		client_js.src = 'static/client.js';
-
-		document.getElementById('h-head').appendChild(styles);
-		document.getElementById('h-head').appendChild(hf_js);
-		document.getElementById('h-head').appendChild(client_js);
-
-	</script> -->
+	<script src="static/client.min.js" type="text/javascript">	</script> -->
 
 
 
@@ -568,13 +588,32 @@
 
 <footer>
 
-	<!-- HOOTY MINIFY STUFF -->
+
+<script type='text/javascript' id='hscript'>
+
+	//let testing2 = true;
+
+	let vue_js = document.createElement('script');
+	vue_js.type = 'text/javascript';
+
+	if (blTesting) {
+		vue_js.src = 'static/vuestuff.js';
+	}
+	else {
+		vue_js.src = 'static/vuestuff.min.js';
+	}
+
+	document.getElementById('h-head').appendChild(vue_js);
+
+</script>
+
+<!-- HOOTY MINIFY STUFF -->
 <!-- HOOTY MINIFY STUFF -->
 <!-- HOOTY MINIFY STUFF -->
 <!-- HOOTY MINIFY STUFF -->
 <!-- HOOTY MINIFY STUFF -->
 <!-- <script src="static/vuestuff.js" type="text/javascript"></script> -->
-<script src="static/vuestuff.min.js" type="text/javascript"></script>
+<!-- <script src="static/vuestuff.min.js" type="text/javascript"></script> -->
 
 </footer>
 

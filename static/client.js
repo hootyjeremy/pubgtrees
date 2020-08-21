@@ -15,7 +15,8 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 // ! Deploy/Testing Version...
 let   version 			= '0.047'
-const blTestingVersion 	= !true;
+const blTestingVersion 	= blTesting; // ! "inherited" from html file's script tag. 
+
 
 if (!blTestingVersion) {
 	//hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
