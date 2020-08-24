@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.047'
+let   version 			= '0.048'
 const blTestingVersion 	= !true;
 
 
