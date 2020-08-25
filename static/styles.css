@@ -22,8 +22,8 @@ header.page-header {
 } */
 
 footer {
-    position: fixed;
-    height: 40px;
+    /* position: fixed; */
+    height: 24px;
 	background-color: #1b1b1b;
 	margin-left: 14px;
 	margin-right: 14px;
