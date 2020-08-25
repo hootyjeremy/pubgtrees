@@ -1049,6 +1049,9 @@ let vuePlayerReport = new Vue({
 			else if (damageTypeCategory == 'Sticky Bomb Explosion') {
 				_damager = 'Sticky Bomb';
 			}
+			else if (damageTypeCategory == 'Jerrycan Explosion') {
+				_damager = 'Jerrycan';
+			}
 			else if (damageTypeCategory == 'Vehicle Crash' || 
 					 damageTypeCategory == 'Vehicle Hit'   || 
 					 damageTypeCategory == 'Vehicle Explosion') {
