@@ -1898,18 +1898,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //              -> environment kills
     //              -> self kills
 
-   // There is a bug where a player can be counted as being in the game but logged out before the game start (because of the way i detect humans, etc).
-    // so when these players slip through the cracks and appear to be in the game when they aren't, they have nowhere to go except to be considered a survivor/winner.
-    // instead of rebuilding the way players are detected right now, i will just scoop out any any remaning arrSurvivors who don't have the winning teamId.
-    for (let x = arrSurvivors.length - 1; x > 0; x--) {
-        if (arrSurvivors[x].teamId != winningTeamId) {
-            //console.log('remove this player: ' + arrSurvivors[x].name);
-            arrSurvivors.splice(x, 1);
-        }
-    }
-
-
-
     let csvDataForD3    = 'name,parent\n' +
                           'Match,\n';
 
