@@ -10,11 +10,6 @@ body {
 	margin-bottom: 60px;
 }
 
-::selection {
-	color: #dcddde;
-	background: #60b6f0;
-}
-
 header.page-header {
 	border-bottom: 1px solid #414144;
 	/* text-align: left;
