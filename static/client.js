@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.048'
+let   version 			= '0.049'
 const blTestingVersion 	= !true;
 
 
@@ -882,7 +882,8 @@ async function GetTelemetry(_matchID) {
 	} catch (error) {
 
 		if (error.message == 'cycle') {
-			alert('Cannot draw tree since two people killed each other and therefore destroys hierarchy. This is a bug I need to fix. I apologize.')
+			alert('D3 error: Cycle. \n\nThe tree cannot be created because it can not parse the data for some reason. \n\nPlease let me know which match is having this error by ' + 
+				  'emailing or DMing me on twitter (see contact info) and letting me know the platform and player name. Also let me know the human count, map, and win placement so that it\'s easier to find.');
 		}
 		else {
 			alert('D3 tree error: ' + error.message);
@@ -1209,7 +1210,7 @@ function CreateTreeFromD3() {
 
 	const response = axios_telemetry_response.data;
 
-	let  table = d3.csvParse(response.csvDataForD3);
+	let table = d3.csvParse(response.csvDataForD3);
 	const root = d3.stratify()
 				.id(function(d) { return d.name; })
 				.parentId(function(d) { return d.parent; })
