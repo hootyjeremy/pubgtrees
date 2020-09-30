@@ -903,12 +903,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // before the match starts, get teamId of each player and bot
         if (blBeforeMatchStart) {
 
-            if (record._T === 'LogPlayerLogout') {
-                console.log('loggedout: ' + record.accountId);
-
-                // $ if this player is in arrSurvivors, then remove them. it's probably fine to leave them in arrTeams for now?
-            }
-
             if (record._T == 'LogItemPickup' && record.item.itemId == 'Item_Back_B_01_StartParachutePack_C') {
 
                 // if (!hf.isBot(record.character.accountId)) { //} telemetry_response.data[i].character.accountId.includes('account.')){
@@ -1908,6 +1902,17 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //              -> environment kills
     //              -> self kills
 
+    // There is a bug where a player can be counted as being in the game but logged out before the game start (because of the way i detect humans, etc).
+    // so when these players slip through the cracks and appear to be in the game when they aren't, they have nowhere to go except to be considered a survivor/winner.
+    // instead of rebuilding the way players are detected right now, i will just scoop out any any remaning arrSurvivors who don't have the winning teamId.
+    for (let x = arrSurvivors.length - 1; x > 0; x--) {
+        if (arrSurvivors[x].teamId != winningTeamId) {
+            //console.log('remove this player: ' + arrSurvivors[x].name);
+            arrSurvivors.splice(x, 1);
+        }
+    }
+
+
     // ----------------------------------
     let csvDataForD3    = 'name,parent\n' +
                           'Match,\n';
@@ -2071,16 +2076,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
         console.log('done searching telemetry.');
     }
 
-
-    // There is a bug where a player can be counted as being in the game but logged out before the game start (because of the way i detect humans, etc).
-    // so when these players slip through the cracks and appear to be in the game when they aren't, they have nowhere to go except to be considered a survivor/winner.
-    // instead of rebuilding the way players are detected right now, i will just scoop out any any remaning arrSurvivors who don't have the winning teamId.
-    for (let x = arrSurvivors.length - 1; x > 0; x--) {
-        if (arrSurvivors[x].teamId != winningTeamId) {
-            //console.log('remove this player: ' + arrSurvivors[x].name);
-            arrSurvivors.splice(x, 1);
-        }
-    }
 
 
     var hooty_response = { matchDetails, arrPlayerCards, allHumanNames, allBotNames, arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, 
