@@ -15,8 +15,8 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.049'
-const blTestingVersion 	= !true;
+let   version 			= '0.050'
+const blTestingVersion 	= true;
 
 
 if (!blTestingVersion) {
@@ -882,7 +882,10 @@ async function GetTelemetry(_matchID) {
 	} catch (error) {
 
 		if (error.message == 'cycle') {
-			alert('Cannot draw tree since two people killed each other and therefore destroys hierarchy. This is a bug I need to fix. I apologize.')
+			alert('There is an error creating the tree structure for this match because of \'circurlar kills.\''  + 
+				'\n\nI can currently detect if player A kills B and B also kills player A which creates a loop and breaks the tree hierarchy structure but ' + 
+					'I have not accounted for cases where player A kills B who kills C and then player C kills A or any other larger loops. These are pretty ' + 
+					'rare but I will need to sit down and get it cleaned up. For now, I cannot draw the match tree and I apologize.');
 		}
 		else {
 			alert('D3 tree error: ' + error.message);
@@ -1209,18 +1212,17 @@ function CreateTreeFromD3() {
 
 	const response = axios_telemetry_response.data;
 
-	let  table = d3.csvParse(response.csvDataForD3);
+	let table = d3.csvParse(response.csvDataForD3);
 	const root = d3.stratify()
 				.id(function(d) { return d.name; })
 				.parentId(function(d) { return d.parent; })
 				(table);
-	 
 	
 	const path_width = 1200;                        // what is this the width of? path?
 	//const root = d3.hierarchy(data);            	// https://github.com/d3/d3-hierarchy
 	const dx = 14;                              	// node height (default 10)
 	const dy = 140;									// path/link/line width
-//	const dy = path_width / (root.height + 1);      // root.height is how many descendants there are. this is where you can make the line lengths static, probably.
+	//const dy = path_width / (root.height + 1);      // root.height is how many descendants there are. this is where you can make the line lengths static, probably.
 	//const tree = d3.tree().nodeSize([dx, dy]);
 	const tree = d3.tree().nodeSize([dx, dy]); 	// static width for paths
 

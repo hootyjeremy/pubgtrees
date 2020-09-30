@@ -1497,7 +1497,12 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                     // ! add to bot names if this bot is a late spawner
                     if (_victim.isBot) {
-                        allBotNames += '|' + _victim.name; // for finding bots in tree
+                        //allBotNames += '|' + _victim.name; // for finding bots in tree
+                        // $ 2020.09.30 test update
+
+                        if (!allBotNames.includes(_victim.name)) {
+                            allBotNames += '|' + _victim.name; // for finding bots in tree
+                        }
                     }
 
                     // playerDamageLog.attacker    = _attacker;
@@ -1775,7 +1780,12 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // }
 
                     if (_victim.isBot) {
-                        allBotNames += '|' + _victim.name; // for finding bots in tree
+                        //allBotNames += '|' + _victim.name; // for finding bots in tree
+                        // $ 2020.09.30 test update
+
+                        if (!allBotNames.includes(_victim.name)) {
+                            allBotNames += '|' + _victim.name; // for finding bots in tree
+                        }
                     }
 
                     // playerDamageLog.attacker    = _attacker;
@@ -1906,6 +1916,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     // so when these players slip through the cracks and appear to be in the game when they aren't, they have nowhere to go except to be considered a survivor/winner.
     // instead of rebuilding the way players are detected right now, i will just scoop out any any remaning arrSurvivors who don't have the winning teamId.
     for (let x = arrSurvivors.length - 1; x > 0; x--) {
+        //console.log(x + ': ' + arrSurvivors[x].name);
         if (arrSurvivors[x].teamId != winningTeamId) {
             //console.log('remove this player: ' + arrSurvivors[x].name);
             arrSurvivors.splice(x, 1);
@@ -2077,6 +2088,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
     }
 
 
+    // let h = allHumanNames.split('|');
+    // let bots = allBotNames.split('|');
 
     var hooty_response = { matchDetails, arrPlayerCards, allHumanNames, allBotNames, arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, 
                            arrEnvironmentKills, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };
