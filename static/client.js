@@ -16,7 +16,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // Deploy/Testing Version...
 let   version 			= '0.050'
-const blTestingVersion 	= true;
+const blTestingVersion 	= !true;
 
 
 if (!blTestingVersion) {
@@ -129,6 +129,7 @@ window.addEventListener('load', (event) => {
 
 	// ! Event listeners...
 	document.getElementById('btnSearchPlayer').addEventListener('click', (event) => {
+
 		btnSearchPlayer_Click();
 	});
 
@@ -608,6 +609,8 @@ async function GetPlayerMatches() {
 
 	btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = true;
 
+	// $ change cursor to "wait"
+	document.body.style.cursor = 'wait';
 	document.getElementById('fetching').style.display 	= "block";	// turn this on
 	document.getElementById('vueapp').style.display 	= "none";
 
@@ -644,6 +647,7 @@ async function GetPlayerMatches() {
 	
 		alert('There was an error with the request. See the developer tools\' console log for fetching errors.');
 
+		document.body.style.cursor = 'default';
 		document.getElementById('fetching').style.display 		= "none";
 		// document.getElementById('vueapp').style.display 		= "none";
 		// document.getElementById('div-analyzing').style.display 	= 'none';
@@ -670,6 +674,7 @@ async function GetPlayerMatches() {
 		}
 
 		btnSearch.disabled = btnPrevious.disabled = btnNext.disabled = false;
+		document.body.style.cursor = 'default';
 		document.getElementById('fetching').style.display = "none";	// turn this on
 	
 		return;
@@ -757,6 +762,7 @@ async function GetPlayerMatches() {
 	document.getElementById('btnNextMatches').style.display		= "block";
 	document.getElementById('vueapp').style.display 			= "block";
 	document.getElementById('fetching').style.display 			= "none";	// turn this back off
+	document.body.style.cursor = 'default';
 
 
 	// if the player has no matches, then don't display the divs
@@ -786,11 +792,12 @@ async function GetTelemetry(_matchID) {
 
 	axios_telemetry_response = null;
 
-	const div_analyze 	= document.getElementById('div-analyzing');
-	const svg_d3tree01	= document.getElementById('d3-tree01');
+	//const div_analyze 	= document.getElementById('div-analyzing');
+	//const svg_d3tree01	= document.getElementById('d3-tree01');
 
-	div_analyze.style.display 	= 'block';
-	svg_d3tree01.style.display 	= 'none';
+	document.body.style.cursor= 'wait';
+	document.getElementById('div-analyzing').style.display 	= 'block';
+	document.getElementById('d3-tree01').style.display 		= 'none';
 
 	try {
 		// get telemetry for this match for this platform/player
@@ -811,6 +818,7 @@ async function GetTelemetry(_matchID) {
 		//console.log('error getting telemetry from hootyserver: ' + error.response.status + ',' + error.response.statusText)
 		alert('Error getting match details: ' + error.message);
 
+		document.body.style.cursor= 'default';
 		document.getElementById('div-analyzing').style.display 	= 'none';
 		document.getElementById('d3-tree01').style.display 		= 'none';
 
@@ -831,8 +839,9 @@ async function GetTelemetry(_matchID) {
 		
 		alert('This match no longer exists.');
 
+		document.body.style.cursor= 'default';
 		document.getElementById('div-analyzing').style.display 	= 'none';
-		document.getElementById('d3-tree01').style.display = 'none';
+		document.getElementById('d3-tree01').style.display 		= 'none';
 
 		//console.log('Match not found');
 		return;
@@ -852,8 +861,9 @@ async function GetTelemetry(_matchID) {
 		alert('Error getting match from pubg api. ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.status + ': ' + axios_telemetry_response.data.pubgApiMatchResponseInfo.statusText);
 
 		// turn these off if there is an error.
-		div_analyze.style.display 	= 'none';
-		svg_d3tree01.style.display 	= 'none';
+		document.body.style.cursor= 'default';
+		document.getElementById('div-analyzing').style.display 	= 'none';
+		document.getElementById('d3-tree01').style.display 		= 'none';
 		
 		return;
 	}
@@ -876,13 +886,14 @@ async function GetTelemetry(_matchID) {
 		//document.getElementById('div-cycle-footnote').style.display = (blCycledKillsFound) ? 'block' : 'none';
 
 
-		div_analyze.style.display 	= 'none';
-		svg_d3tree01.style.display 	= 'block';
+		document.body.style.cursor	= 'default';
+		document.getElementById('div-analyzing').style.display 	= 'none';
+		document.getElementById('d3-tree01').style.display 		= 'block';
 
 	} catch (error) {
 
 		if (error.message == 'cycle') {
-			alert('There is an error creating the tree structure for this match because of \'circurlar kills.\''  + 
+			alert('There is an error creating the tree structure for this match because of \'circular kills.\''  + 
 				'\n\nI can currently detect if player A kills B and B also kills player A which creates a loop and breaks the tree hierarchy structure but ' + 
 					'I have not accounted for cases where player A kills B who kills C and then player C kills A or any other larger loops. These are pretty ' + 
 					'rare but I will need to sit down and get it cleaned up. For now, I cannot draw the match tree and I apologize.');
@@ -892,8 +903,9 @@ async function GetTelemetry(_matchID) {
 		}
 
 		// turn these off if there is an error.
-		div_analyze.style.display 	= 'none';
-		svg_d3tree01.style.display 	= 'none';
+		document.body.style.cursor = 'default';
+		document.getElementById('div-analyzing').style.display 	= 'none';
+		document.getElementById('d3-tree01').style.display 		= 'none';
 
 		return;
 	}
@@ -922,19 +934,6 @@ async function GetTelemetry(_matchID) {
 
 		return;
 	}
-
-
-
-	// ? how can you pop up a dialog (like instagram) that will show the clicked player's info?
-
-
-
-	//#region // ! [Console log stuff]
-	//
-
-	//PrintReportForSelectedPlayer(strPlayerName);
-
-	//#endregion
 
 }
 
