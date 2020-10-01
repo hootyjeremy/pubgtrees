@@ -886,7 +886,7 @@ async function GetTelemetry(_matchID) {
 		//document.getElementById('div-cycle-footnote').style.display = (blCycledKillsFound) ? 'block' : 'none';
 
 
-		document.body.style.cursor	= 'default';
+		// document.body.style.cursor	= 'default';
 		document.getElementById('div-analyzing').style.display 	= 'none';
 		document.getElementById('d3-tree01').style.display 		= 'block';
 
@@ -925,12 +925,14 @@ async function GetTelemetry(_matchID) {
 		//UpdateTreeContext(strPlayerName);
 		ClearTreeContext();	// draw colors
 
-
+		document.body.style.cursor = 'default';
 		document.getElementById('d3-tree01').scrollIntoView({behavior: "smooth"});
 
 	} catch (error) {
 		console.log('error in ClearTreeContext() for player ' + strPlayerName + ' -> ' + error);
 		alert('An error occurred while updating player colors. The player you searched for has possibly changed their name after this game was played.');
+
+		document.body.style.cursor = 'default';
 
 		return;
 	}
