@@ -157,7 +157,8 @@ var _damageTypeCategory = {
     "Damage_VehicleCrashHit": "Vehicle Crash",
     "Damage_VehicleHit": "Vehicle Hit",
     "SpikeTrap": "Spike Trap",
-    "Damage_Explosion_C4": 'C4 Explosion'
+    "Damage_Explosion_C4": 'C4 Explosion',
+    "Damage_ShipHit": 'Ship Hit',
 }
 
 //https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageCauserName.json
