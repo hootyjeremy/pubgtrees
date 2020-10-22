@@ -123,6 +123,7 @@ module.exports = {
 
 // https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/mapName.json
 var _mapName = {
+    "Chimera_Main": "Paramo",
     "Desert_Main": "Miramar",
     "DihorOtok_Main": "Vikendi",
     "Erangel_Main": "Erangel",
@@ -159,6 +160,7 @@ var _damageTypeCategory = {
     "SpikeTrap": "Spike Trap",
     "Damage_Explosion_C4": 'C4 Explosion',
     "Damage_ShipHit": 'Ship Hit',
+    "Damage_Lava": "Lava",
 }
 
 //https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageCauserName.json
@@ -241,6 +243,7 @@ var _damageCauserName = {
     "Dacia_A_03_v2_Esports_C": "Dacia",
     "Dacia_A_04_v2_C": "Dacia",
     "Jerrycan": "Jerrycan",
+    "Lava": "Lava",
     "None": "None",
     "PanzerFaust100M_Projectile_C": "Panzerfaust Projectile",
     "PG117_A_01_C": "PG-117",
@@ -254,6 +257,7 @@ var _damageCauserName = {
     "RedZoneBomb_C": "Redzone",
     "RedZoneBombingField": "Redzone",
     "TslDestructibleSurfaceManager": "Destructible Surface",
+    "TslPainCausingVolume": "Lava",
     "Uaz_A_01_C": "UAZ",
     "Uaz_Armored_C": "UAZ (armored)",
     "Uaz_B_01_C": "UAZ",
