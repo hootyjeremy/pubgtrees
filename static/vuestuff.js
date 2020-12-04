@@ -141,19 +141,22 @@ let vueMatchInfo = new Vue({
 		mapName: null,
 		matchType: null,
 		shardId: null,
-		participantCount: '0',
+		//participantCount: '0',
+		humansCount: '0',
 	},
 	methods: {
 		updateTreeMatchDetails: function (matchDetails, arrMatches) {
 	
 			if (arrMatches == null) {
 				// if this is direct link to a match, there will be no matches so you can't get the participant count. 
-				this.participantCount = '-';
+				//this.participantCount = '-';
+				this.humansCount = '-';
 			}
 			else {
 				arrMatches.forEach(match => {
 					if (match.matchId == matchDetails.id) {
-						this.participantCount = match.participantCount;
+						//this.participantCount = match.participantCount;
+						this.humansCount = match.humansCount;
 					}
 				})
 			}
@@ -1159,5 +1162,16 @@ let vueSearchDiv = new Vue({
 	},
 	created: function() {
 		this.blTestingVersion = blTestingVersion;
+	},
+});
+
+// here so that index.html doesn't always need version updated 
+let vueTopBoxes = new Vue({
+	el: '#version',
+	data: {
+		version: true,		
+	},
+	created: function() {
+		this.version = version;
 	},
 });

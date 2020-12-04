@@ -448,10 +448,13 @@ app.get('/getplayermatches', async (req, res) => {
         var arrRosters              = [];   // [ rosterId, [roster participantIDs] ]  -> match participant ID's to their roster
 		var dctParticipantRoster    = []; 	// [ participantId, rosterId ]
 		var dctTeamRoster 			= [];	// [ name, participantId ]
-		var participantIndex 		= 0;
-		var rosterIndex 			= 0;
+        var participantIndex 		= 0;
+    	var rosterIndex 			= 0;
 		var participantRosterIndex  = 0;
-		var teamRosterIndex 		= 0;
+        var teamRosterIndex 		= 0;
+        
+        let humansCount             = 0;    // how many humans were in this game?
+        let botsCount               = 0;
 
         for (let j = 0; j < match_data.included.length; j++) {
 
@@ -473,6 +476,14 @@ app.get('/getplayermatches', async (req, res) => {
 					DBNOs 			= included.attributes.stats.DBNOs;
 					winPlace 		= included.attributes.stats.winPlace;
                     timeSurvived 	= hf.ConvertSecondsToMinutes(included.attributes.stats.timeSurvived);
+                }
+
+                // 0.052 count human participants
+                if (!hf.isBot(included.attributes.stats.playerId)) {
+                    humansCount++;
+                }
+                else {
+                    botsCount++;
                 }
 
                 dctParticipantNames[participantIndex] = { 'participantID': included.id, 'name': included.attributes.stats.name };
@@ -568,7 +579,9 @@ app.get('/getplayermatches', async (req, res) => {
             'winPlace':         winPlace,
             'timeSurvived':     timeSurvived,
             'matchId':          match_data.data.id,
-            'participantCount': participantIndex,
+            //'participantCount': participantIndex,
+            'humansCount':      humansCount,
+            'botsCount':        botsCount,
         };
 
 
@@ -2101,6 +2114,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
     // let h = allHumanNames.split('|');
     // let bots = allBotNames.split('|');
+    // console.log('bots.length: ' + bots.length);
+
 
     var hooty_response = { matchDetails, arrPlayerCards, allHumanNames, allBotNames, arrSelfKills, csvDataForD3, playerTeamId, arrTeams, arrSurvivors, arrKillLog, 
                            arrEnvironmentKills, arrPlayersDamageLog, pubgApiMatchResponseInfo, pubgApiTelemetryResponseInfo };

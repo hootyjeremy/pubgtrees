@@ -86,8 +86,8 @@
 
 
 
-	<link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
-	<link rel="icon" href="static/favicon.ico" type="image/x-icon">
+	<!-- <link rel="shortcut icon" href="static/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="static/favicon.ico" type="image/x-icon"> -->
 
 
 	<title>PUBG Trees</title>
@@ -103,10 +103,10 @@
 			<div class='cube' style='width: 320px; height: 130px; float: left;'">
 				<!-- <a href='https://www.pubgtrees.com' style='font-size: 24px;'>PUBG Trees</a>	 -->
 				<div style="font-size: 24px; font-weight: bold; text-decoration: underline; margin-top: 30px;">PUBG Trees</div>
-				<div style='font-weight: normal; font-size: 14px;'>
+				<div id='version' style='font-weight: normal; font-size: 14px;'>
 					built by hooty__
 					<br>
-					version 0.052
+					version {{ version }}
 				</div>
 				<br>
 			</div>
@@ -225,7 +225,7 @@
 				v-on:click="analyzeMatch(match.matchId, index)"
 			> 					
 				<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{match.timeSinceMatch}}</td> 
-				<td style="text-align:center; width: 50px">{{match.participantCount}}</td>
+				<td style="text-align:center; width: 50px">{{match.humansCount}}</td>
 				<td style="text-align:center; width: 80px">{{resolveMatchType(match.matchType)}}</td>
 				<td style="text-align:left; width: 60px">{{match.mapName.toUpperCase()}}</td>
 				<td style="text-align:center; width: 80px">{{match.gameMode.toUpperCase()}}</td> 
@@ -282,7 +282,7 @@
 		<table>
 		<tr class='matchRow' style="cursor: auto;"> 
 			<td style="border-radius: 6px 0px 0px 6px; text-align:center; width: 80px;">{{createdAt}}</td>
-			<td>Humans: {{participantCount}}</td>
+			<td>Humans: {{humansCount}}</td>
 			<td>Ranked: {{matchType}}</td> 
 			<td>{{mapName}}</td>
 			<td>{{gameMode}} </td>
