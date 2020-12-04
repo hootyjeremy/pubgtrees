@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.051'
+let   version 			= '0.052'
 const blTestingVersion 	= !true;
 
 
@@ -1384,6 +1384,10 @@ function CreateTreeFromD3() {
 			// 		})
 			// 	}
 			// })
+
+			// if (d.data.name == 'fjh2331762810') {
+			// 	console.log('humanPlayers: ' + d.data.name);
+			// }
 
 			return 'allPlayers humanPlayers' + winnerClass;
 		}

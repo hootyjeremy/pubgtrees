@@ -714,7 +714,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
             //break;
         }
         else if (match_data.included[i].type == 'participant') {
-            //get survivor names  here
+            //get survivor names here
 
             //deathType: byzone, byplayer, suicide, alive
             
@@ -724,7 +724,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // else if (match_data.included[i].attributes.stats.deathType == "suicide") {
             //     console.log('suicide: ' + match_data.included[i].attributes.stats.deathType + '/' + match_data.included[i].attributes.stats.name);
             // }
-            allHumanNames += '|' + match_data.included[i].attributes.stats.name;
+
+            // ! 0.052 update: participants in "included" will now show bots as well as humans. can grab them here. also can still add to "allBotNames" deeper down if there are late ones.
+            //allHumanNames += '|' + match_data.included[i].attributes.stats.name;
+
+            if (hf.isBot(match_data.included[i].attributes.stats.playerId)) {
+                // this is a bot
+                allBotNames += '|' + match_data.included[i].attributes.stats.name; 
+            }
+            else {
+                // this is a human
+                allHumanNames += '|' + match_data.included[i].attributes.stats.name;
+            }
 
             // make player cards here for the individual players' reports
             arrPlayerCards.push({ 
