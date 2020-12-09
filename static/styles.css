@@ -88,6 +88,17 @@ tr.matchRow {
 	cursor: pointer;
 }
 
+tr.activeMatchRow {
+	background-color: #448fc0;
+	cursor: pointer;
+}
+
+tr.matchRow:hover {
+	background-color: #414144;
+	cursor: pointer;
+}
+
+
 tr.reportRow {
 	background-color: #343436;
 	cursor: normal;
@@ -99,13 +110,8 @@ tr.blankRow {
 }
 
 
-tr.activeMatchRow {
-	background-color: #448fc0;
-	cursor: pointer;
-}
-
 tr.rowKill {
-	background-color: #262628;
+	background-color: rgb(38, 38, 40);
 }
 
 th, td {
@@ -142,7 +148,7 @@ td.killerTeammate {
 
 td.playerTeammate {
 	/* color: #60b6f0; */
-	color: #ab97e0;
+	color: rgb(171, 151, 224);
 }
 
 
