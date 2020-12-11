@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.053'
+let   version 			= '0.054'
 const blTestingVersion 	= !true;
 
 
@@ -474,7 +474,8 @@ function checkURLQuery() {
 
 	if (tmpURL.search != '') {
 
-		if (paramType == null || paramMatchId == null || paramPlayer == null || paramPlatform == null) {
+		// if (paramType == null || paramMatchId == null || paramPlayer == null || paramPlatform == null) {
+		if (paramType == null || paramPlayer == null || paramPlatform == null) {
 			alert('The link has invalid search parameters. See console log.');
 			console.log('URL search parameter error: Check that all 4 parameters are present and spelled correctly: type, matchid, player, and platform.');
 
@@ -493,6 +494,8 @@ function checkURLQuery() {
 
 			// $ this will only need to be done if there is a "copy player url"
 
+			console.log('url query: ' + tmpURL.search)
+
 			// get player and matches
 			btnSearchPlayer_Click();
 
@@ -500,6 +503,8 @@ function checkURLQuery() {
 			history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
 		}
 		else if (paramType == 'match') {
+
+			console.log('url query: ' + tmpURL.search)
 
 			// search for specific match telemetry
 			GetTelemetry(paramMatchId);	
