@@ -1414,8 +1414,7 @@ function CreateTreeFromD3() {
 		}
 		else if (d.data.name == 'Winner' || d.data.name == 'Winners') {
 			// want to draw the winner category in winner's color so that the branch is somewhat separated from the rest.
-			return 'categories'
-			//return 'categories winner'
+			return 'categories winner'
 		}
 		else if (d.data.name == 'Match' || d.data.name == 'Environment' || 
 				 d.data.name == 'Self kills' || d.data.name == 'Circular kills') {
