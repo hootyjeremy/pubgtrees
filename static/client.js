@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.054'
+let   version 			= '0.055'
 const blTestingVersion 	= !true;
 
 
@@ -470,7 +470,7 @@ function checkURLQuery() {
 	let paramPlayer		= tmpURL.searchParams.get('player')
 	let paramPlatform 	= tmpURL.searchParams.get('platform')
 
-	// $ do some correction for a corrupted search param string
+	// ? do some correction for a corrupted search param string?
 
 	if (tmpURL.search != '') {
 
@@ -500,7 +500,8 @@ function checkURLQuery() {
 			btnSearchPlayer_Click();
 
 			// https://stackoverflow.com/questions/3338642/updating-address-bar-with-new-url-without-hash-or-reloading-the-page
-			history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
+			//history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
+			history.pushState('','',location);	// https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
 		}
 		else if (paramType == 'match') {
 
@@ -509,13 +510,13 @@ function checkURLQuery() {
 			// search for specific match telemetry
 			GetTelemetry(paramMatchId);	
 
-			history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
+			//history.replaceState('','','/');	// update browser's url so it isn't all this garbage up there
+			history.pushState('','',location);
 		}
 	}
 	else {
 		//console.log('no search query');
-	}
-	
+	}	
 }
 
 
@@ -546,6 +547,11 @@ function btnCopyMatchToClipboard_Click() {
 
 
 function SearchNewPlayer(player) {
+
+	// $ ------------------------------------
+	// $ THIS DOESN'T APPEAR TO BE IN USE....
+	// $ ------------------------------------
+
 	// console.log('selectedPlayer: ' + player);
 	// console.log('platform: ' + strPlatform);
 
@@ -1970,6 +1976,16 @@ function btnSearchPlayer_Click() {
 	match_floors_index = 0;
 
 	prelim();
+
+	// 0.055
+	// update the browser url so that it shows the current player: ?type=player&player=JowyBear&platform=steam
+	// console.log(location.protocol);
+	// console.log(location.host);
+	// console.log('location.pathname: ' + location.pathname);
+	// console.log('location.search: ' + location.search);
+	//console.log('url -> ' + location.protocol + '//' + location.host + '?type=player&player=' + strPlayerName + '&platform=' + strPlatform);
+	history.replaceState('','',location.protocol + '//' + location.host + '?type=player&player=' + strPlayerName + '&platform=' + strPlatform);
+	//history.pushState('','',location.protocol + '//' + location.host + '?type=player&player=' + strPlayerName + '&platform=' + strPlatform);
 }
 
 
