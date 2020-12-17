@@ -163,6 +163,11 @@ var _damageTypeCategory = {
     "Damage_Explosion_C4": 'C4 Explosion',
     "Damage_ShipHit": 'Ship Hit',
     "Damage_Lava": "Lava",
+
+    "Damage_HelicopterHit": "Helicopter",
+    "Damage_KillTruckHit": "Kill Truck",
+    "Damage_KillTruckTurret": "Kill Truck Turret",
+    "Damage_Explosion_LootTruck": "Loot Truck Explosion",
 }
 
 //https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageCauserName.json
@@ -325,4 +330,8 @@ var _damageCauserName = {
     "WeapJuliesKar98k_C": "Kar98k",
     "WeapMadsQBU88_C": "QBU",
 
+    "WeapTurret_KillTruck_Main_C": "Kill Truck Turret",
+    "BP_IncendiaryDebuff_C": "Burn",
+
+    
 }

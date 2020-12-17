@@ -19,6 +19,7 @@ const zlib          = require('zlib');
 
 // database stuff
 const { Client }    = require('pg');
+const { kill } = require('process');
 // const { O_NOATIME } = require('constants');
 let databaseURL     = '';
 let dbRowsToInsert  = '';
@@ -467,14 +468,14 @@ app.get('/getplayermatches', async (req, res) => {
 
                 //console.log('[' + j + '] deathType: ' + included.attributes.stats.deathType + ', ' + included.attributes.stats.name);
 
-                // $ HAVEN...
-                // $ if this is the haven map, try renaming each guard and commander in the data so that they have unique names..
-                // if (match_data.data.attributes.mapName == "Heaven_Main") {
-                //     if (included.attributes.stats.name == "Guard" || included.attributes.stats.name == "Commander") {
-                //         //console.log(included.attributes.stats.name + ' -> ' + included.attributes.stats.playerId);
-                //         included.attributes.stats.name = included.attributes.stats.name + '.' + included.attributes.stats.playerId;
-                //     }
-                // }
+                // !!! HAVEN...
+                // !!! if this is the haven map, try renaming each guard and commander in the data so that they have unique names..
+                if (match_data.data.attributes.mapName == "Heaven_Main") {
+                    if (included.attributes.stats.name == "Guard" || included.attributes.stats.name == "Commander") {
+                        //console.log(included.attributes.stats.name + ' -> ' + included.attributes.stats.playerId);
+                        included.attributes.stats.name = included.attributes.stats.name + '.' + included.attributes.stats.playerId;
+                    }
+                }
 
 
                 // is this the selected player?
@@ -755,14 +756,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
             if (hf.isBot(match_data.included[i].attributes.stats.playerId)) {
                 // this is a bot
 
-                // $ HAVEN...
-                // $ if this is the haven map, try renaming each guard and commander in the data so that they have unique names..
-                // if (match_data.data.attributes.mapName == "Heaven_Main") {
-                //     if (match_data.included[i].attributes.stats.name == "Guard" || match_data.included[i].attributes.stats.name == "Commander") {
-                //         //console.log(included.attributes.stats.name + ' -> ' + included.attributes.stats.playerId);
-                //         match_data.included[i].attributes.stats.name += '.' + match_data.included[i].attributes.stats.playerId;
-                //     }
-                // }
+                // !!! HAVEN...
+                // !!! if this is the haven map, try renaming each guard and commander in the data so that they have unique names..
+                if (match_data.data.attributes.mapName == "Heaven_Main") {
+                    if (match_data.included[i].attributes.stats.name == "Guard" || match_data.included[i].attributes.stats.name == "Commander") {
+                        //console.log(included.attributes.stats.name + ' -> ' + included.attributes.stats.playerId);
+                        match_data.included[i].attributes.stats.name += '.' + match_data.included[i].attributes.stats.playerId;
+                    }
+                }
 
 
                 allBotNames += '|' + match_data.included[i].attributes.stats.name; 
@@ -1166,6 +1167,25 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 //console.log('(' + i_string.padStart(5, ' ') + ') LogPlayerTakeDamage. attacker: ' + _attackerName + ', victim: ' + record.victim.name + 
                 //', damageCauserName: ' + record.damageCauserName + ', damageReason: ' + record.damageReason + ', damageTypeCategory: ' + record.damageTypeCategory);
 
+
+
+
+                // !!! HAVEN MAP CORRECTIONS for GUARD and COMMANDER
+                if (record.attacker != null && hf.isBot(record.attacker.accountId)) {
+                    //console.log(`LogPlayerTakeDamage (attacker): ${record.attacker.accountId}/${record.attacker.name}`);
+                    record.attacker.name += '.' + record.attacker.accountId;
+                }
+
+                if (record.victim != null && hf.isBot(record.victim.accountId)) {
+                    //console.log(`LogPlayerTakeDamage (victim): ${record.victim.accountId}/${record.victim.name}`);
+                    record.victim.name += '.' + record.victim.accountId;
+                }
+
+
+
+
+
+
                 // if not a solo, check for teammate damage
 
                 if (record.attacker != null && record.damageTypeCategory != 'Damage_Groggy' && record.damage > 0) {
@@ -1306,6 +1326,22 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             //#region // ! [Region] LogPlayerMakeGroggy...
             //
+
+
+            // !!! HAVEN MAP CORRECTIONS for GUARD and COMMANDER
+            if (record.attacker.accountId != '' && hf.isBot(record.attacker.accountId)) {
+                //console.log(`LogPlayerMakeGroggy (attacker): ${record.attacker.accountId}/${record.attacker.name}`);
+                record.attacker.name += '.' + record.attacker.accountId;
+            }
+
+            if (record.victim.accountId != '' && hf.isBot(record.victim.accountId)) {
+                //console.log(`LogPlayerMakeGroggy (victim): ${record.victim.accountId}/${record.victim.name}`);
+                record.victim.name += '.' + record.victim.accountId;
+            }
+            
+
+
+
 
             //console.log(record);
             //strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
@@ -1483,6 +1519,20 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // 
 
             try {
+
+
+                // !!! HAVEN MAP CORRECTIONS for GUARD and COMMANDER
+                if (record.killer != null && hf.isBot(record.killer.accountId)) {
+                    //console.log(`LogPlayerKill (killer): ${record.killer.accountId}/${record.killer.name}`);
+                    record.killer.name += '.' + record.killer.accountId;
+                }
+
+                if (record.victim != null && hf.isBot(record.victim.accountId)) {
+                    //console.log(`LogPlayerKill (victim): ${record.victim.accountId}/${record.victim.name}`);
+                    record.victim.name += '.' + record.victim.accountId;
+                }
+
+
 
                 //strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
 
@@ -1988,6 +2038,48 @@ app.get('/getmatchtelemetry', async (req, res) => {
         csvDataForD3 += 'Winner,Match\n';
         csvDataForD3 += arrSurvivors[0].name + ',Winner\n';
     }
+
+
+    // ! HAVEN CORRECTIONS
+    // if a guard or commander gets killed, then they have a parent. but if they don't get killed, then they have no parent and break the d3 tree.
+    // need to check the arrKillLog to see if a commander killed but didn't die. 
+    if (match_data.data.attributes.mapName == "Heaven_Main") {
+        console.log();
+        // cycle the kill log and find every guard and commander who is a killer. then re-check for all victims. if they don't exist as a victim, then add them to tree
+
+        let killer_has_no_parent = true;
+        let haven_ai_created = false;
+
+        for (i = 0; i < arrKillLog.length; i++) {
+            if (arrKillLog[i].killer.includes('.npc')) {
+
+                for (j = 0; j < arrKillLog.length; j++) {
+                    if (arrKillLog[j].victim == arrKillLog[i].killer) {
+                        // this killer was killed and can be left alone
+                        killer_has_no_parent = false;
+                    }
+                }
+
+                // if the killer was not killed, add them to <Haven AI> branch
+                if (killer_has_no_parent) {
+
+                    // create haven branch if ai has no natural killers
+                    if (!haven_ai_created) {
+                        csvDataForD3 += 'Haven,Match\n';
+                    }
+                    haven_ai_created = true;
+
+
+                    // add this ai killer under haven...
+                    if (!csvDataForD3.includes(arrKillLog[i].killer)) {
+                        csvDataForD3 += arrKillLog[i].killer + ',Haven\n';
+                    }
+                }
+
+            }
+        }
+    }
+
 
 
     // [Self kills branch] -------------------------

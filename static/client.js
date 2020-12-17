@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.056'
+let   version 			= '0.057'
 const blTestingVersion 	= !true;
 
 
@@ -859,15 +859,16 @@ async function GetTelemetry(_matchID) {
 	}
 
 
-	if (axios_telemetry_response.data.matchDetails.mapName == "Haven") {
-		alert('PUBG HAVEN UPDATE: With the new seasonal map, Haven, there are AI Commanders and Guards that break the rendering of the kill tree. For now, there will not be a tree drawn for Haven games.');
+	// if (axios_telemetry_response.data.matchDetails.mapName == "Haven") {
+	// 	alert('PUBG HAVEN UPDATE: With the new seasonal map, Haven, there are AI Commanders and Guards that break the rendering of the kill tree. For now, there will not be a tree drawn for Haven games.');
 
-		document.body.style.cursor = 'default';
-		document.getElementById('div-analyzing').style.display 	= 'none';
-		document.getElementById('d3-tree01').style.display 		= 'none';
+	// 	document.body.style.cursor = 'default';
+	// 	document.getElementById('div-analyzing').style.display 	= 'none';
+	// 	document.getElementById('d3-tree01').style.display 		= 'none';
 
-		return;
-	}
+	// 	return;
+	// }
+
 
 	// if direct link to match, this will break because there is no (axios matches). so circumventing this error...
 	if (axios_matches_response == null) {
@@ -1420,6 +1421,11 @@ function CreateTreeFromD3() {
 				}
 			})
 
+			// ! haven correction
+			if (d.data.name.includes('.npc')) {
+				winnerClass = '';
+			}
+			
 			return 'allPlayers botPlayers' + winnerClass;
 		}
 		else if (d.data.name == 'Winner' || d.data.name == 'Winners') {
@@ -1427,7 +1433,7 @@ function CreateTreeFromD3() {
 			return 'categories winner'
 		}
 		else if (d.data.name == 'Match' || d.data.name == 'Environment' || 
-				 d.data.name == 'Self kills' || d.data.name == 'Circular kills') {
+				 d.data.name == 'Self kills' || d.data.name == 'Circular kills' || d.data.name == 'Haven') {
 			// if it's not a player, then it's a category. (or an untracked late spawn bot?)
 			return 'categories';
 		}
@@ -1459,7 +1465,7 @@ function CreateTreeFromD3() {
 	})
 	.attr('cursor', d => {
 		if (d.data.name == 'Match' || d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || 
-			d.data.name == 'Self kills' || d.data.name == 'Circular kills' || d.data.name.includes('<') || d.data.name.includes('(') || 
+			d.data.name == 'Self kills' || d.data.name == 'Circular kills' || d.data.name == 'Haven' || d.data.name.includes('<') || d.data.name.includes('(') || 
 			!response.allHumanNames.includes(d.data.name)) {
 			// if it's not a player, then it's a category or a bot. (or an untracked late spawn bot?)
 			return 'normal';
@@ -1474,18 +1480,18 @@ function CreateTreeFromD3() {
 	//.text(d => d.data.name)
 	.attr("x", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills') ? -6 : 6;
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills' || d.data.name == 'Haven') ? -6 : 6;
 	}) 
 	.attr("text-anchor", d => {
 		// if category, offset anchor to the left
-		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills') ? "end" : "start";
+		return (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills' || d.data.name == 'Haven') ? "end" : "start";
 	}) 
 	.text(d => {
 		// add '<>' to the category names
 		if (d.data.name == 'Match') {
 			return '';
 		}
-		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills') {
+		else if (d.data.name == 'Winner' || d.data.name == 'Winners' || d.data.name == 'Environment' || d.data.name == 'Self kills' || d.data.name == 'Circular kills' || d.data.name == 'Haven') {
 			
 			// if (d.data.name == 'Circular kills') {
 			// 	// need to know if the footnote should be displayed.
@@ -1496,6 +1502,11 @@ function CreateTreeFromD3() {
 		}
 		else if (!response.allHumanNames.includes(d.data.name) && !d.data.name.includes('<') && !d.data.name.includes('(')) {
 			// this is a bot
+
+			// ! haven corrections
+			if (d.data.name.includes('.npc')) {
+				return d.data.name;
+			}
 
 			if (d.data.name.length > 10) {
 				return 'bot.' + d.data.name.substring(0, 10) + '~';
@@ -1561,6 +1572,13 @@ function ClearTreeContext() {
 
 					circleClassList.add('winner');
 					//document.getElementById('circle-' + element.name).classList.add('winner');
+
+
+					// ! haven correction
+					if (element.name.includes('.npc')) {
+						playerClassList.remove('winner');
+						circleClassList.remove('winner');
+					}
 				}
 
 				if (element.name == strPlayerName) {
