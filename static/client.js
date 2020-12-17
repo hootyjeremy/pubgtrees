@@ -859,6 +859,16 @@ async function GetTelemetry(_matchID) {
 	}
 
 
+	if (axios_telemetry_response.data.matchDetails.mapName == "Haven") {
+		alert('PUBG HAVEN UPDATE: With the new seasonal map, Haven, there are AI Commanders and Guards that break the rendering of the kill tree. For now, there will not be a tree drawn for Haven games.');
+
+		document.body.style.cursor = 'default';
+		document.getElementById('div-analyzing').style.display 	= 'none';
+		document.getElementById('d3-tree01').style.display 		= 'none';
+
+		return;
+	}
+
 	// if direct link to match, this will break because there is no (axios matches). so circumventing this error...
 	if (axios_matches_response == null) {
 		vueMatchInfo.updateTreeMatchDetails(axios_telemetry_response.data.matchDetails, null);

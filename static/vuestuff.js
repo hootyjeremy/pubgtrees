@@ -117,6 +117,8 @@ let vm = new Vue({
 
 			}
 
+			
+
 			GetTelemetry(_matchId);
 
 		}
