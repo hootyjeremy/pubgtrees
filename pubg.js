@@ -427,7 +427,7 @@ app.get('/getplayermatches', async (req, res) => {
 			(match_data.data.attributes.gameMode != "solo"  &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
 			 match_data.data.attributes.gameMode != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
              match_data.data.attributes.gameMode != "squad" &&	match_data.data.attributes.gameMode != "squad-fpp") ||
-             match_data.data.attributes.mapName == "Range_Main"  ) {
+             match_data.data.attributes.mapName == "Range_Main" || match_data.data.attributes.mapName == "Heaven_Main") {
 
             
             if (blTestingVersion) {
@@ -466,6 +466,16 @@ app.get('/getplayermatches', async (req, res) => {
                 // death types: byplayer, byzone (blue only?), alive (won without dying), suicide
 
                 //console.log('[' + j + '] deathType: ' + included.attributes.stats.deathType + ', ' + included.attributes.stats.name);
+
+                // $ HAVEN...
+                // $ if this is the haven map, try renaming each guard and commander in the data so that they have unique names..
+                // if (match_data.data.attributes.mapName == "Heaven_Main") {
+                //     if (included.attributes.stats.name == "Guard" || included.attributes.stats.name == "Commander") {
+                //         //console.log(included.attributes.stats.name + ' -> ' + included.attributes.stats.playerId);
+                //         included.attributes.stats.name = included.attributes.stats.name + '.' + included.attributes.stats.playerId;
+                //     }
+                // }
+
 
                 // is this the selected player?
                 if (included.attributes.stats.name == strPlayerName) {
@@ -741,14 +751,28 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // ! 0.052 update: participants in "included" will now show bots as well as humans. can grab them here. also can still add to "allBotNames" deeper down if there are late ones.
             //allHumanNames += '|' + match_data.included[i].attributes.stats.name;
 
+
             if (hf.isBot(match_data.included[i].attributes.stats.playerId)) {
                 // this is a bot
+
+                // $ HAVEN...
+                // $ if this is the haven map, try renaming each guard and commander in the data so that they have unique names..
+                // if (match_data.data.attributes.mapName == "Heaven_Main") {
+                //     if (match_data.included[i].attributes.stats.name == "Guard" || match_data.included[i].attributes.stats.name == "Commander") {
+                //         //console.log(included.attributes.stats.name + ' -> ' + included.attributes.stats.playerId);
+                //         match_data.included[i].attributes.stats.name += '.' + match_data.included[i].attributes.stats.playerId;
+                //     }
+                // }
+
+
                 allBotNames += '|' + match_data.included[i].attributes.stats.name; 
             }
             else {
                 // this is a human
                 allHumanNames += '|' + match_data.included[i].attributes.stats.name;
             }
+
+            //console.log(match_data.included[i].attributes.stats.name);
 
             // make player cards here for the individual players' reports
             arrPlayerCards.push({ 
@@ -759,7 +783,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                                     'timeSurvived': hf.ConvertSecondsToMinutes(match_data.included[i].attributes.stats.timeSurvived),
                                     'winPlace': match_data.included[i].attributes.stats.winPlace,
                                     'teamKills': match_data.included[i].attributes.stats.teamKills,
-                                });
+            });
         }
     }
 

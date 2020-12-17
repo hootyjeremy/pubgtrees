@@ -123,14 +123,16 @@ module.exports = {
 
 // https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/mapName.json
 var _mapName = {
-    "Chimera_Main": "Paramo",
     "Desert_Main": "Miramar",
     "DihorOtok_Main": "Vikendi",
     "Erangel_Main": "Erangel",
     "Baltic_Main": "Erangel",
     "Range_Main": "Camp Jackal (Training Mode)",
     "Savage_Main": "Sanhok",
-    "Summerland_Main": "Karakin"
+    "Summerland_Main": "Karakin",
+
+    "Chimera_Main": "Paramo",
+    "Heaven_Main": "Haven",
 }
 
 // https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageTypeCategory.json
