@@ -1635,15 +1635,21 @@ function ClearTreeContext() {
 		// strip off "circle-" to see the name associated
 		let who = allCircles[i].id.substring(7, allCircles[i].id.length);
 
-		if (axios_telemetry_response.data.allHumanNames.includes(who)) {
-			allCircles[i].classList.add('humanPlayers');
-		}
-		else if (who == 'Winners' || who == 'Winner' || who == 'Self kills' || who == 'Environment' || who == 'Circular kills' ||
+		//console.log('   circle: ' + who);
+		//console.log('-> ' + allCircles[i].id);
+
+		// 0.058 update: if there was a player with the string 'Match' in their name, then the match category would get a humanPlayers class.
+		// check previous versions if something else breaks and the expected behavior isn't happening.
+		if (allCircles[i] == 'circle-Winners' || allCircles[i] == 'circle-Winner' || allCircles[i] == 'circle-Self kills' || 
+				allCircles[i] == 'circle-Environment' || allCircles[i] == 'circle-Circular kills' ||
 				 who.includes('<')) {
 			allCircles[i].classList.add('categories');
 		}
-		else if (who == 'Match') {
+		else if (allCircles[i].id == 'circle-Match') {
 			allCircles[i].classList.add('transparent');
+		}
+		else if (axios_telemetry_response.data.allHumanNames.includes(who)) {
+			allCircles[i].classList.add('humanPlayers');
 		}
 		else {
 			// anything else should be a bot?
