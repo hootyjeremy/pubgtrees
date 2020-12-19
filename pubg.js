@@ -899,6 +899,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //var null_attacker   = [];   // for testing bluezone/redzone/blackzone
 
 
+    //let arrRecord_T = [];
+
     // ! loop through each telemetry event...
     for (let i = 0; i < telemetry_response.length; i++){
         //console.log(i);
@@ -924,6 +926,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     console.log('LogPlayerCreate: ' + telemetry_response.data[i]._D + ' -> ' + telemetry_response.data[i].character.accountId + ', ' + telemetry_response.data[i].character.name );
         // }
 
+        // if (!arrRecord_T.includes(record._T)) {
+        //     arrRecord_T.push(record._T);
+        // }
+
         
         // $ BOT PROBLEM
         // $ some bots and bot teams are created after the round starts so they aren't detected in LogPlayerCreate or in backpack pickup.
@@ -944,7 +950,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //     debugger;
         // }
 
-    
+
 
         //#region // ! [Region (pre-match/post-match)]
         //
@@ -1171,14 +1177,17 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
                 // !!! HAVEN MAP CORRECTIONS for GUARD and COMMANDER
-                if (record.attacker != null && hf.isBot(record.attacker.accountId)) {
-                    //console.log(`LogPlayerTakeDamage (attacker): ${record.attacker.accountId}/${record.attacker.name}`);
-                    record.attacker.name += '.' + record.attacker.accountId;
-                }
-
-                if (record.victim != null && hf.isBot(record.victim.accountId)) {
-                    //console.log(`LogPlayerTakeDamage (victim): ${record.victim.accountId}/${record.victim.name}`);
-                    record.victim.name += '.' + record.victim.accountId;
+                if (match_data.data.attributes.mapName == "Heaven_Main") {
+                    if (record.attacker != null && hf.isBot(record.attacker.accountId)) {
+                        //console.log(`LogPlayerTakeDamage (attacker): ${record.attacker.accountId}/${record.attacker.name}`);
+                        record.attacker.name += '.' + record.attacker.accountId;
+                    }
+    
+                    if (record.victim != null && hf.isBot(record.victim.accountId)) {
+                        //console.log(`LogPlayerTakeDamage (victim): ${record.victim.accountId}/${record.victim.name}`);
+                        record.victim.name += '.' + record.victim.accountId;
+                    }
+    
                 }
 
 
@@ -1329,15 +1338,18 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
             // !!! HAVEN MAP CORRECTIONS for GUARD and COMMANDER
-            if (record.attacker.accountId != '' && hf.isBot(record.attacker.accountId)) {
-                //console.log(`LogPlayerMakeGroggy (attacker): ${record.attacker.accountId}/${record.attacker.name}`);
-                record.attacker.name += '.' + record.attacker.accountId;
+            if (match_data.data.attributes.mapName == "Heaven_Main") {
+                if (record.attacker.accountId != '' && hf.isBot(record.attacker.accountId)) {
+                    //console.log(`LogPlayerMakeGroggy (attacker): ${record.attacker.accountId}/${record.attacker.name}`);
+                    record.attacker.name += '.' + record.attacker.accountId;
+                }
+    
+                if (record.victim.accountId != '' && hf.isBot(record.victim.accountId)) {
+                    //console.log(`LogPlayerMakeGroggy (victim): ${record.victim.accountId}/${record.victim.name}`);
+                    record.victim.name += '.' + record.victim.accountId;
+                }
             }
-
-            if (record.victim.accountId != '' && hf.isBot(record.victim.accountId)) {
-                //console.log(`LogPlayerMakeGroggy (victim): ${record.victim.accountId}/${record.victim.name}`);
-                record.victim.name += '.' + record.victim.accountId;
-            }
+            
             
 
 
@@ -1522,14 +1534,16 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
                 // !!! HAVEN MAP CORRECTIONS for GUARD and COMMANDER
-                if (record.killer != null && hf.isBot(record.killer.accountId)) {
-                    //console.log(`LogPlayerKill (killer): ${record.killer.accountId}/${record.killer.name}`);
-                    record.killer.name += '.' + record.killer.accountId;
-                }
-
-                if (record.victim != null && hf.isBot(record.victim.accountId)) {
-                    //console.log(`LogPlayerKill (victim): ${record.victim.accountId}/${record.victim.name}`);
-                    record.victim.name += '.' + record.victim.accountId;
+                if (match_data.data.attributes.mapName == "Heaven_Main") {
+                    if (record.killer != null && hf.isBot(record.killer.accountId)) {
+                        //console.log(`LogPlayerKill (killer): ${record.killer.accountId}/${record.killer.name}`);
+                        record.killer.name += '.' + record.killer.accountId;
+                    }
+    
+                    if (record.victim != null && hf.isBot(record.victim.accountId)) {
+                        //console.log(`LogPlayerKill (victim): ${record.victim.accountId}/${record.victim.name}`);
+                        record.victim.name += '.' + record.victim.accountId;
+                    }
                 }
 
 
@@ -2044,7 +2058,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     // if a guard or commander gets killed, then they have a parent. but if they don't get killed, then they have no parent and break the d3 tree.
     // need to check the arrKillLog to see if a commander killed but didn't die. 
     if (match_data.data.attributes.mapName == "Heaven_Main") {
-        console.log();
+        //console.log();
         // cycle the kill log and find every guard and commander who is a killer. then re-check for all victims. if they don't exist as a victim, then add them to tree
 
         let killer_has_no_parent = true;
@@ -2206,6 +2220,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
         //console.log('arrKillerVictims', arrKillerVictims);
         console.log('arrKillLog',       arrKillLog);
         console.log('arrSurvivors',     arrSurvivors);
+
+        //console.log(arrRecord_T);
     
         //console.log('csvDataForD3',     csvDataForD3);
         //console.log(null_attacker);

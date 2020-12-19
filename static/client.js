@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.057'
+let   version 			= '0.058'
 const blTestingVersion 	= !true;
 
 
@@ -1569,7 +1569,6 @@ function ClearTreeContext() {
 			if (element.name == allPlayers[i].textContent) {
 				if (element.winPlace == 1) {
 					playerClassList.add('winner');
-
 					circleClassList.add('winner');
 					//document.getElementById('circle-' + element.name).classList.add('winner');
 
@@ -1583,7 +1582,6 @@ function ClearTreeContext() {
 
 				if (element.name == strPlayerName) {
 					playerClassList.add('searchedPlayer');
-
 					circleClassList.add('searchedPlayer');
 					//document.getElementById('circle-' + element.name).classList.add('searchedPlayer');
 				}
@@ -1790,7 +1788,6 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 
 		
 		// clear out the classes for the circles
-
 		for (let j = circleClassList.length - 1; j > 0; j--) {
 
 			// prune all but default classes
