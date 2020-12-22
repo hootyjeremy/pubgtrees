@@ -16,7 +16,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // Deploy/Testing Version...
 let   version 			= '0.059'
-const blTestingVersion 	= !true;
+const blTestingVersion 	= true;
 
 
 if (!blTestingVersion) {
@@ -908,6 +908,7 @@ async function GetTelemetry(_matchID) {
 	}
 
 
+
 	// ! D3 Tree Stuff...
 	try {
 		// clear out the svg D3 tree if there is anything in there...
@@ -942,9 +943,9 @@ async function GetTelemetry(_matchID) {
 		document.getElementById('d3-tree01').style.display 		= 'none';
 		//document.getElementById('vue-obituaries').style.display = 'block';
 
-
 		return;
 	}
+
 
 
 	// ! Update text class colors
@@ -957,9 +958,19 @@ async function GetTelemetry(_matchID) {
 			document.getElementById(strPlayerName).classList.add('searchedPlayer');
 		}
 
+		
+		// ! Obituary rows
+		// 0.059 - Show deaths in order with their timestamp and deathtype?
+		// probably need a vue for loop to add a new span which has it's own id and class and can be contextally colored to the clicked name?
+		vueObituaries.updateObituaries(axios_telemetry_response.data.arrKillLog, axios_telemetry_response.data.arrPlayerCards, axios_telemetry_response.data.arrSurvivors);
+		document.getElementById('vue-obituaries').style.display = 'block';
+
+
 		// don't update tree context on the first look
 		//UpdateTreeContext(strPlayerName);
-		ClearTreeContext();	// draw colors
+		//ClearTreeContext();	// draw colors
+		// ! removing ClearTreeContext() here because vueObituaries.updateObituaries() calls it anyway.
+
 
 		document.body.style.cursor = 'default';
 		document.getElementById('d3-tree01').scrollIntoView({behavior: "smooth"});
@@ -975,10 +986,6 @@ async function GetTelemetry(_matchID) {
 
 
 
-	// 0.059 - Show deaths in order with their timestamp and deathtype?
-	// probably need a vue for loop to add a new span which has it's own id and class and can be contextally colored to the clicked name?
-	vueObituaries.updateObituaries(axios_telemetry_response.data.arrKillLog, axios_telemetry_response.data.arrPlayerCards, axios_telemetry_response.data.arrSurvivors);
-	document.getElementById('vue-obituaries').style.display = 'block';
 
 
 }
@@ -1692,6 +1699,7 @@ function ClearTreeContext() {
 
 
 
+	// ! obituary rows 
 	// update the table row classes
 	let obitRows = document.getElementsByClassName('obituaryRow');
 
@@ -1709,14 +1717,25 @@ function ClearTreeContext() {
 	}
 
 
-	// $ need to be able to clear the table data colors too
-	// let obitSelected = document.getElementsByClassName('obituarySelected');
+	// clear the table data colors too
+	let obitSelected = document.getElementsByClassName('obit-name');
 
-	// for (i = 0; i < obitSelected.length; i++) {
-	// 	obitSelected[i].classList.remove('obituarySelected');
-	// }
+	for (i = 0; i < obitSelected.length; i++) {
 
+		// remove all classes but the default 'obit-name'
+		for (j = 0; j < obitSelected[i].classList.length; j++) {
+			//console.log(obitSelected[i].classList[j]);
 
+			// $ i'm drunk so i'm not 100% sure this works but the dom is behaving the way i want so i'm just going to wrap this up and make some assumptions here.
+			if (obitSelected[i].classList[j] != 'obit-name') {
+				obitSelected[i].classList.remove(obitSelected[i].classList[j]);
+			}
+		}
+
+		if (obitSelected[i].innerText == strPlayerName) {
+			obitSelected[i].classList.add('selectedPlayer');
+		}
+	}
 }
 
 

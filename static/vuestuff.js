@@ -140,7 +140,7 @@ let vueObituaries = new Vue({
 		hiddenClass: '', 
 	},
 	methods: {
-		updateObituaries: function(arrKillLog, arrPlayerCards, arrSurvivors) {
+		updateObituaries: async function(arrKillLog, arrPlayerCards, arrSurvivors) {
 
 			// cycle through the kill log and marry deaths to their death time
 
@@ -167,8 +167,7 @@ let vueObituaries = new Vue({
 
 						this.arrDeaths.push({ 'winPlace': player.winPlace, 'name': player.name, 'timeSurvived': player.timeSurvived, 'kills': kills, 'damage': damage, 'hiddenClass': hiddenClass});
 					}
-				})
-				
+				})				
 			})
 
 
@@ -186,10 +185,18 @@ let vueObituaries = new Vue({
 
 
 
+			// ? this is probably sloppy since it calls ClearTreeContext() a second time. you can possibly remove ClearTreeContext() calls in other places and only let it happen here?
+			// having to do this as a callback because the dom isn't update at this point so re-drawing it doesn't do anything because the rows don't exist yet.
+			await this.$nextTick(function() {
+				ClearTreeContext();
+			});
+
 			//console.log(this.arrDeaths);
 
 		},
 		vue_UpdateTreeContext: function(selectedPlayer, tf) {
+			// this is called when the user clicks on an obit row
+
 			//console.log(selectedPlayer + ', ' + tf);
 			UpdateTreeContext(selectedPlayer, tf);
 		}
