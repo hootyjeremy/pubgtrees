@@ -109,10 +109,34 @@ tr.blankRow {
 	cursor: normal;
 }
 
-
 tr.rowKill {
 	background-color: rgb(38, 38, 40);
 }
+
+
+/* obituaries */
+tr.obituaryRow {
+	background-color: #343436;
+	cursor: pointer;
+}
+
+tr.obituaryRow:hover {
+	background-color: #616161;
+	cursor: pointer;
+}
+
+tr.obituarySelected {
+	/* background-color: #515154; */
+	background-color: #616161;
+	cursor: pointer;
+}
+
+tr.trHidden {
+	display: none;
+}
+
+
+
 
 th, td {
 	color: #dcddde;
@@ -315,7 +339,7 @@ a:link, a:visited {
 	font-weight: bold;
 }
 
-div#search-div, div#vueapp, div#d3-tree01, div#player-report, div#tree-hints, div.cube {
+div#search-div, div#vueapp, div#d3-tree01, div#player-report, div#tree-hints, div.cube, div#vue-obituaries {
 	border-radius: 10px;
 	background-color: #414144;
 	margin-left: 14px;

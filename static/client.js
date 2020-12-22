@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.058'
+let   version 			= '0.059'
 const blTestingVersion 	= !true;
 
 
@@ -628,6 +628,8 @@ async function GetPlayerMatches() {
 	// hide these if a new player is looked up
 	document.getElementById('div-analyzing').style.display 	= 'none';
 	document.getElementById('d3-tree01').style.display 		= 'none';
+	document.getElementById('vue-obituaries').style.display = 'none';
+
 
 
 	//var axios_response = null;
@@ -782,6 +784,8 @@ async function GetPlayerMatches() {
 
 		document.getElementById('vueapp').style.display = 'none';
 		document.getElementById('d3-tree01').style.display = 'none';
+		document.getElementById('vue-obituaries').style.display = 'none';
+
 	}
 
 
@@ -809,6 +813,8 @@ async function GetTelemetry(_matchID) {
 	document.body.style.cursor= 'wait';
 	document.getElementById('div-analyzing').style.display 	= 'block';
 	document.getElementById('d3-tree01').style.display 		= 'none';
+	document.getElementById('vue-obituaries').style.display = 'none';
+
 
 	try {
 		// get telemetry for this match for this platform/player
@@ -832,6 +838,8 @@ async function GetTelemetry(_matchID) {
 		document.body.style.cursor= 'default';
 		document.getElementById('div-analyzing').style.display 	= 'none';
 		document.getElementById('d3-tree01').style.display 		= 'none';
+		document.getElementById('vue-obituaries').style.display = 'none';
+
 
 		return;
 	}
@@ -853,6 +861,8 @@ async function GetTelemetry(_matchID) {
 		document.body.style.cursor= 'default';
 		document.getElementById('div-analyzing').style.display 	= 'none';
 		document.getElementById('d3-tree01').style.display 		= 'none';
+		document.getElementById('vue-obituaries').style.display = 'none';
+
 
 		//console.log('Match not found');
 		return;
@@ -886,6 +896,8 @@ async function GetTelemetry(_matchID) {
 		document.body.style.cursor= 'default';
 		document.getElementById('div-analyzing').style.display 	= 'none';
 		document.getElementById('d3-tree01').style.display 		= 'none';
+		document.getElementById('vue-obituaries').style.display = 'none';
+
 		
 		return;
 	}
@@ -928,6 +940,8 @@ async function GetTelemetry(_matchID) {
 		document.body.style.cursor = 'default';
 		document.getElementById('div-analyzing').style.display 	= 'none';
 		document.getElementById('d3-tree01').style.display 		= 'none';
+		//document.getElementById('vue-obituaries').style.display = 'block';
+
 
 		return;
 	}
@@ -958,6 +972,14 @@ async function GetTelemetry(_matchID) {
 
 		return;
 	}
+
+
+
+	// 0.059 - Show deaths in order with their timestamp and deathtype?
+	// probably need a vue for loop to add a new span which has it's own id and class and can be contextally colored to the clicked name?
+	vueObituaries.updateObituaries(axios_telemetry_response.data.arrKillLog, axios_telemetry_response.data.arrPlayerCards, axios_telemetry_response.data.arrSurvivors);
+	document.getElementById('vue-obituaries').style.display = 'block';
+
 
 }
 
@@ -1668,7 +1690,36 @@ function ClearTreeContext() {
 	//document.getElementById('selectedPlayerRectangle').setAttribute('x', -200);
 	SetRectangleLocation(strPlayerName);
 
+
+
+	// update the table row classes
+	let obitRows = document.getElementsByClassName('obituaryRow');
+
+	for (i = 0; i < obitRows.length; i++) {
+
+		//remove 'obituarySelected' by default, then add if this is the selected user
+		obitRows[i].classList.remove('obituarySelected');
+
+		if (obitRows[i].id == 'obit-' + strPlayerName) {
+			// if this is the obit row for the selected player, add obitSelected
+			obitRows[i].classList.add('obituarySelected');
+		}
+
+		//console.log(obitRows[i].id);
+	}
+
+
+	// $ need to be able to clear the table data colors too
+	// let obitSelected = document.getElementsByClassName('obituarySelected');
+
+	// for (i = 0; i < obitSelected.length; i++) {
+	// 	obitSelected[i].classList.remove('obituarySelected');
+	// }
+
+
 }
+
+
 
 
 function UpdateTreeContext(selectedPlayer, _playerClicked) {
@@ -1797,7 +1848,7 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 		for (let j = circleClassList.length - 1; j > 0; j--) {
 
 			// prune all but default classes
-			if (circleClassList[j] != 'allPlayers' && circleClassList[j] != 'humanPlayers' && circleClassList[j] != 'botPlayers') {
+			if (circleClassList[j] != 'allPlayers' && circleClassList[j] != 'humanPlayers' && circleClassList[j] != 'botPlayers' && circleClassList[j] != 'transparent') {
 				circleClassList.remove(circleClassList[j]);
 			}
 		}
@@ -1898,6 +1949,99 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 	}
 
 	//#endregion - path/lines
+
+
+
+	//#region // ! [Region] Obituaries...
+	//
+
+	// cycle through obituary rows and then add the td class for context?
+	let obits = document.getElementsByClassName('obit-name');
+
+	for (i = 0; i < obits.length; i++) {
+
+		// if this element's innerText is the selected player, teammate, or any context, then color the row appropriately.		
+		//console.log(obits[i].innerText);
+
+
+		// prune all classes but 'obit-name' before checking it for the new context
+		let obitClassList = obits[i].classList;
+		
+		for (let j = obitClassList.length - 1; j >= 0; j--) { 
+			//console.log('    ' + allPlayers[i].classList.value);
+			if (obitClassList[j] != 'obit-name') {
+				obitClassList.remove(obitClassList[j]);
+			}
+		}
+
+
+		// is this a bot player?
+		if (axios_telemetry_response.data.allBotNames.split('|').includes(obits[i].innerText)) {
+			//console.log(obits[i].innerText + ' is a bot');
+			obits[i].classList.add('botPlayer');
+		}
+
+
+		// $ check what happens to context colors if a teammate is your killer or you kill yourself.
+
+		// copy/paste from above
+		if (obits[i].innerText == selectedPlayer) {
+			obits[i].classList.add('selectedPlayer');
+		}
+		else {
+			// if not the selected player, what is currentPlayer's teamId? is it not the selected player?
+
+			// loop through arrTeams until you find the teamId of the selected player
+			response.arrTeams.forEach(team => {
+		
+				// loop through all of this team's teammates. if the selected player is there, then this is a teammate. 
+				team.teammates.forEach(teammate => {
+		
+					if (obits[i].innerText === teammate.name) {
+						//console.log('currentPlayer team found: ' + teammate.name + ' -> ' + currentPlayer);
+
+						if (team.teamId == selectedPlayerTeamId) {
+							//console.log('currentPlayer teammate found: ' + teammate.name + ' -> ' + currentPlayer);
+							// #7dde98 green
+							obits[i].classList.add('playerTeammate');
+						}
+						else if (team.teamId == selectedPlayerKillerTeamId) {
+							// this player is on the killer's team. is it the killer or just a teammate?
+							if (obits[i].innerText == selectedPlayerKiller) {
+								// this is the killer
+								obits[i].classList.add('killer');
+							}
+							else {
+								// this is a killer teammate
+								obits[i].classList.add('killerTeammate');
+							}
+						}
+					}
+				});
+			});
+		}
+	}
+
+
+
+	// update the table row classes
+	let obitRows = document.getElementsByClassName('obituaryRow');
+
+	for (i = 0; i < obitRows.length; i++) {
+
+		//remove 'obituarySelected' by default, then add if this is the selected user
+		obitRows[i].classList.remove('obituarySelected');
+
+		if (obitRows[i].id == 'obit-' + selectedPlayer) {
+			// if this is the obit row for the selected player, add obitSelected
+			obitRows[i].classList.add('obituarySelected');
+		}
+
+		//console.log(obitRows[i].id);
+	}
+
+	//
+	//#endregion -- Obituaries
 
 
 

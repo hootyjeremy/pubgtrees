@@ -251,6 +251,13 @@
 		</tr>
 		</table>
 
+		<br>
+		<div style='background-color: #343436; border-radius: 6px; width: 900px;'>
+			<span style='margin: 10px; font-style: italic; color: #98a0a6;'>
+				* Click any player to select them and see their teammates and killer. Click the selected player again to see their damage and activity. *
+			</span>
+		</div>
+
 
 		<div id='div-d3-tree' style="overflow: auto;">
 			<br>
@@ -287,7 +294,49 @@
 	</center>
 </div>
 
-<br>
+
+
+<div id='vue-obituaries' style='display: none'>
+	<center>
+
+	<h1 style='padding-top: 14px;'>Order of Deaths</h1>
+
+	<div style='background-color: #343436; border-radius: 6px; width: 500px;'>
+		<span style='margin: 10px; font-style: italic; color: #98a0a6;'>
+			* This is a new feature that isn't finished yet and I'm still working on it. *
+		</span>
+	</div>
+
+	<br>
+
+	<table>
+		<thead>
+			<tr>
+				<th>Time alive</th>
+				<th>Player</th>
+				<th>Placed</th>
+				<th>Kills</th>
+				<th>Damage</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr class='obituaryRow' :class='death.hiddenClass'
+				v-for='death in arrDeaths' :key='death.name' :id="'obit-' + death.name"
+				v-on:click="vue_UpdateTreeContext(death.name, true)"
+			> 					
+				<td style="border-radius: 6px 0px 0px 6px; text-align:center;">{{death.timeSurvived}}</td> 
+				<td class='obit-name' style="text-align:left; width: 50px; font-weight: bold;">{{death.name}}</td>
+				<td style="text-align: center; width: 50px;">#{{death.winPlace}}</td>
+				<td style="text-align:center; width: 50px">{{death.kills}}</td>
+				<td style="text-align:center; border-radius: 0px 6px 6px 0px; padding-right: 14px;">{{death.damage}}</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<br>
+
+	</center>	
+</div>
 
 
 <div id='div-treehint-modal' style='display: none;'>

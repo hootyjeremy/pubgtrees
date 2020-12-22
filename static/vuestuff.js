@@ -133,6 +133,70 @@ let vm = new Vue({
 //#region // ! [Region] #d3-tree01 (tree details)
 //
 
+let vueObituaries = new Vue({
+	el: '#vue-obituaries',
+	data: {
+		arrDeaths: [],
+		hiddenClass: '', 
+	},
+	methods: {
+		updateObituaries: function(arrKillLog, arrPlayerCards, arrSurvivors) {
+
+			// cycle through the kill log and marry deaths to their death time
+
+			this.arrDeaths = [];
+
+			arrKillLog.forEach(element => {
+				//console.log(element.victim);
+
+				// get death time for this victim
+				arrPlayerCards.forEach(player => {
+					if (player.name == element.victim) {
+						//console.log(player.name + ' -> ' + player.timeSurvived);
+
+						hiddenClass = '';
+
+						let kills = (player.kills === 0) ? '-' : player.kills;
+						let damage = (player.damageDealt === 0) ? '-' : parseInt(player.damageDealt).toLocaleString('en') ;
+
+						// hide bots' rows
+						if (axios_telemetry_response.data.allBotNames.split('|').includes(player.name)) {
+							hiddenClass = 'trHidden';
+						}
+
+
+						this.arrDeaths.push({ 'winPlace': player.winPlace, 'name': player.name, 'timeSurvived': player.timeSurvived, 'kills': kills, 'damage': damage, 'hiddenClass': hiddenClass});
+					}
+				})
+				
+			})
+
+
+			// update the last rows for the survivors
+			arrSurvivors.forEach(element => {
+				arrPlayerCards.forEach(player => {
+					if (player.name == element.name) {
+						let kills = (player.kills === 0) ? '-' : player.kills;
+						let damage = (player.damageDealt === 0) ? '-' : parseInt(player.damageDealt).toLocaleString('en') ;
+
+						this.arrDeaths.push({ 'winPlace': player.winPlace, 'name': player.name, 'timeSurvived': '-', 'kills': kills, 'damage': damage, 'hiddenClass': 'hiddenClass' });
+					}
+				})
+			})
+
+
+
+			//console.log(this.arrDeaths);
+
+		},
+		vue_UpdateTreeContext: function(selectedPlayer, tf) {
+			//console.log(selectedPlayer + ', ' + tf);
+			UpdateTreeContext(selectedPlayer, tf);
+		}
+	}
+	
+})
+
 let vueMatchInfo = new Vue({
 	el: '#d3-tree01',
 	data: {
@@ -145,6 +209,10 @@ let vueMatchInfo = new Vue({
 		shardId: null,
 		//participantCount: '0',
 		humansCount: '0',
+
+		// survival time stuff...
+		arrDeaths: [],
+
 	},
 	methods: {
 		updateTreeMatchDetails: function (matchDetails, arrMatches) {
@@ -171,6 +239,7 @@ let vueMatchInfo = new Vue({
 			this.matchType 	= vm.resolveMatchType(matchDetails.matchType);
 			this.shardId 	= matchDetails.shardId;
 		},
+
 	}
 })
 
