@@ -881,7 +881,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     let arrSelfKills        = [];   // just to identify self kill data
     
     var arrTeams        = [];   // [teamId, [players]]
-    var arrPlayerTeam   = [];   // [name, teamId]   // for reverse lookups
+    //var arrPlayerTeam   = [];   // [name, teamId]   // for reverse lookups
     var arrKnocks       = [];   // [{ knocked_player, whodunit}] -> this is here to keep up with who is currently knocked in-game so you know if a player was thirsted
 
     // data for client response...
@@ -899,7 +899,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     //var null_attacker   = [];   // for testing bluezone/redzone/blackzone
 
 
-    //let arrRecord_T = [];
+    // let arrRecord_T = [];
 
     // ! loop through each telemetry event...
     for (let i = 0; i < telemetry_response.length; i++){
@@ -944,6 +944,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
         // if (record._T == 'LogPlayerPosition') {
         //     if (record.character.accountId.includes('ai.')) {
 
+        //         console.log('(' + i_string.padStart(5, ' ') + ') LogPlayerPosition: ' + record.character.teamId + ' - ' + record.character.name);
+        //         console.log(record);
+        //     }
+        // }
+
 
         // if (record._T == 'LogGameStatePeriodic') {
         //     console.log(record);
@@ -964,7 +969,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 //     human_count++;
                 // }
 
-                arrPlayerTeam.push({ 'name': record.character.name, 'teamId': record.character.teamId});
+                //arrPlayerTeam.push({ 'name': record.character.name, 'teamId': record.character.teamId});
                 
                 // ! create arrTeams array
                 // [{ 'teamId': teamId, 'teammates': [{'playerName': name, 'isBot': bool}] }]
@@ -1046,7 +1051,20 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 //console.log(record);
             }
 
-            winningTeamId = record.gameResultOnFinished.results[0].teamId;
+            try {
+                winningTeamId = record.gameResultOnFinished.results[0].teamId;
+            }
+            catch (error) {
+                //console.log(arrTeams);
+                //console.log(arrKillLog);
+                //console.log(arrSurvivors);
+
+                // if a bot won (and is a late spawning bot) then set winningTeamId to the survivor's teamId.
+                winningTeamId = arrSurvivors[0].teamId;
+
+                
+            }
+            
         }
 
         //
@@ -1165,7 +1183,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
             //console.dir(i + ': ' + record);
             //strRecordTimestamp = hf.getDurationFromDatesTimestamp(matchStartTime, record._D);
-            
+
+           
             try {
                 // $ if attacker is null, is that always bluezone or environment damage?
                 var _attackerName = (record.attacker == null) ? 'null' : record.attacker.name;
@@ -1175,6 +1194,23 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
+                // add late spawning bots if they are found here in the damage event
+                for (j = 0; j < arrTeams.length; j++) {
+                    // check if attacker is a bot first, then check if victim is a bot
+
+                    if (record.attacker != null && hf.isBot(record.attacker.accountId)) {
+                        addBotToTeamsArray(arrSurvivors, arrTeams, record.attacker);
+                    }
+
+                    if (record.victim != null && hf.isBot(record.victim.accountId)) {
+                        addBotToTeamsArray(arrSurvivors, arrTeams, record.victim);
+                    }
+
+                    //debugger;
+
+                }
+
+    
 
                 // !!! HAVEN MAP CORRECTIONS for GUARD and COMMANDER
                 if (match_data.data.attributes.mapName == "Heaven_Main") {
@@ -1272,7 +1308,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     playerDamageLog.attacker    = _attacker;
                     playerDamageLog.victim      = _victim;
 
-                    playerDamageLog.damage              = record.damage;
+                    playerDamageLog.damage      = record.damage;
                     
                     //playerDamageLog.distance            = _distance;
 
@@ -2215,7 +2251,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
     // ! print damage log
     if (blTestingVersion){
         console.log('arrTeams:',        arrTeams);
-        console.log('arrPlayerTeam',    arrPlayerTeam);
+        //console.log('arrPlayerTeam',    arrPlayerTeam);
 
         //console.log('arrKillerVictims', arrKillerVictims);
         console.log('arrKillLog',       arrKillLog);
@@ -2646,3 +2682,77 @@ function printTeamRoster(dctRoster) {
     return strRoster;
 }
 
+
+
+function addBotToTeamsArray(arrSurvivors, arrTeams, bot) {
+
+    // this is here for correcting a late spawn bot who wins the game but is unaccounted for
+
+    // check if bot's teamId exists in arrTeams. if not, then add them.
+    // check if bot exists in arrSurvivors. if not, add them.
+
+    let blTeamFound = blBotFound = blSurvivorFound = false;
+    let index = 0;
+
+    let team        = new Object();
+    team.teamId     = bot.teamId;
+    team.teammates  = [];
+
+    let player                  = new Object();
+    player.name                 = bot.name;
+    player.isBot                = true;
+    player.accountId            = bot.accountId;
+    player.isKnockedOrKilled    = false;
+    player.isCurrentlyAlive     = true;
+
+
+
+    // check if team exists
+    for (i = 0; i < arrTeams.length; i++) {
+
+        if (arrTeams[i].teamId == bot.teamId) {
+
+            // if the team exists, does the bot exist?
+            arrTeams[i].teammates.forEach(teammate => {
+                if (teammate.name === bot.name) {
+                    blBotFound = true;
+                    index = i;
+                }
+            })            
+
+            blTeamFound = true;
+            break;
+        } 
+    }
+
+
+    if (blTeamFound) {
+        
+        // if team exists but bot doesn't, add the bot teammate to this team
+        if (!blBotFound) {
+            // ? NOT SURE IF THIS ONE WORKS SINCE I HAVEN'T SEEN AN EXAMPLE WHERE A NEW BOT WAS ADDED TO AN EXISTING TEAM. 
+            // console.log(bot.name + ' -> ' + blBotFound)
+            // console.log('adding ' + player.name + ' to arrTeams index ' + index);
+
+            arrTeams[index].teammates.push(player);
+
+            arrSurvivors.push({ 'name': player.name, 'teamId': team.teamId });
+            //debugger;
+        }
+
+    }
+    else {
+
+        // if the team is not found, then create a team and add the bot teammate
+        //console.log(bot.name + ' -> ' + blBotFound)
+
+        team.teammates.push(player);
+        arrTeams.push(team);
+
+        arrSurvivors.push({ 'name': player.name, 'teamId': team.teamId });
+
+        //debugger;
+
+    }
+
+}
