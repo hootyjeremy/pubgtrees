@@ -645,7 +645,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
-
     // ---------------------------------------------------->
     //#region // ! [Region] Fetch telemetry from match data
     //
@@ -897,7 +896,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     let arrArmor            = [];   // $ keep up with what armor is currently worn by each player
 
     //var null_attacker   = [];   // for testing bluezone/redzone/blackzone
-
 
     // let arrRecord_T = [];
 
@@ -1186,7 +1184,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
            
             try {
-                // $ if attacker is null, is that always bluezone or environment damage?
+                // ? if attacker is null, is that always bluezone or environment damage?
                 var _attackerName = (record.attacker == null) ? 'null' : record.attacker.name;
 
                 //console.log('(' + i_string.padStart(5, ' ') + ') LogPlayerTakeDamage. attacker: ' + _attackerName + ', victim: ' + record.victim.name + 
@@ -1194,7 +1192,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
 
-                // add late spawning bots if they are found here in the damage event
+                // add late spawning bots to the arrTeams array if they are found here in the damage event
                 for (j = 0; j < arrTeams.length; j++) {
                     // check if attacker is a bot first, then check if victim is a bot
 

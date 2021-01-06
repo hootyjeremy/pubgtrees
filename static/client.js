@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.060'
+let   version 			= '0.061'
 const blTestingVersion 	= !true;
 
 
@@ -1747,6 +1747,8 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 
 	//ClearTreeContext();
 
+	let startTime = new Date();
+
 	//console.log('clicked name: ' + selectedPlayer);
 	//console.log('UpdateTreeContext() event ');
 
@@ -1970,6 +1972,8 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 	//#endregion - path/lines
 
 
+	console.log('before obits: ' + (new Date().getTime() - startTime.getTime()) / 1000);
+
 
 	//#region // ! [Region] Obituaries...
 	//
@@ -2001,7 +2005,7 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 		}
 
 
-		// $ check what happens to context colors if a teammate is your killer or you kill yourself.
+		// ? check what happens to context colors if a teammate is your killer or you kill yourself.
 
 		// copy/paste from above
 		if (obits[i].innerText == selectedPlayer) {
@@ -2013,34 +2017,78 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 			// loop through arrTeams until you find the teamId of the selected player
 			response.arrTeams.forEach(team => {
 		
-				// loop through all of this team's teammates. if the selected player is there, then this is a teammate. 
-				team.teammates.forEach(teammate => {
-		
-					if (obits[i].innerText === teammate.name) {
-						//console.log('currentPlayer team found: ' + teammate.name + ' -> ' + currentPlayer);
+				//console.log(team.teamId);
 
-						if (team.teamId == selectedPlayerTeamId) {
-							//console.log('currentPlayer teammate found: ' + teammate.name + ' -> ' + currentPlayer);
-							// #7dde98 green
+				if (team.teamId == selectedPlayerTeamId) {
+					// if this is a teammate of the selected player...
+
+					team.teammates.forEach(teammate => {
+
+						if (obits[i].innerText === teammate.name) {
+
 							obits[i].classList.add('playerTeammate');
 						}
-						else if (team.teamId == selectedPlayerKillerTeamId) {
-							// this player is on the killer's team. is it the killer or just a teammate?
-							if (obits[i].innerText == selectedPlayerKiller) {
-								// this is the killer
-								obits[i].classList.add('killer');
-							}
-							else {
-								// this is a killer teammate
-								obits[i].classList.add('killerTeammate');
-							}
+	
+					})
+
+				}
+				else if (team.teamId == selectedPlayerKillerTeamId) {
+					// if this is the killer's team
+
+					team.teammates.forEach(teammate => {
+
+						if (obits[i].innerText == selectedPlayerKiller) {
+							// this is the killer
+							obits[i].classList.add('killer');
 						}
-					}
-				});
+						else {
+							// this is a killer teammate
+							//obits[i].classList.add('killerTeammate');
+
+							// $ this is buggy right now. drawing the killer's teammates is not working in obits.
+						}
+
+					})
+					
+				}
+
+
+
+
+
+				// loop through all of this team's teammates. if the selected player is there, then this is a teammate. 
+				// team.teammates.forEach(teammate => {
+		
+				// 	if (obits[i].innerText === teammate.name) {
+				// 		//console.log('currentPlayer team found: ' + teammate.name + ' -> ' + currentPlayer);
+
+				// 		if (team.teamId == selectedPlayerTeamId) {
+				// 			//console.log('currentPlayer teammate found: ' + teammate.name + ' -> ' + currentPlayer);
+				// 			// #7dde98 green
+				// 			obits[i].classList.add('playerTeammate');
+				// 			return;
+				// 		}
+				// 		else if (team.teamId == selectedPlayerKillerTeamId) {
+				// 			// this player is on the killer's team. is it the killer or just a teammate?
+				// 			if (obits[i].innerText == selectedPlayerKiller) {
+				// 				// this is the killer
+				// 				obits[i].classList.add('killer');
+				// 				return;
+				// 			}
+				// 			else {
+				// 				// this is a killer teammate
+				// 				obits[i].classList.add('killerTeammate');
+				// 				return;
+				// 			}
+				// 		}
+				// 	}
+
+				// });
 			});
 		}
 	}
 
+	console.log('after obits1: ' + (new Date().getTime() - startTime.getTime()) / 1000);
 
 
 	// update the table row classes
@@ -2062,6 +2110,8 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 	//
 	//#endregion -- Obituaries
 
+
+	console.log('after obits2: ' + (new Date().getTime() - startTime.getTime()) / 1000);
 
 
 	// set the rectangle at the selected player
