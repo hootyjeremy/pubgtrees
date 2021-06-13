@@ -31,7 +31,7 @@ let dbRowsToInsert  = '';
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-let blTestingVersion = true;
+let blTestingVersion = false;
 
 if (typeof process.env.TESTING_VERSION != 'undefined') {
     // if running from production server, "testing" is false
@@ -1564,6 +1564,8 @@ app.get('/getmatchtelemetry', async (req, res) => {
             //#region  // ! [Region] 'LogPlayerKill'
             // 
 
+            //console.log('LogPlayerKill: ', record);
+
             try {
 
 
@@ -2040,6 +2042,10 @@ app.get('/getmatchtelemetry', async (req, res) => {
             //#endregion 'LogPlayerKill' ----------------------------------------
 
         } // LogPlayerKill
+        else if (record._T == 'LogPlayerKillV2') {
+            //console.log('LogPlayerKillV2: ', record);
+        }
+
 
 
         // enter this playerDamageLog into arrPlayersDamageLog

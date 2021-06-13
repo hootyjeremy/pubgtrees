@@ -15,8 +15,8 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.061'
-const blTestingVersion 	= !true;
+let   version 			= '0.063'
+const blTestingVersion 	= false;
 
 
 if (!blTestingVersion) {
@@ -1972,11 +1972,16 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 	//#endregion - path/lines
 
 
-	console.log('before obits: ' + (new Date().getTime() - startTime.getTime()) / 1000);
+
+	// $ BUG: cycling through obits is buggy and takes up to 5 seconds per click. fix this later.
+	/*
 
 
 	//#region // ! [Region] Obituaries...
 	//
+
+	console.log('[before obits: ' + (new Date().getTime() - startTime.getTime()) / 1000);
+
 
 	// cycle through obituary rows and then add the td class for context?
 	let obits = document.getElementsByClassName('obit-name');
@@ -2088,7 +2093,7 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 		}
 	}
 
-	console.log('after obits1: ' + (new Date().getTime() - startTime.getTime()) / 1000);
+	console.log(' after obits1: ' + (new Date().getTime() - startTime.getTime()) / 1000);
 
 
 	// update the table row classes
@@ -2107,11 +2112,16 @@ function UpdateTreeContext(selectedPlayer, _playerClicked) {
 		//console.log(obitRows[i].id);
 	}
 
+	console.log(' after obits2: ' + (new Date().getTime() - startTime.getTime()) / 1000 + ']');
+
+	*/
+	// $ BUG: cycling through obits is buggy right now. sometimes it takes up to 5 seconds to cycle through all of this. FIX.
+
+
 	//
 	//#endregion -- Obituaries
 
 
-	console.log('after obits2: ' + (new Date().getTime() - startTime.getTime()) / 1000);
 
 
 	// set the rectangle at the selected player

@@ -79,6 +79,40 @@ text {
 	font-weight: bold;
 }
 
+
+
+div#gridMatches {
+	display: grid;
+	grid-template-columns: 90px 60px 80px 80px 50px 50px 50px 50px 50px auto;
+	grid-auto-rows: 30px;
+	grid-column-gap: 2px;
+	grid-row-gap: 2px;
+	padding: 12px;
+	font-size: 14px;
+	background-color: #343436;
+	border: 2px solid #98a0a6;
+	border-radius: 8px;
+}
+
+span.gridMatchesHeader {
+	font-weight: bold;
+}
+
+
+span.gridCell {
+	/* background-color: #343436; */
+	align-self: center;
+	justify-self: center;
+	/* height: 28px; */
+}
+
+span.gridCellEnd {
+	justify-self: start;
+	/* text-align: left; */
+}
+
+
+
 table {
 	font-size: 14px;
 }

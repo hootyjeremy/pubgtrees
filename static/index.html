@@ -156,8 +156,47 @@
 
 
 
-<div id='vueapp' style="display:none;">
+<div id='vueapp' style="display:none; padding: 40px">
+
+	<!-- grid -->
+
+	<!-- 
+	<div id="gridMatches">
+		<span class='gridMatchesHeader'>Age</span>
+		<span class='gridMatchesHeader'>Humans</span>
+		<span class='gridMatchesHeader'>Map</span>
+		<span class='gridMatchesHeader'>Mode</span>
+		<span class='gridMatchesHeader'>Ranked</span>
+		<span class='gridMatchesHeader'>Placed</span>
+		<span class='gridMatchesHeader'>Kills</span>
+		<span class='gridMatchesHeader'>Knocks</span>
+		<span class='gridMatchesHeader'>Dmg</span>
+		<span class='gridMatchesHeader'>Team</span>
+
+		
+		<template
+			v-for='(match, index) in match_data' :match_prop='match' :key='match.matchId' :id="'matchRow' + index"
+			v-on:click="analyzeMatch(match.matchId, index)">
+
+			<span class='gridCell'>{{match.timeSinceMatch}}</span>
+			<span class='gridCell'>{{match.humansCount}}</span>
+			<span class='gridCell'>{{match.mapName.toUpperCase()}}</span>
+			<span class='gridCell'>{{match.gameMode.toUpperCase()}}</span>
+			<span class='gridCell'>{{resolveMatchType(match.matchType)}}</span>
+
+			<span class='gridCell'>#{{match.winPlace}}</span>
+			<span class='gridCell'>{{match.kills}}</span>
+			<span class='gridCell'>{{resolveKnocks(match.gameMode, match.DBNOs)}}</span>
+			<span class='gridCell'>{{match.damageDealt}}</span>
+			<span class='gridCell gridCellEnd'>{{printRoster(match.teamRoster, match.strPlayerName)}}</span>
+		</template>
+	</div>
+
 	<br>
+	<br>
+	-->
+
+
 
 	<center>
 
@@ -331,8 +370,10 @@
 
 	<br>
 
-	</center>	
+	</center>
 </div>
+
+
 
 
 <div id='div-treehint-modal' style='display: none;'>
