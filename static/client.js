@@ -40,6 +40,8 @@ if (!blTestingVersion) {
 	// }
 
 	console.log('you are at: ' + location.href);
+
+	window.alert('v 0.064 - 2021.06.23: The current version is bugged now that the LogPlayerKill is updated with LogPlayerKillV2 in the PUBG API. I will try to resolve this soon but no ETA. I am sorry about this.')
 }
 else {
 	console.log('testing version: ' + version);
