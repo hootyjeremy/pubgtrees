@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.064'
+let   version 			= '0.065'
 const blTestingVersion 	= false;
 
 
@@ -41,7 +41,7 @@ if (!blTestingVersion) {
 
 	console.log('you are at: ' + location.href);
 
-	window.alert('v 0.064 - 2021.06.23: The current version is bugged now that the LogPlayerKill is updated with LogPlayerKillV2 in the PUBG API. I will try to resolve this soon but no ETA. I am sorry about this.')
+	window.alert('Bug Alert: (v0.065 - 2021.06.23) The PUBG API has updated the kill/death event with a new object that has better information. I have not been able to completely adjust the backend to deal with this so the tree and reporting is a little buggy for now. I will be working on it this week. Also, matches older than 2021.06.23 can not be read by my backend code. I will see what I can do about that as well.')
 }
 else {
 	console.log('testing version: ' + version);
