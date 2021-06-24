@@ -41,7 +41,7 @@ if (!blTestingVersion) {
 
 	console.log('you are at: ' + location.href);
 
-	window.alert('Bug Alert: (v0.065 - 2021.06.23) The PUBG API has updated the kill/death event with a new object that has better information. I have not been able to completely adjust the backend to deal with this so the tree and reporting is a little buggy for now. I will be working on it this week. Also, matches older than 2021.06.23 can not be read by my backend code. I will see what I can do about that as well.')
+	//window.alert('Bug Alert: (v0.065 - 2021.06.23) The PUBG API has updated the kill/death event with a new object that has better information. I have not been able to completely adjust the backend to deal with this so the tree and reporting is a little buggy for now. I will be working on it this week. Also, matches older than 2021.06.23 can not be read by my backend code. I will see what I can do about that as well.')
 }
 else {
 	console.log('testing version: ' + version);
