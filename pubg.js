@@ -2071,6 +2071,11 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                     // ! (environment kill) if the player didn't die to a killer
 
+                    // ! LogPlayerKillV2 info...
+                    // if environment, killer is null and finisher will tell you who killed them
+
+
+
                     var killer_player_type = '*env*';
 
                     // $ need to know if environment "thirsted" the player?
@@ -2078,7 +2083,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + 
                     //             ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type);
 
-                    _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [**' + hf.translateDamageTypeCategory(record.killerDamageInfo.damageTypeCategory).padEnd(15, ' ') + 
+                    _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [**' + hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory).padEnd(15, ' ') + 
                                  ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type;
 
                     arrKillFeedLog.push(_recordLog);
@@ -2101,7 +2106,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     playerDamageLog.isTeamWipe      = null;     // died while knocked (because team was wiped)
 
 
-                    _attacker.name = '<' + hf.translateDamageTypeCategory(record.killerDamageInfo.damageTypeCategory) + '>';
+                    _attacker.name = '<' + hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory) + '>';
                     
                     _victim.name    = record.victim.name;
                     _victim.isBot   = hf.isBot(record.victim.accountId);
@@ -2121,9 +2126,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // playerDamageLog.attacker    = _attacker;
                     // playerDamageLog.victim      = _victim;
 
-                    playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.killerDamageInfo.damageTypeCategory);
-                    playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.killerDamageInfo.damageCauserName);
-                    playerDamageLog.damageReason        = record.killerDamageInfo.damageReason;
+                    playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory);
+                    playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.finishDamageInfo.damageCauserName);
+                    playerDamageLog.damageReason        = record.finishDamageInfo.damageReason;
 
                     // arrPlayersDamageLog.push(playerDamageLog);
                     // arrEnvironmentKills.push( { 'damageTypeCategory':   playerDamageLog.damageTypeCategory,
@@ -2134,9 +2139,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // kill tree stuff (environment kill) -------------------------------------->
                     _victim.timeOfDeath         = strRecordTimestamp;
                     _victim.isThirst            = null; // $ need to know if environment knocked and then thirsted? or if environment thirsted a knock by player? probably not...
-                    _victim.damageTypeCategory  = hf.translateDamageTypeCategory(record.killerDamageInfo.damageTypeCategory);    //playerDamageLog.damageTypeCategory;
-                    _victim.damageCauserName    = hf.translateDamageCauserName(record.killerDamageInfo.damageCauserName);        // playerDamageLog.damageCauserName;
-                    _victim.damageReason        = record.killerDamageInfo.damageReason;                                          //playerDamageLog.damageReason;
+                    _victim.damageTypeCategory  = hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory);    //playerDamageLog.damageTypeCategory;
+                    _victim.damageCauserName    = hf.translateDamageCauserName(record.finishDamageInfo.damageCauserName);        // playerDamageLog.damageCauserName;
+                    _victim.damageReason        = record.finishDamageInfo.damageReason;                                          //playerDamageLog.damageReason;
 
                     // _victim.isSelfKill      = null;
                     // _victim.isThirst        = null;
@@ -2160,9 +2165,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
                     arrPlayersDamageLog.push(playerDamageLog);
-                    arrEnvironmentKills.push( { 'damageTypeCategory':   hf.translateDamageTypeCategory(record.killerDamageInfo.damageTypeCategory),
-                                                'damageCauserName':     hf.translateDamageCauserName(record.killerDamageInfo.damageCauserName),
-                                                'damageReason':         record.killerDamageInfo.damageReason } ); 
+                    arrEnvironmentKills.push( { 'damageTypeCategory':   hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory),
+                                                'damageCauserName':     hf.translateDamageCauserName(record.finishDamageInfo.damageCauserName),
+                                                'damageReason':         record.finishDamageInfo.damageReason } ); 
 
 
                     // arrKillerVictims -------------------------->
