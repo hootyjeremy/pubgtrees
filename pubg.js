@@ -31,7 +31,7 @@ let dbRowsToInsert  = '';
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-let blTestingVersion = false;
+let blTestingVersion = true;
 
 if (typeof process.env.TESTING_VERSION != 'undefined') {
     // if running from production server, "testing" is false
@@ -2067,13 +2067,16 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 }
 
 
+                // if killer is null, it's pretty much enviroment
+                // if finisher and victim are the same person, it's a suicide
                 if (record.killer == null) {
 
                     // ! (environment kill) if the player didn't die to a killer
 
                     // ! LogPlayerKillV2 info...
                     // if environment, killer is null and finisher will tell you who killed them
-
+                    // (record.finisher.name != record.victim.name)
+                    
 
 
                     var killer_player_type = '*env*';
@@ -2200,6 +2203,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 }
                 else {
                     // ! Player kill (not environment)... 
+
 
                     var killer_player_type = hf.strIsHumanOrBot(record.killer.accountId).padEnd(5, ' '); // (record.killer.accountId.includes('account')) ? 'human' : 'ai   ';
                     var damage_info     = '';

@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 // --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.067'
+let   version 			= '0.068'
 const blTestingVersion 	= false;
 
 
@@ -180,6 +180,10 @@ window.addEventListener('load', (event) => {
 
 	document.getElementById('btnCloseTreeHintModal2').addEventListener('click', (event) => {
 		HideTreeHintModal();
+	})
+
+	document.getElementById('btnCloseInfoModal2').addEventListener('click', (event) => {
+		HideInfoModal();
 	})
 
 
@@ -415,6 +419,10 @@ window.addEventListener('keydown', (event) => {
 			HideTreeHintModal();
 		}
 
+		if (document.getElementById('div-info-modal').style.display != 'none') {
+			HideInfoModal();
+		}
+
 	}
 });
 
@@ -431,6 +439,11 @@ window.addEventListener('click', (event) => {
 	if (event.target.id == 'div-treehint-modal') {
 		//console.log('modal clicked');
 		HideTreeHintModal();
+	}
+
+	if (event.target.id == 'div-info-modal') {
+		//console.log('modal clicked');
+		HideInfoModal();
 	}
 
 })
@@ -2330,4 +2343,8 @@ function ShowTreeHintModal() {
 
 function HideTreeHintModal() {
 	document.getElementById('div-treehint-modal').style.display = 'none';
+}
+
+function HideInfoModal() {
+	document.getElementById('div-info-modal').style.display = 'none';
 }

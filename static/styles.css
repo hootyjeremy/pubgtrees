@@ -373,7 +373,7 @@ a:link, a:visited {
 	font-weight: bold;
 }
 
-div#search-div, div#vueapp, div#d3-tree01, div#player-report, div#tree-hints, div.cube, div#vue-obituaries {
+div#search-div, div#vueapp, div#d3-tree01, div#player-report, div#tree-hints, div.cube, div#vue-obituaries, div#info-modal {
 	border-radius: 10px;
 	background-color: #414144;
 	margin-left: 14px;
@@ -382,12 +382,12 @@ div#search-div, div#vueapp, div#d3-tree01, div#player-report, div#tree-hints, di
 }
 
 
-div#player-report, div#tree-hints {
+div#player-report, div#tree-hints, div#info-modal {
 	border: 2px solid #efb8df;
 }
 
 
-div#div-modal, div#div-treehint-modal {
+div#div-modal, div#div-treehint-modal, div#div-info-modal {
 	background-color: rgba(0,0,0,0.6);	
 
 	display: none;
