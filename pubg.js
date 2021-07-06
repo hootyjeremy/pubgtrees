@@ -31,7 +31,7 @@ let dbRowsToInsert  = '';
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-let blTestingVersion = true;
+let blTestingVersion = false;
 
 if (typeof process.env.TESTING_VERSION != 'undefined') {
     // if running from production server, "testing" is false
@@ -2048,6 +2048,16 @@ app.get('/getmatchtelemetry', async (req, res) => {
         else if (record._T == 'LogPlayerKillV2') {
             //console.log('LogPlayerKillV2: ', record);
 
+            //#region // ! [Region] 'LogPlayerKillV2'
+            //
+
+            
+            // routes:
+            // -player kills player/self kills self
+            // -environment kills player
+            // -environment knocks player, player dies to "groggy" (whether bleedout or teamwipe)
+
+            let blAdjustedEnvironmentKill = false;
 
             try {
 
@@ -2067,145 +2077,73 @@ app.get('/getmatchtelemetry', async (req, res) => {
                 }
 
 
-                // if killer is null, it's pretty much enviroment
-                // if finisher and victim are the same person, it's a suicide
-                if (record.killer == null) {
-
-                    // ! (environment kill) if the player didn't die to a killer
-
-                    // ! LogPlayerKillV2 info...
-                    // if environment, killer is null and finisher will tell you who killed them
-                    // (record.finisher.name != record.victim.name)
-                    
+                var objDamageInfo   = new Object();
+                var objKiller       = new Object();
 
 
-                    var killer_player_type = '*env*';
 
-                    // $ need to know if environment "thirsted" the player?
+                // ! adjust Damage_Groggy "self-kills" that are caused by dying while knocked to environment
+                // ? can this happen from player and not just environment?
+                // ? are players in solo mode who die to environment reporting properly?
+                if (record.finisher !== null && 
+                    record.finisher.accountId == record.victim.accountId && record.finishDamageInfo.damageTypeCategory == "Damage_Groggy") {
 
-                    // console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(record.damageTypeCategory).padEnd(15, ' ') + 
-                    //             ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type);
+                    objDamageInfo = record.dBNODamageInfo;
 
-                    _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [**' + hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory).padEnd(15, ' ') + 
-                                 ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type;
+                    objKiller.name      = hf.translateDamageTypeCategory(objDamageInfo.damageTypeCategory); //objDamageInfo.damageTypeCategory;
+                    objKiller.accountId = 'adjusted.for.environment';
+                    objKiller.teamId    = -1;
 
-                    arrKillFeedLog.push(_recordLog);
-                    arrDamageLog.push(_recordLog);
+                    // mimic case for environment kill by removing these objects:
+                    record.dBNOMaker = record.finisher = record.killer = null;
 
-
-                    // arrPlayersDamageLog (environment kill) ----------------------------->
-                    var _attacker   = new Object();
-                    var _victim     = new Object();
-                    playerDamageLog._T          = 'LogPlayerKill';
-                    playerDamageLog.matchTime   = strRecordTimestamp;
-                    playerDamageLog.byPlayer    = false;
-
-                    playerDamageLog.isSelfKill      = null;
-                    playerDamageLog.isThirst        = null;
-                    playerDamageLog.isTeammateKill  = null;
-
-                    //playerDamageLog.isBleedOut      = null;
-                    playerDamageLog.isNoRevive      = null;     // died while knocked (not rezed, timer ran out)
-                    playerDamageLog.isTeamWipe      = null;     // died while knocked (because team was wiped)
-
-
-                    _attacker.name = '<' + hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory) + '>';
-                    
-                    _victim.name    = record.victim.name;
-                    _victim.isBot   = hf.isBot(record.victim.accountId);
-                    _victim.teamId  = record.victim.teamId;
-                    _victim.zone    = record.victim.zone;
-
-                    // ! add to bot names if this bot is a late spawner
-                    if (_victim.isBot) {
-                        //allBotNames += '|' + _victim.name; // for finding bots in tree
-                        // $ 2020.09.30 test update
-
-                        if (!allBotNames.includes(_victim.name)) {
-                            allBotNames += '|' + _victim.name; // for finding bots in tree
-                        }
-                    }
-
-                    // playerDamageLog.attacker    = _attacker;
-                    // playerDamageLog.victim      = _victim;
-
-                    playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory);
-                    playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.finishDamageInfo.damageCauserName);
-                    playerDamageLog.damageReason        = record.finishDamageInfo.damageReason;
-
-                    // arrPlayersDamageLog.push(playerDamageLog);
-                    // arrEnvironmentKills.push( { 'damageTypeCategory':   playerDamageLog.damageTypeCategory,
-                    //                             'damageCauserName':     playerDamageLog.damageCauserName,
-                    //                             'damageReason':         playerDamageLog.damageReason } ); 
-
-
-                    // kill tree stuff (environment kill) -------------------------------------->
-                    _victim.timeOfDeath         = strRecordTimestamp;
-                    _victim.isThirst            = null; // $ need to know if environment knocked and then thirsted? or if environment thirsted a knock by player? probably not...
-                    _victim.damageTypeCategory  = hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory);    //playerDamageLog.damageTypeCategory;
-                    _victim.damageCauserName    = hf.translateDamageCauserName(record.finishDamageInfo.damageCauserName);        // playerDamageLog.damageCauserName;
-                    _victim.damageReason        = record.finishDamageInfo.damageReason;                                          //playerDamageLog.damageReason;
-
-                    // _victim.isSelfKill      = null;
-                    // _victim.isThirst        = null;
-                    // _victim.isTeammateKill  = null;
-
-                    // _victim.isBleedOut      = null;
-                    // _victim.isNoRevive      = null;     // died while knocked (not rezed, timer ran out)
-                    // _victim.isTeamWipe      = null;     // died while knocked (because team was wiped)
-
-                    // _victim.isThirst        = playerDamageLog.isThirst;
-                    // _victim.isSelfKill      = playerDamageLog.isSelfKill; 
-                    // _victim.isTeammateKill  = playerDamageLog.isTeammateKill; 
-
-                    // _victim.isBleedOut      = playerDamageLog.isBleedOut;
-                    // _victim.isNoRevive      = playerDamageLog.isNoRevive;
-                    // _victim.isTeamWipe      = playerDamageLog.isTeamWipe;
-
-
-                    playerDamageLog.attacker    = _attacker;
-                    playerDamageLog.victim      = _victim;
-
-
-                    arrPlayersDamageLog.push(playerDamageLog);
-                    arrEnvironmentKills.push( { 'damageTypeCategory':   hf.translateDamageTypeCategory(record.finishDamageInfo.damageTypeCategory),
-                                                'damageCauserName':     hf.translateDamageCauserName(record.finishDamageInfo.damageCauserName),
-                                                'damageReason':         record.finishDamageInfo.damageReason } ); 
-
-
-                    // arrKillerVictims -------------------------->
-                    // for (j = 0; j < arrKillerVictims.length; j++) {
-                    //     if (arrKillerVictims[j].name == _attacker.name) {
-                    //         blKillerExists = true;
-                    //         arrKillerVictims[j].victims.push(_victim);   // add victim to this killer's victims array
-                    //         break;
-                    //     }
-                    // }
-
-                    // if there is no record for this killer, create it...
-                    // if (!blKillerExists) {
-                    //     killer.name     = _attacker.name;
-                    //     killer.type     = 'environment';    // either environment or player (human or bot)
-                    //     killer.isBot    = null;
-                    //     killer.teamId   = null;
-
-                    //     killer.victims.push(_victim);
-                    //     arrKillerVictims.push(killer);
-                    // }
-
-                    console.log(record)
-
-                    arrKillLog.push({ 'killer': _attacker.name, 'victim': record.victim.name });  // killer:victim
+                    blAdjustedEnvironmentKill = true;
 
                     //debugger;
-
-                    // end of environment kill -------------------------
                 }
-                else {
-                    // ! Player kill (not environment)... 
 
 
-                    var killer_player_type = hf.strIsHumanOrBot(record.killer.accountId).padEnd(5, ' '); // (record.killer.accountId.includes('account')) ? 'human' : 'ai   ';
+                // ! LogPlayerKillV2 stuff...
+                // figure out what type of death it is first
+                // finisher = flusher, 
+                // killer   = knocker/credit
+                if (record.killer !== null || record.finisher !== null || record.dBNOMaker !== null) {
+                    // ! player kills player (non-environment kill)
+                    // console.log('is this a player killing a player?');
+
+                    //#region // ! [Region] Player Kill
+                    //
+
+                    // ! assign local killer as record.killer or record.finisher
+                    try {
+                        // want to start out by assigning whoever gets credit to a single object that can inform other objects down below...
+                        if (record.killer !== null) {
+                            //console.log('killer: ' + record.killer.name.padEnd(20) + ' x ' + record.victim.name)
+                            objDamageInfo   = record.killerDamageInfo;
+                            objKiller       = record.killer;
+                        }
+                        else if (record.finisher !== null) {
+                            //console.log('finish: ' + record.finisher.name.padEnd(20) + ' x ' + record.victim.name)
+                            objDamageInfo   = record.finishDamageInfo;
+                            objKiller       = record.finisher;
+                        }
+                        else {
+                            // this apparently never happens.
+                            console.log('LogPlayerKillV2: ***no finisher or killer*** for victim (' + record.victim.name + ')')
+
+                            objDamageInfo   = null;
+                            objKiller       = null;
+                        }
+
+                    }
+                    catch (err) {
+                        console.log('ERR in LogPlayerKillV2 for victim (' + record.victim.name + ')', err)
+                    }
+
+
+
+                    // killer is set, continue on...
+                    var killer_player_type = hf.strIsHumanOrBot(objKiller.accountId).padEnd(5, ' '); // (objKiller.accountId.includes('account')) ? 'human' : 'ai   ';
                     var damage_info     = '';
                     var selfKill        = '';
                     var thirst          = '';
@@ -2224,7 +2162,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // self-kill
                     // self-kill while knocked by player                    
                     // self-kill while knocked by environment
-                    if (record.killer.accountId == record.victim.accountId) {
+                    if (objKiller.accountId == record.victim.accountId) {
                         // this player died to themself (could have been self-kill or bled out while knocked)
 
                         // $ if they were knocked, then attribute the kill to the knocker (player or environment)
@@ -2251,7 +2189,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
                             arrSelfKills.push(record.victim.name);
                         }
 
-                        selfKill += ' ' + hf.translateDamageTypeCategory(record.damageTypeCategory);
+                        selfKill += ' ' + hf.translateDamageTypeCategory(objDamageInfo.damageTypeCategory);
                     }
                     else {
                         // if they were killed while knocked and they didn't die to themselves, it's a thirst...
@@ -2272,7 +2210,7 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
 
                         // if the killer was on the same team, it's a teammate kill
-                        if (record.killer.teamId == record.victim.teamId) {
+                        if (objKiller.teamId == record.victim.teamId) {
                             teammateKill = ' *teammate kill*';
 
                             playerDamageLog.isTeammateKill = true;
@@ -2281,37 +2219,36 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         else {
                             playerDamageLog.isTeammateKill = false;
                             //_victim.isTeammateKill = false;
-                        }
-    
+                        }    
                     }
 
 
-                    if (record.killerDamageInfo.damageTypeCategory != 'Damage_Groggy') {
+
+                    if (objDamageInfo.damageTypeCategory != 'Damage_Groggy') {
 
                         // if they died by self killing, then show the type category?
-                        if (record.killerDamageInfo.damageTypeCategory == 'Damage_Instant_Fall' ||
-                            record.killerDamageInfo.damageTypeCategory == 'Damage_Drown') {
-                            damage_info = hf.translateDamageTypeCategory(record.killerDamageInfo.damageTypeCategory);
+                        if (objDamageInfo.damageTypeCategory == 'Damage_Instant_Fall' ||
+                            objDamageInfo.damageTypeCategory == 'Damage_Drown') {
+                            damage_info = hf.translateDamageTypeCategory(objDamageInfo.damageTypeCategory);
                         }
                         else {
-                            damage_info = hf.translateDamageCauserName(record.killerDamageInfo.damageCauserName);
+                            damage_info = hf.translateDamageCauserName(objDamageInfo.damageCauserName);
                         }
                     }
-                    else if (record.killerDamageInfo.damageTypeCategory == 'Damage_Groggy'       || 
-                             record.killerDamageInfo.damageTypeCategory == 'Damage_Instant_Fall' ) {
+                    else if (objDamageInfo.damageTypeCategory == 'Damage_Groggy'       || 
+                             objDamageInfo.damageTypeCategory == 'Damage_Instant_Fall' ) {
                         // if they die from being groggy, then it's not a thirst.
                         thirst = '';
                         playerDamageLog.isThirst = false; // reset if not a thirst
                         //_victim.isThirst = false; // reset if not a thirst
                         
-
+                        
                         // $ if you are aware of the last living partner's death, then you will know if this bleed out is from no-rez or team-wipd
 
-                        if (record.killerDamageInfo.damageTypeCategory == 'Damage_Groggy') {
+                        if (objDamageInfo.damageTypeCategory == 'Damage_Groggy') {
                             damage_info = 'Bled-out';
                             // playerDamageLog.isBleedOut = true;
                             //_victim.isBleedOut = true;
-
 
                             // does this victim have any teammates up? 
                             // if no teammates are currently up, then this death is a team wipe.
@@ -2356,21 +2293,22 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     }
 
 
+
                     // remove thirst if killed by environment since environment can't thirst
-                    if (record.killerDamageInfo.damageTypeCategory == 'Damage_BlueZone' || 
-                        record.killerDamageInfo.damageTypeCategory == 'Damage_Drown' || 
-                        record.killerDamageInfo.damageTypeCategory == 'Damage_Explosion_BlackZone' || 
-                        record.killerDamageInfo.damageTypeCategory == 'Damage_Instant_Fall' || 
-                        record.killerDamageInfo.damageTypeCategory == 'Damage_Explosion_RedZone') {
+                    if (objDamageInfo.damageTypeCategory == 'Damage_BlueZone' || 
+                        objDamageInfo.damageTypeCategory == 'Damage_Drown' || 
+                        objDamageInfo.damageTypeCategory == 'Damage_Explosion_BlackZone' || 
+                        objDamageInfo.damageTypeCategory == 'Damage_Instant_Fall' || 
+                        objDamageInfo.damageTypeCategory == 'Damage_Explosion_RedZone') {
                             thirst = '';
                             playerDamageLog.isThirst = false; // reset if not a thirst
                             // _victim.isThirst = false; // reset if not a thirst
                     }
 
 
-                    // console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.killer.name.padEnd(16, ' ') + 
+                    // console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + objKiller.name.padEnd(16, ' ') + 
                     //             ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type + ' ' + damage_info + selfKill + thirst + teammateKill);
-                    _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + record.killer.name.padEnd(16, ' ') + 
+                    _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [' + objKiller.name.padEnd(16, ' ') + 
                                     ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type + ' ' + damage_info + selfKill + thirst + teammateKill;
 
 
@@ -2382,14 +2320,14 @@ app.get('/getmatchtelemetry', async (req, res) => {
                     // arrPlayersDamageLog (player kill, not environment) --------------------------------->
                     var _attacker   = new Object();
                     var _victim     = new Object();
-                    playerDamageLog._T          = 'LogPlayerKill';
+                    playerDamageLog._T          = 'LogPlayerKillV2';
                     playerDamageLog.matchTime   = strRecordTimestamp;
                     playerDamageLog.byPlayer    = true;
 
-                    _attacker.name      = record.killer.name;
-                    _attacker.isBot     = hf.isBot(record.killer.accountId);
-                    _attacker.teamId    = record.killer.teamId;
-                    _attacker.health    = record.killer.health;
+                    _attacker.name      = objKiller.name;
+                    _attacker.isBot     = hf.isBot(objKiller.accountId);
+                    _attacker.teamId    = objKiller.teamId;
+                    _attacker.health    = objKiller.health;
 
                     _victim.name        = record.victim.name;
                     _victim.isBot       = hf.isBot(record.victim.accountId);
@@ -2411,30 +2349,28 @@ app.get('/getmatchtelemetry', async (req, res) => {
                         }
                     }
 
-                    // playerDamageLog.attacker    = _attacker;
-                    // playerDamageLog.victim      = _victim;
 
-                    playerDamageLog.damage              = record.damage;
+                    playerDamageLog.damage = record.damage;
 
-                    if ((record.killer.location.x == 0 && record.killer.location.y == 0 && record.killer.location.z == 0) || 
+                    if ((objKiller.location.x == 0 && objKiller.location.y == 0 && objKiller.location.z == 0) || 
                         (record.victim.location.x == 0 && record.victim.location.y == 0 && record.victim.location.z == 0)) {
                             // this is probably a bot that is throwing the distances off so just return -1
                         playerDamageLog.distance = -1;
                     }
                     else {
-                        playerDamageLog.distance = hf.getDistanceXYZ(record.killer.location, record.victim.location);
+                        playerDamageLog.distance = hf.getDistanceXYZ(objKiller.location, record.victim.location);
                     }
 
-                    playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(record.killerDamageInfo.damageTypeCategory);
-                    playerDamageLog.damageCauserName    = hf.translateDamageCauserName(record.killerDamageInfo.damageCauserName);
-                    playerDamageLog.damageReason        = record.killerDamageInfo.damageReason;
+                    playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(objDamageInfo.damageTypeCategory);
+                    playerDamageLog.damageCauserName    = hf.translateDamageCauserName(objDamageInfo.damageCauserName);
+                    playerDamageLog.damageReason        = objDamageInfo.damageReason;
 
                     // arrPlayersDamageLog.push(playerDamageLog);
 
 
 
                     // (CLIENT) kill tree stuff (player kills) -------------------------------------->
-                    _victim.killerHealth        = record.killer.health;
+                    _victim.killerHealth        = objKiller.health;
                     _victim.timeOfDeath         = strRecordTimestamp;
 
                     // _victim.isThirst            = playerDamageLog.isThirst;
@@ -2454,37 +2390,157 @@ app.get('/getmatchtelemetry', async (req, res) => {
 
                     arrPlayersDamageLog.push(playerDamageLog);
 
-
-                    // arrKillerVictims -------------------------->
-                    // for (j = 0; j < arrKillerVictims.length; j++) {
-                    //     if (arrKillerVictims[j].name == record.killer.name) {
-                    //         blKillerExists = true;
-                    //         arrKillerVictims[j].victims.push(_victim);   // add victim to this killer's victims array
-
-                    //         break;
-                    //     }
-                    // }
-
-                    // if there is no record for this killer, create it...
-                    // if (!blKillerExists) {
-                    //     killer.name     = record.killer.name;
-                    //     killer.isBot    = hf.isBot(record.killer.accountId);
-                    //     killer.type     = 'player'; // (set to self kill if their only kill was themselves)
-                    //     killer.teamId   = record.killer.teamId;
-
-                    //     killer.victims.push(_victim);
-                    //     arrKillerVictims.push(killer);
-                    // }
+                    arrKillLog.push({ 'killer': objKiller.name, 'victim': record.victim.name });  // killer:victim
 
 
-                    arrKillLog.push({ 'killer': record.killer.name, 'victim': record.victim.name });  // killer:victim
+                    //
+                    //#endregion [Player Kill]
 
-                    //debugger;
+                    //debugger;                  
+                }
+                else if (record.killer === null && record.finisher === null && record.dBNOMaker === null) {
+
+                    // ! (environment kill) if the player didn't die to a killer
+
+
+                    // ! assign local killer as record.killer or record.finisher
+                    try {
+                        // want to start out by assigning whoever gets credit to a single object that can inform other objects down below...
+                        if (record.finishDamageInfo !== null && !blAdjustedEnvironmentKill)  {
+                            //console.log('finishDamageInfo')
+                            objDamageInfo = record.finishDamageInfo;                            
+                        }
+                        else if (record.killerDamageInfo !== null && !blAdjustedEnvironmentKill) {
+                            console.log('killerDamageInfo')
+                            debugger;   // $sort this out
+                        }
+                        else if (record.dBNODamageInfo !== null && !blAdjustedEnvironmentKill) {
+                            console.log('dBNODamageInfo')
+                            debugger;   // $sort this out
+                        }
+
+
+                    }
+                    catch (err) {
+                        console.log('ERR in LogPlayerKillV2 for evironment victim (' + record.victim.name + ')', err)
+                    }
+
+
+
+                    var killer_player_type = '*env*';
+
+                    // $ need to know if environment "thirsted" the player?
+
+                    // console.log('(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [*' + hf.translateDamageTypeCategory(objKiller.damageTypeCategory).padEnd(15, ' ') + 
+                    //             ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type);
+
+                    _recordLog = '(' + i_string.padStart(5, ' ') + ') ' + strRecordTimestamp + ' [**' + hf.translateDamageTypeCategory(objDamageInfo.damageTypeCategory).padEnd(15, ' ') + 
+                                 ' x ' + record.victim.name.padEnd(16, ' ') + ']  ' + killer_player_type + ' x '  + victim_player_type;
+
+                    arrKillFeedLog.push(_recordLog);
+                    arrDamageLog.push(_recordLog);
+
+
+                    // arrPlayersDamageLog (environment kill) ----------------------------->
+                    var _attacker   = new Object();
+                    var _victim     = new Object();
+                    playerDamageLog._T          = 'LogPlayerKillV2';
+                    playerDamageLog.matchTime   = strRecordTimestamp;
+                    playerDamageLog.byPlayer    = false;
+
+                    playerDamageLog.isSelfKill      = null;
+                    playerDamageLog.isThirst        = null;
+                    playerDamageLog.isTeammateKill  = null;
+
+                    //playerDamageLog.isBleedOut      = null;
+                    playerDamageLog.isNoRevive      = null;     // died while knocked (not rezed, timer ran out)
+                    playerDamageLog.isTeamWipe      = null;     // died while knocked (because team was wiped)
+
+
+                    _attacker.name = '<' + hf.translateDamageTypeCategory(objDamageInfo.damageTypeCategory) + '>';
+                    
+                    _victim.name    = record.victim.name;
+                    _victim.isBot   = hf.isBot(record.victim.accountId);
+                    _victim.teamId  = record.victim.teamId;
+                    _victim.zone    = record.victim.zone;
+
+                    // ! add to bot names if this bot is a late spawner
+                    if (_victim.isBot) {
+                        //allBotNames += '|' + _victim.name; // for finding bots in tree
+                        // $ 2020.09.30 test update
+
+                        if (!allBotNames.includes(_victim.name)) {
+                            allBotNames += '|' + _victim.name; // for finding bots in tree
+                        }
+                    }
+
+                    // playerDamageLog.attacker    = _attacker;
+                    // playerDamageLog.victim      = _victim;
+
+                    playerDamageLog.damageTypeCategory  = hf.translateDamageTypeCategory(objDamageInfo.damageTypeCategory);
+                    playerDamageLog.damageCauserName    = hf.translateDamageCauserName(objDamageInfo.damageCauserName);
+                    playerDamageLog.damageReason        = objDamageInfo.damageReason;
+
+                    // arrPlayersDamageLog.push(playerDamageLog);
+                    // arrEnvironmentKills.push( { 'damageTypeCategory':   playerDamageLog.damageTypeCategory,
+                    //                             'damageCauserName':     playerDamageLog.damageCauserName,
+                    //                             'damageReason':         playerDamageLog.damageReason } ); 
+
+
+                    // kill tree stuff (environment kill) -------------------------------------->
+                    _victim.timeOfDeath         = strRecordTimestamp;
+                    _victim.isThirst            = null; // $ need to know if environment knocked and then thirsted? or if environment thirsted a knock by player? probably not...
+                    _victim.damageTypeCategory  = hf.translateDamageTypeCategory(objDamageInfo.damageTypeCategory);    //playerDamageLog.damageTypeCategory;
+                    _victim.damageCauserName    = hf.translateDamageCauserName(objDamageInfo.damageCauserName);        // playerDamageLog.damageCauserName;
+                    _victim.damageReason        = objDamageInfo.damageReason;                                          //playerDamageLog.damageReason;
+
+                    // _victim.isSelfKill      = null;
+                    // _victim.isThirst        = null;
+                    // _victim.isTeammateKill  = null;
+
+                    // _victim.isBleedOut      = null;
+                    // _victim.isNoRevive      = null;     // died while knocked (not rezed, timer ran out)
+                    // _victim.isTeamWipe      = null;     // died while knocked (because team was wiped)
+
+                    // _victim.isThirst        = playerDamageLog.isThirst;
+                    // _victim.isSelfKill      = playerDamageLog.isSelfKill; 
+                    // _victim.isTeammateKill  = playerDamageLog.isTeammateKill; 
+
+                    // _victim.isBleedOut      = playerDamageLog.isBleedOut;
+                    // _victim.isNoRevive      = playerDamageLog.isNoRevive;
+                    // _victim.isTeamWipe      = playerDamageLog.isTeamWipe;
+
+
+                    playerDamageLog.attacker    = _attacker;
+                    playerDamageLog.victim      = _victim;
+
+
+                    arrPlayersDamageLog.push(playerDamageLog);
+                    arrEnvironmentKills.push( { 'damageTypeCategory':   hf.translateDamageTypeCategory(objDamageInfo.damageTypeCategory),
+                                                'damageCauserName':     hf.translateDamageCauserName(objDamageInfo.damageCauserName),
+                                                'damageReason':         objDamageInfo.damageReason } ); 
+
+
+
+                    arrKillLog.push({ 'killer': _attacker.name, 'victim': record.victim.name });  // killer:victim
+
+
+                    // end of environment kill -------------------------
+
+
+                    // console.log('--------------------------------------');
+                    // console.log('is this environtment killing a player?');
+                    // console.log('dBNO di:   ', record.dBNODamageInfo)
+                    // console.log('killer di: ', record.killerDamageInfo)
+                    // console.log('finish di: ', record.finishDamageInfo)
+                    // console.log('victim:    ', record.victim)
+                    // console.log('--------------------------------------');
+                    // debugger;                    
+
                 }
 
 
                 //debugger;
-
             }
             catch (err) {
                 console.log('(' + i_string.padStart(5, ' ') + ') error: ' + err);
@@ -2516,6 +2572,9 @@ app.get('/getmatchtelemetry', async (req, res) => {
             // $ maybe don't need a "survived" tag in KillerVictims because what if the survivor didn't kill anybody and just lived while a person died of env?
             // $ just pull it from the match data and flag from that.
 
+
+            //
+            //#endregion // ! [End Region] 'LogPlayerKillV2
 
         }
 
@@ -2738,7 +2797,6 @@ app.get('/getmatchtelemetry', async (req, res) => {
     
         //console.log('csvDataForD3',     csvDataForD3);
         //console.log(null_attacker);
-    
         // ! print killfeed log
         // console.log('KillFeed log...');
         // for (let j = 0; j < arrKillFeedLog.length; j++) {

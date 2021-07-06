@@ -400,7 +400,7 @@ let vuePlayerReport = new Vue({
 			arrPlayersDamageLog.forEach(record => {
 
 				// need to figure out the .isCurrentlyAlive of each player at every event before diving into the filter
-				if (record._T == 'LogPlayerKill') {
+				if (record._T == 'LogPlayerKillV2') {
 					arrTeams.forEach(team => {
 						if (team.teamId == record.victim.teamId) {
 							team.teammates.forEach(teammate => {
@@ -432,7 +432,7 @@ let vuePlayerReport = new Vue({
 							if (record.victim.name != name && record.victim.teamId == playerTeam.teamId) {
 								// this is a teammate who is a victim
 
-								if (record._T != 'LogPlayerMakeGroggy' && record._T != 'LogPlayerRevive' && record._T != 'LogPlayerKill') {
+								if (record._T != 'LogPlayerMakeGroggy' && record._T != 'LogPlayerRevive' && record._T != 'LogPlayerKillV2') {
 									return;
 								}
 							}
@@ -626,9 +626,9 @@ let vuePlayerReport = new Vue({
 						//#endregion LogPlayerRevive
 
 					}
-					else if (record._T == 'LogPlayerKill') {
+					else if (record._T == 'LogPlayerKillV2') {
 
-						//#region // ! [LogPlayerKill]
+						//#region // ! [LogPlayerKillV2]
 						//
 
 						_event = '\u2573'; // '╳'; // 'x';
@@ -685,7 +685,7 @@ let vuePlayerReport = new Vue({
 							}
 						}
 
-						//#endregion LogPlayerKill
+						//#endregion LogPlayerKillV2
 
 					}
 

@@ -59,7 +59,7 @@
 
 <body>
 
-	<div id='div-info-modal' style='display: block;'>
+	<div id='div-info-modal' style='display: none;'>
 		<!-- show this display when they click on "what is this tree?" -->
 	
 		<div id='info-modal' style='margin-top: 40px; margin-bottom: 40px; width:580px; display:inline-block;'>
@@ -70,7 +70,7 @@
 					<br>
 					<br>
 	
-					The trees for each match might display a little wonky for now while I'm working on patching the backend for a PUBG API update that improves kill even information.
+					The trees for each match might display a little wonky for now while I'm working on patching the backend for a PUBG API update that improves kill event information.
 					<br>
 					<br>
 
@@ -502,7 +502,7 @@
 
 
 <div id='div-modal'>
-	<div id='player-report' style='margin-top: 40px; margin-bottom: 40px; width:980px; display:inline-block;  overflow: auto;'>
+	<div id='player-report' style='margin-top: 40px; margin-bottom: 40px; width:auto; display:inline-block;  overflow: auto;'>
 		<span id='btnCloseModal'>&times;</span>
 		<center>
 		<br>
@@ -584,8 +584,8 @@
 						<th>Weapon</th>
 						<th style="width: 40px;" :class="{ tdHidden: isHidden}">Dist</th>
 						<th :class="{ tdHidden: isHidden}"></th>
-						<th>Info</th>
-						<th>Zone</th>
+						<th style='width: auto;'>Info</th>
+						<th style='width: auto;'>Zone</th>
 					</tr>
 				</thead>
 		
@@ -611,8 +611,8 @@
 						<td>{{reportRow.damagerInfo}}</td>
 						<td style='text-align: right;' :class="{ tdHidden: isHidden}">{{reportRow.distance}}</td>
 						<td style='text-align: center;' :class="{ tdHidden: isHidden}"><img :src='reportRow.armor'></td>
-						<td style='text-align: left; width: 130px; word-break: break-word;' >{{reportRow.info}}</td>
-						<td style='border-radius: 0px 6px 6px 0px; text-align: left; padding-right: 10px;'>{{reportRow.zone}}</td>
+						<td style='text-align: left; width: auto; word-break: break-word;' >{{reportRow.info}}</td>
+						<td style='border-radius: 0px 6px 6px 0px; text-align: left; padding-right: 10px; width: auto;'>{{reportRow.zone}}</td>
 					</tr>
 				</tbody>
 			</table>
