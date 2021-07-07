@@ -3226,8 +3226,16 @@ function addBotToTeamsArray(arrSurvivors, arrTeams, bot) {
     // check if bot's teamId exists in arrTeams. if not, then add them.
     // check if bot exists in arrSurvivors. if not, add them.
 
+    // $ LogPlayerKillV2 : 2021.07.06 -> I don't think this is working as intended but changing index to -1 stops the first team from getting a bot added to it 5000 times.
+    // $                                 And since it's just bot crap, I'm not wasting any time right now on it.
+
+    // if (bot.name == 'Ita_chi_11') {
+    //     debugger;
+    // }
+
     let blTeamFound = blBotFound = blSurvivorFound = false;
-    let index = 0;
+    let team_index = -1;
+    //let teammate_index = -1;
 
     let team        = new Object();
     team.teamId     = bot.teamId;
@@ -3251,13 +3259,15 @@ function addBotToTeamsArray(arrSurvivors, arrTeams, bot) {
             arrTeams[i].teammates.forEach(teammate => {
                 if (teammate.name === bot.name) {
                     blBotFound = true;
-                    index = i;
+                    //teammate_index = i;
                 }
-            })            
+            })
+
+            team_index = i;
 
             blTeamFound = true;
             break;
-        } 
+        }
     }
 
 
@@ -3269,7 +3279,7 @@ function addBotToTeamsArray(arrSurvivors, arrTeams, bot) {
             // console.log(bot.name + ' -> ' + blBotFound)
             // console.log('adding ' + player.name + ' to arrTeams index ' + index);
 
-            arrTeams[index].teammates.push(player);
+            arrTeams[team_index].teammates.push(player);
 
             arrSurvivors.push({ 'name': player.name, 'teamId': team.teamId });
             //debugger;
