@@ -59,22 +59,23 @@
 
 <body>
 
-	<div id='div-info-modal' style='display: none;'>
+	<div id='div-info-modal' style='display: block;'>
 		<!-- show this display when they click on "what is this tree?" -->
 	
 		<div id='info-modal' style='margin-top: 40px; margin-bottom: 40px; width:580px; display:inline-block;'>
 	
 			<div style="width: 540px; text-align: left; padding: 10px; margin: 14px;">
 				<p> 
-					Update June 24, 2021...
+					Update July 07, 2021...
 					<br>
 					<br>
 	
-					The trees for each match might display a little wonky for now while I'm working on patching the backend for a PUBG API update that improves kill event information.
+					With the new respawn mechanic in Taego, a kill tree cannot be created since a player can die twice. This breaks the hierarchy of a tree at the moment
+					because each object must be unique. Other maps will still produce a tree but Taego maps will break. I'll try to figure something out sooner or later.
 					<br>
 					<br>
-
-					Also, any matches from before June 23 2021 are likely broken. I may or may not fix that after I get the new API stuff working. I don't have a lot of time to work right now so we'll see. If you could donate $10,000 below, I'll at least give it a try over the weekend but no guarantees.
+					I could probably add resapwn numbers after the name like "whoever(1)" for their kills and deaths. If I find the time, I'll see what I can do.
+				
 				</p>
 	
 	

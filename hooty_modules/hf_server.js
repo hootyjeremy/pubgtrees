@@ -133,6 +133,7 @@ var _mapName = {
 
     "Chimera_Main": "Paramo",
     "Heaven_Main": "Haven",
+    "Tiger_Main": "Taego",
 }
 
 // https://github.com/pubg/api-assets/blob/master/dictionaries/telemetry/damageTypeCategory.json
