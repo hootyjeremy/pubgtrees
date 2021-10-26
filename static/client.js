@@ -26,24 +26,24 @@ if (!blTestingVersion) {
 	console.log('live version: ' + version);
 
 	//let blHttpRedirected = false;
-	// if (location.protocol == 'http:') {
-	// 	//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
-
-	// 	// ? this seems to work but is weird. 
-		
-	// 	location.replace('https://www.pubgtrees.com');		
-	// }
-
-	// $ converting this to no longer require https (since not paying for site anymore)
-	// $ force redirect to http
-	if (location.protocol == 'https') {
+	if (location.protocol == 'http:') {
 		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
 
 		// ? this seems to work but is weird. 
 		
-		location.replace('http://www.pubgtrees.com');
-		//blHttpRedirected = true;
+		location.replace('https://www.pubgtrees.com');		
 	}
+
+	// $ converting this to no longer require https (since not paying for site anymore)
+	// $ force redirect to http
+	// if (location.protocol == 'https') {
+	// 	//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
+
+	// 	// ? this seems to work but is weird. 
+		
+	// 	location.replace('http://www.pubgtrees.com');
+	// 	//blHttpRedirected = true;
+	// }
 
 
 	// if ( blHttpRedirected) {
