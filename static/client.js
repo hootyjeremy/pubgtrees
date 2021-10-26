@@ -12,10 +12,10 @@ let strLine = "--------------------------------------------";
 let hooty_server_url 	= 'http://localhost:3000';
 //let defaultPlayer		= 'hooty__';
 
-// --------------------------------------------------------->
 
 // Deploy/Testing Version...
-let   version 			= '0.072'
+// ? IS IT POSSIBLE TO GET THESE TWO VALUES FROM THE PUBG.JS SERVER INSTEAD OF HARD_CODING IT HERE? 
+let   version 			= '0.073'
 const blTestingVersion 	= false;
 
 
@@ -26,14 +26,25 @@ if (!blTestingVersion) {
 	console.log('live version: ' + version);
 
 	//let blHttpRedirected = false;
-	if (location.protocol == 'http:') {
+	// if (location.protocol == 'http:') {
+	// 	//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
+
+	// 	// ? this seems to work but is weird. 
+		
+	// 	location.replace('https://www.pubgtrees.com');		
+	// }
+
+	// $ converting this to no longer require https (since not paying for site anymore)
+	// $ force redirect to http
+	if (location.protocol == 'https') {
 		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
 
 		// ? this seems to work but is weird. 
 		
-		location.replace('https://www.pubgtrees.com');		
+		location.replace('http://www.pubgtrees.com');
 		//blHttpRedirected = true;
 	}
+
 
 	// if ( blHttpRedirected) {
 	// 	console.log('redirected http to https');

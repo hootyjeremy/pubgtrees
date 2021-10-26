@@ -428,7 +428,8 @@ app.get('/getplayermatches', async (req, res) => {
 			(match_data.data.attributes.gameMode != "solo"  &&	match_data.data.attributes.gameMode != "solo-fpp" 	&&
 			 match_data.data.attributes.gameMode != "duo" 	&&	match_data.data.attributes.gameMode != "duo-fpp" 	&&
              match_data.data.attributes.gameMode != "squad" &&	match_data.data.attributes.gameMode != "squad-fpp") ||
-             match_data.data.attributes.mapName == "Range_Main" || match_data.data.attributes.mapName == "Tiger_Main") {
+             //match_data.data.attributes.mapName == "Range_Main" || match_data.data.attributes.mapName == "Tiger_Main") {
+             match_data.data.attributes.mapName == "Range_Main") {
              // match_data.data.attributes.mapName == "Heaven_Main"
             
             if (blTestingVersion) {

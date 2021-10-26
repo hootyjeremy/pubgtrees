@@ -103,6 +103,14 @@ let vm = new Vue({
 			//vmTreeD3.updateTreeTable(tmpMatchDetails);
 
 
+			// filter out Taego from tree analysis
+			if (this.match_data[index].mapName === 'Taego') {
+				//console.log("taego");
+				alert('Taego matches cannot be analyzed because respawns break hierarchy which the tree depends on.');
+				return;
+			}
+
+
 			for (let i = 0; i < this.match_data.length; i++) {
 				//console.log('index: ' + index);
 
