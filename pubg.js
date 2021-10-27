@@ -19,7 +19,7 @@ const zlib          = require('zlib');
 
 // database stuff
 const { Client }    = require('pg');
-const { kill } = require('process');
+const { kill }      = require('process');
 // const { O_NOATIME } = require('constants');
 let databaseURL     = '';
 let dbRowsToInsert  = '';
