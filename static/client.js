@@ -23,17 +23,16 @@ if (!blTestingVersion) {
 	//hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
 	//defaultPlayer 		= '';
 
-	//hooty_server_url 	= 'https://www.pubgtrees.com';
-	hooty_server_url 	= 'http://www.pubgtrees.com';
+	hooty_server_url 	= 'https://www.pubgtrees.com';
 	console.log('live version: ' + version);
 
 	//let blHttpRedirected = false;
-	// if (location.protocol == 'http:') {
-	// 	// this seems to work but is weird. 
-	// 	//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
+	if (location.protocol == 'http:') {
+		// this seems to work but is weird. 
+		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
 		
-	// 	location.replace('https://www.pubgtrees.com');		
-	// }
+		location.replace('https://www.pubgtrees.com');		
+	}
 
 	// $ converting this to no longer require https (since not paying for site anymore)
 	// $ force redirect to http
