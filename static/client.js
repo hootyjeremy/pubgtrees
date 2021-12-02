@@ -42,7 +42,7 @@ if (!blTestingVersion) {
 		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
 
 		// ? this seems to work but is weird. 
-		
+		console.log('location.protocol: ' + location.protocol);
 		console.log('redirecting https to http...');
 		location.replace('http://www.pubgtrees.com');
 	}
