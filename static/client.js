@@ -28,7 +28,6 @@ if (!blTestingVersion) {
 	console.log('live version: ' + version);
 
 	/*
-	//let blHttpRedirected = false;
 	if (location.protocol == 'http:') {
 		// this seems to work but is weird. 
 		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
@@ -39,19 +38,16 @@ if (!blTestingVersion) {
 
 	// $ converting this to no longer require https (since not paying for site anymore)
 	// $ force redirect to http
-	// if (location.protocol == 'https') {
-	// 	//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
+	if (location.protocol == 'https') {
+		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
 
-	// 	// ? this seems to work but is weird. 
+		// ? this seems to work but is weird. 
 		
-	// 	location.replace('http://www.pubgtrees.com');
-	// 	//blHttpRedirected = true;
-	// }
+		location.replace('http://www.pubgtrees.com');
+		console.log('redirected https to http');
+	}
 
 
-	// if ( blHttpRedirected) {
-	// 	console.log('redirected http to https');
-	// }
 
 	console.log('you are at: ' + location.href);
 
