@@ -38,13 +38,13 @@ if (!blTestingVersion) {
 
 	// $ converting this to no longer require https (since not paying for site anymore)
 	// $ force redirect to http
-	if (location.protocol == 'https') {
+	if (location.protocol != 'http') {
 		//alert('please go to https://hooty-pubg01.herokuapp.com instead of this unsecure page.');
 
 		// ? this seems to work but is weird. 
 		
+		console.log('redirecting https to http...');
 		location.replace('http://www.pubgtrees.com');
-		console.log('redirected https to http');
 	}
 
 
