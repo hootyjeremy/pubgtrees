@@ -23,10 +23,11 @@ if (!blTestingVersion) {
 	//hooty_server_url 	= 'https://hooty-pubg01.herokuapp.com';
 	//defaultPlayer 		= '';
 
-	hooty_server_url 	= 'https://www.pubgtrees.com';
-	//hooty_server_url 	= 'http://www.pubgtrees.com';
+	//hooty_server_url 	= 'https://www.pubgtrees.com';
+	hooty_server_url 	= 'http://www.pubgtrees.com';
 	console.log('live version: ' + version);
 
+	/*
 	//let blHttpRedirected = false;
 	if (location.protocol == 'http:') {
 		// this seems to work but is weird. 
@@ -34,6 +35,7 @@ if (!blTestingVersion) {
 		
 		location.replace('https://www.pubgtrees.com');		
 	}
+	*/
 
 	// $ converting this to no longer require https (since not paying for site anymore)
 	// $ force redirect to http
