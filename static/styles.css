@@ -55,16 +55,6 @@ button {
 	height: 32px;
 }
 
-input[type=button], input[type=submit], input[type=reset] {
-	font-family: 'Roboto Condensed', sans-serif;
-	font-size: 16px;
-    /* color: rgb(240, 234, 232); */
-	color: #dcddde;
-    background-color: #82759c;
-	border: 1px solid #dcddde;
-	border-radius: 4px;
-	height: 32px;
-}
 
 button.disabledButton {
     background-color: #343436;
