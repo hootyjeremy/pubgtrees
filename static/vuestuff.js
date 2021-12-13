@@ -1141,6 +1141,9 @@ let vuePlayerReport = new Vue({
 			else if (damageTypeCategory == 'Jerrycan Explosion') {
 				_damager = 'Jerrycan';
 			}
+			else if (damageTypeCategory == 'Panzerfaust Explosion') {
+				_damager = 'Panzerfaust';
+			}
 			else if (damageTypeCategory == 'Vehicle Crash' || 
 					 damageTypeCategory == 'Vehicle Hit'   || 
 					 damageTypeCategory == 'Vehicle Explosion') {
@@ -1148,7 +1151,7 @@ let vuePlayerReport = new Vue({
 			}
 			else {
 				console.log(strLine);
-				console.log('unaccounted damageTypeCategory...');
+				console.log('unaccounted damageTypeCategory in vuestuff.js...');
 				console.log('damageTypeCategory=', damageTypeCategory + ' | damageCauserName=', damageCauserName + ' | damageReason=', damageReason);
 			}
 

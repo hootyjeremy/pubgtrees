@@ -169,8 +169,6 @@ var _damageTypeCategory = {
     "Damage_KillTruckHit": "Kill Truck",
     "Damage_KillTruckTurret": "Kill Truck Turret",
     "Damage_Explosion_LootTruck": "Loot Truck Explosion",
-
-    "Panzerfaust Explosion": "Panzerfaust",
     
 }
 
