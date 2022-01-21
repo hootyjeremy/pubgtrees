@@ -171,8 +171,9 @@ app.get('/getplayermatches', async (req, res) => {
         console.log('searchDirection: ' + searchDirection);
     }
 
-    //console.log('req.ip --> ' + req.ip)
-    //console.log(JSON.stringify(req))
+    console.log('req.ip --> ' + req.ip)
+    console.log(`req.headers['x-forwarded-for'] --> ` + req.headers['x-forwarded-for'])
+    
 
     // console.log('request ip: ' + req.ip);
     // console.log('req.query.endpoint:     ' + req.query.endpoint);
