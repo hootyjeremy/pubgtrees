@@ -571,6 +571,8 @@ function btnCopyMatchToClipboard_Click() {
 }
 
 
+
+// $ THIS DOESN'T APPEAR TO BE IN USE....
 function SearchNewPlayer(player) {
 
 	// $ ------------------------------------

@@ -44,7 +44,6 @@ if (typeof process.env.TESTING_VERSION != 'undefined') {
 }
 
 
-
 // ! Global variables...
 const strLine   = "--------------------------------------------";
 
@@ -171,6 +170,9 @@ app.get('/getplayermatches', async (req, res) => {
         //console.log('skipped_matches: ' + skipped_matches);
         console.log('searchDirection: ' + searchDirection);
     }
+
+    console.log('req.ip --> ' + req.ip)
+    console.log(req)
 
     // console.log('request ip: ' + req.ip);
     // console.log('req.query.endpoint:     ' + req.query.endpoint);
