@@ -128,6 +128,12 @@ tr.activeMatchRow {
 	cursor: pointer;
 }
 
+tr.matchTaego {
+	background-color: #414144;
+	/* font-style: italic; */
+	cursor: pointer;
+}
+
 tr.matchRow:hover {
 	background-color: #616164;
 	cursor: pointer;
@@ -375,6 +381,14 @@ a:link, a:visited {
 }
 
 div#search-div, div#vueapp, div#d3-tree01, div#player-report, div#tree-hints, div.cube, div#vue-obituaries, div#info-modal {
+	border-radius: 10px;
+	background-color: #414144;
+	margin-left: 14px;
+	margin-right: 14px;
+	margin-top: 20px;
+}
+
+div.cube-small {
 	border-radius: 10px;
 	background-color: #414144;
 	margin-left: 14px;

@@ -106,7 +106,7 @@ let vm = new Vue({
 			// filter out Taego from tree analysis
 			if (this.match_data[index].mapName === 'Taego') {
 				//console.log("taego");
-				alert('Taego matches cannot be analyzed because respawns break hierarchy which the tree depends on.');
+				alert(`Taego matches cannot be analyzed. The way the tree hierarchy works is that every individual player's death binds them to their killer. Once their killer dies, the killer is binded to their own killer, and so on until there are only the last living players (who get the chicken dinner). With Taego, players are able to respawn which means that they can be killed by another player later and, therefore, will have two two different killers. This means that there would not be only ONE tree where everything is connected, but rather multiple trees would need to display the kills and deaths of a respawned player separately from the original tree. I don't have time right now to go back and code the ability for alternate trees which don't conflict with each other or a workaround.`);
 				return;
 			}
 
@@ -211,6 +211,7 @@ let vueObituaries = new Vue({
 	}
 	
 })
+
 
 let vueMatchInfo = new Vue({
 	el: '#d3-tree01',

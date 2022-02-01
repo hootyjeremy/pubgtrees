@@ -15,7 +15,7 @@ let hooty_server_url 	= 'http://localhost:3000';
 
 // Deploy/Testing Version...
 // ? IS IT POSSIBLE TO GET THESE TWO VALUES FROM THE PUBG.JS SERVER INSTEAD OF HARD_CODING IT HERE? 
-let   version 			= '0.076'
+let   version 			= '0.077'
 const blTestingVersion 	= false;
 
 

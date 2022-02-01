@@ -31,7 +31,7 @@ let dbRowsToInsert  = '';
 
 // ---------------------------->
 // ! Deploy/Testing Version...
-let blTestingVersion = false;
+let blTestingVersion = true;
 
 if (typeof process.env.TESTING_VERSION != 'undefined') {
     // if running from production server, "testing" is false
